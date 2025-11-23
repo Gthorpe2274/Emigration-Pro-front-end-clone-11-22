@@ -1,0 +1,139 @@
+import { useState } from 'react';
+import { Mail, X, ArrowRight } from 'lucide-react';
+
+interface EmailCaptureModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (email: string) => void;
+  assessmentId?: number;
+}
+
+export default function EmailCaptureModal({ isOpen, onClose, onSubmit, assessmentId }: EmailCaptureModalProps) {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    // Validate email
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Store email lead in database
+      const response = await fetch('/api/subscribe-for-permanent-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.toLowerCase(),
+          assessment_id: assessmentId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save email');
+      }
+
+      // Store email in sessionStorage for potential future use
+      sessionStorage.setItem('userEmail', email.toLowerCase());
+
+      // Call the parent's onSubmit handler (which triggers redirect)
+      onSubmit(email.toLowerCase());
+      
+      // Note: The redirect happens in the parent component
+      // Keep the modal in submitting state until redirect completes
+    } catch (err) {
+      console.error('Error capturing email:', err);
+      setError('Failed to save email. Please try again.');
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          aria-label="Close"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Mail className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Get Your Emigration Report
+          </h2>
+          <p className="text-gray-600">
+            Enter your email to proceed to checkout and receive your personalized emigration guide
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Email Address
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Mail className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your.email@example.com"
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isSubmitting || !email}
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                Processing...
+              </>
+            ) : (
+              <>
+                Continue to Generate your Report and check out
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </button>
+        </form>
+
+        {/* Privacy note */}
+        <p className="text-xs text-gray-500 text-center mt-4">
+          Your email will be used to send your report and provide support. We respect your privacy.
+        </p>
+      </div>
+    </div>
+  );
+}
