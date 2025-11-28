@@ -64,7 +64,7 @@ export default function Home() {
                 className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
               >
                 <MapPin className="w-5 h-5 mr-2" />
-                Take Free Assessment
+                Get your free assessment and relocation hub contaning expat vidoes, professional services references and more all free.
               </Link>
               <div className="text-lg text-black font-bold">
                 No credit card required • 5 minutes
