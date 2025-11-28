@@ -53,7 +53,7 @@ export default function Home() {
             
             <div className="inline-block bg-white px-8 py-6 border-2 border-gray-300 shadow-xl mb-10 mx-auto max-w-3xl">
               <p className="text-2xl text-gray-900 font-medium">
-                Get step-by-step emigration guidance with dour PERSONALIZED comprehensive report covering immigration requirements, 
+                Your one stop shop for step-by-step emigration guidance with your PERSONALIZED comprehensive report covering immigration requirements, 
                 cost analysis, healthcare systems, and relocation timelines and more.
               </p>
             </div>
