@@ -1,0 +1,1 @@
+This folder contains the built output assets for the worker "emigration-pro" generated at 2025-11-24T17:30:00.655Z.

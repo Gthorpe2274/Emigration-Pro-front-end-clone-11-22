@@ -47,15 +47,26 @@ export default function Blog() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
-      
+
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-5xl font-bold text-gray-900 mb-4 text-center">
             Emigration Insights & Resources
           </h1>
-          <p className="text-xl text-gray-600 mb-12 text-center">
+          <p className="text-xl text-gray-600 mb-8 text-center">
             Expert advice, destination guides, and relocation tips for your journey abroad
           </p>
+
+          <div className="text-center mb-12">
+            <a
+              href="https://report.emigrationpro.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 text-lg"
+            >
+              Get Your Report
+            </a>
+          </div>
 
           {loading ? (
             <div className="text-center py-12">
@@ -69,7 +80,7 @@ export default function Blog() {
           ) : (
             <div className="space-y-8">
               {posts.map((post) => (
-                <article 
+                <article
                   key={post.id}
                   className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
                 >

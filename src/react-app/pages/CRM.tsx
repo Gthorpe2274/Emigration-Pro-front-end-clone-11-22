@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Users, Mail, Key, Calendar, MapPin, Search, Download } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
-import SystemLogin from '@/react-app/components/SystemLogin';
 
 interface Purchaser {
   id: number;
@@ -19,26 +18,44 @@ interface Purchaser {
 }
 
 export default function CRM() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem('crmAdminAuth') === 'true';
+  });
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
   const [purchasers, setPurchasers] = useState<Purchaser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
 
+  // Handle login
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === 'admin#123') {
+      sessionStorage.setItem('crmAdminAuth', 'true');
+      setIsAuthenticated(true);
+      setLoginError('');
+      fetchPurchasers();
+    } else {
+      setLoginError('Incorrect password. Please try again.');
+      setPassword('');
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    sessionStorage.removeItem('crmAdminAuth');
+    setIsAuthenticated(false);
+    setPassword('');
+  };
+
   useEffect(() => {
-    // Check if user is authenticated
-    const authenticated = sessionStorage.getItem('systemLoginAuthenticated') === 'true';
-    setIsAuthenticated(authenticated);
-    
-    if (authenticated) {
+    if (isAuthenticated) {
       fetchPurchasers();
     }
-  }, []);
-
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
-    fetchPurchasers();
-  };
+  }, [isAuthenticated]);
 
   const fetchPurchasers = async () => {
     try {
@@ -97,9 +114,48 @@ export default function CRM() {
     window.URL.revokeObjectURL(url);
   };
 
-  // If not authenticated, show login component
+  // If not authenticated, show login form
   if (!isAuthenticated) {
-    return <SystemLogin onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">CRM Admin</h1>
+            <p className="text-gray-600">Enter password to access</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                placeholder="Enter admin password"
+                required
+              />
+            </div>
+
+            {loginError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {loginError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105"
+            >
+              Login
+            </button>
+          </form>
+        </div>
+      </div>
+    );
   }
 
   if (loading) {
@@ -131,13 +187,21 @@ export default function CRM() {
                   <p className="text-gray-600">View and manage all purchaser records</p>
                 </div>
               </div>
-              <button
-                onClick={exportToCSV}
-                className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                <span>Export CSV</span>
-              </button>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={exportToCSV}
+                  className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Export CSV</span>
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition"
+                >
+                  Logout
+                </button>
+              </div>
             </div>
 
             {/* Stats */}

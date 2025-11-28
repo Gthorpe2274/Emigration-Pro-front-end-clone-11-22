@@ -20,9 +20,11 @@ import SocialLogin from './pages/SocialLogin';
 import SystemLogin from './pages/SystemLogin';
 import PermanentRelocationHub from './pages/PermanentRelocationHub';
 import CRM from './pages/CRM';
-import Blog from './pages/Blog';
+import AdminLogin from './pages/AdminLogin';
+import ProtectedAdmin from './components/ProtectedAdmin';
 import BlogPost from './pages/BlogPost';
 import BlogAdmin from './pages/BlogAdmin';
+import Blog from './pages/Blog';
 
 function App() {
   return (
@@ -48,7 +50,7 @@ function App() {
         <Route path="/admin/social-login" element={<SocialLogin />} />
         <Route path="/admin/system-login" element={<SystemLogin />} />
         <Route path="/admin/crm" element={<CRM />} />
-        <Route path="/admin/blog" element={<BlogAdmin />} />
+        <Route path="/admin/blog" element={<ProtectedAdmin />} />
         <Route path="/access-hub" element={<PermanentRelocationHub />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />

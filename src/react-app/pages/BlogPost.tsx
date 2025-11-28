@@ -28,7 +28,7 @@ export default function BlogPost() {
     try {
       const response = await fetch(`/api/blog/posts/${slug}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setPost(data.post);
       } else {
@@ -74,8 +74,8 @@ export default function BlogPost() {
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Post Not Found</h1>
             <p className="text-gray-600 mb-8">The blog post you're looking for doesn't exist.</p>
-            <Link 
-              to="/blog" 
+            <Link
+              to="/blog"
               className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
             >
               Back to Blog
@@ -90,11 +90,11 @@ export default function BlogPost() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
-      
+
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto">
-          <Link 
-            to="/blog" 
+          <Link
+            to="/blog"
             className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-8 font-semibold"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,16 +104,22 @@ export default function BlogPost() {
           </Link>
 
           <article className="bg-white rounded-2xl shadow-lg overflow-hidden">
+
+
             {post.featured_image && (
               <div className="relative h-96 overflow-hidden">
                 <img
                   src={post.featured_image}
                   alt={post.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error('Image failed to load:', post.featured_image);
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
                 />
               </div>
             )}
-            
+
             <div className="p-8 md:p-12">
               <div className="flex items-center text-sm text-gray-500 mb-4">
                 <time dateTime={post.published_date}>
@@ -131,9 +137,9 @@ export default function BlogPost() {
                 {post.title}
               </h1>
 
-              <div 
+              <div
                 className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
-                dangerouslySetInnerHTML={{ __html: post.body }}
+                dangerouslySetInnerHTML={{ __html: post.body.replace(/\n/g, '<br />') }}
               />
 
               {post.allow_comments && (

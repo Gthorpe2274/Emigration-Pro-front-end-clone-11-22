@@ -29,7 +29,7 @@ export default function BlogAdmin() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
-  
+
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -62,6 +62,23 @@ export default function BlogAdmin() {
     setPassword('');
   };
 
+  const insertTag = (startTag: string, endTag: string) => {
+    const textarea = document.getElementById('post-body') as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = formData.body;
+
+    const newText = text.substring(0, start) + startTag + text.substring(start, end) + endTag + text.substring(end);
+    setFormData({ ...formData, body: newText });
+
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + startTag.length, end + startTag.length);
+    }, 0);
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchAllPosts();
@@ -90,33 +107,33 @@ export default function BlogAdmin() {
     e.preventDefault();
 
     try {
-      const url = editingPost 
+      const url = editingPost
         ? `/api/admin/blog/posts/${editingPost.id}`
         : '/api/admin/blog/posts';
-      
+
       const method = editingPost ? 'PUT' : 'POST';
-      
+
       const response = await fetch(url, {
         method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-API-Key': 'admin#123'
         },
         body: JSON.stringify(formData)
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         alert(editingPost ? 'Post updated successfully!' : 'Post created successfully!');
         resetForm();
         fetchAllPosts();
       } else {
-        alert('Error: ' + data.error);
+        alert('Error: ' + (data.error || JSON.stringify(data)));
       }
     } catch (error) {
       console.error('Error saving post:', error);
-      alert('Failed to save post');
+      alert('Failed to save post: ' + (error instanceof Error ? error.message : String(error)));
     }
   };
 
@@ -146,9 +163,9 @@ export default function BlogAdmin() {
           'X-API-Key': 'admin#123'
         }
       });
-      
+
       const data = await response.json();
-      
+
       if (data.success) {
         alert('Post deleted successfully');
         fetchAllPosts();
@@ -191,7 +208,7 @@ export default function BlogAdmin() {
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Blog Admin</h1>
             <p className="text-gray-600">Enter password to access</p>
           </div>
-          
+
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
@@ -207,13 +224,13 @@ export default function BlogAdmin() {
                 required
               />
             </div>
-            
+
             {loginError && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                 {loginError}
               </div>
             )}
-            
+
             <button
               type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105"
@@ -221,7 +238,7 @@ export default function BlogAdmin() {
               Login
             </button>
           </form>
-          
+
           <div className="mt-6 text-center">
             <Link to="/" className="text-sm text-blue-600 hover:text-blue-700">
               ← Back to Home
@@ -236,7 +253,7 @@ export default function BlogAdmin() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
-      
+
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
@@ -263,7 +280,7 @@ export default function BlogAdmin() {
               <h2 className="text-2xl font-bold mb-6">
                 {editingPost ? 'Edit Post' : 'Create New Post'}
               </h2>
-              
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
@@ -295,22 +312,128 @@ export default function BlogAdmin() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Featured Image URL</label>
-                  <input
-                    type="text"
-                    value={formData.featured_image}
-                    onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      value={formData.featured_image}
+                      onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter image URL or generate one"
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const images = [
+                            'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80', // Airplane wing
+                            'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=800&q=80', // Airport terminal
+                            'https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=800&q=80', // Suitcase
+                            'https://images.unsplash.com/photo-1473625247510-8ceb1760943f?w=800&q=80', // Woman with suitcase
+                            'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800&q=80', // Passport
+                            'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80', // Travel planning
+                            'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=800&q=80', // Map
+                          ];
+                          setFormData(prev => ({ ...prev, featured_image: images[Math.floor(Math.random() * images.length)] }));
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition text-sm"
+                      >
+                        ✈️ Airport/Travel
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const images = [
+                            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80', // Moving boxes
+                            'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80', // Keys/House
+                            'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80', // Modern home
+                            'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=800&q=80', // Unpacking
+                            'https://images.unsplash.com/photo-1503594384566-461fe158e797?w=800&q=80', // Moving day
+                            'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=800&q=80', // Family moving
+                          ];
+                          setFormData(prev => ({ ...prev, featured_image: images[Math.floor(Math.random() * images.length)] }));
+                        }}
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition text-sm"
+                      >
+                        🏠 Moving/House
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const images = [
+                            'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&q=80', // Diverse group
+                            'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80', // Professional woman
+                            'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=800&q=80', // Family airport
+                            'https://images.unsplash.com/photo-1464938050520-ef2270bb8ce8?w=800&q=80', // Diverse crowd
+                            'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80', // Friends
+                            'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=800&q=80', // Portrait
+                          ];
+                          setFormData(prev => ({ ...prev, featured_image: images[Math.floor(Math.random() * images.length)] }));
+                        }}
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg transition text-sm"
+                      >
+                        👨‍👩‍👧‍👦 People/Family
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const images = [
+                            'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80', // City street
+                            'https://images.unsplash.com/photo-1449824913929-79aa4361e851?w=800&q=80', // Hong Kong
+                            'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80', // Paris
+                            'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800&q=80', // New York
+                            'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=800&q=80', // Venice
+                            'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80', // Street view
+                          ];
+                          setFormData(prev => ({ ...prev, featured_image: images[Math.floor(Math.random() * images.length)] }));
+                        }}
+                        className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg transition text-sm"
+                      >
+                        🌍 Foreign Cities
+                      </button>
+                    </div>
+                  </div>
+                  {formData.featured_image && (
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-600 mb-1">Preview:</p>
+                      <img
+                        src={formData.featured_image}
+                        alt="Preview"
+                        className="max-w-full h-48 object-cover rounded-lg border border-gray-300"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '';
+                          (e.target as HTMLImageElement).alt = '❌ Image failed to load. Check the URL.';
+                          (e.target as HTMLImageElement).className = 'text-red-600 text-sm';
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Body</label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <button type="button" onClick={() => insertTag('<b>', '</b>')} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-bold" title="Bold">B</button>
+                    <button type="button" onClick={() => insertTag('<i>', '</i>')} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm italic" title="Italic">I</button>
+                    <button type="button" onClick={() => insertTag('<u>', '</u>')} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm underline" title="Underline">U</button>
+                    <button type="button" onClick={() => insertTag('<h2>', '</h2>')} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-bold" title="Heading 2">H2</button>
+                    <button type="button" onClick={() => insertTag('<h3>', '</h3>')} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-bold" title="Heading 3">H3</button>
+                    <button type="button" onClick={() => insertTag('<ul>\n  <li>', '</li>\n</ul>')} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm" title="List">• List</button>
+                    <button type="button" onClick={() => {
+                      const url = window.prompt('Enter URL:');
+                      if (url) insertTag(`<a href="${url}" class="text-blue-600 hover:underline">`, '</a>');
+                    }} className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm" title="Link">Link</button>
+                  </div>
                   <textarea
+                    id="post-body"
                     value={formData.body}
                     onChange={(e) => setFormData({ ...formData, body: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 h-64"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 h-64 font-mono text-sm"
                     required
                   />
+                  <p className="text-xs text-gray-500 mt-1">Use the toolbar to format text. Newlines will be preserved as line breaks.</p>
                 </div>
 
                 <div>
@@ -385,7 +508,7 @@ export default function BlogAdmin() {
 
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-2xl font-bold mb-6">All Posts</h2>
-            
+
             {loading ? (
               <p>Loading posts...</p>
             ) : posts.length === 0 ? (
@@ -399,7 +522,7 @@ export default function BlogAdmin() {
                         <h3 className="text-xl font-semibold text-gray-800">{post.title}</h3>
                         <p className="text-sm text-gray-600 mt-1">Slug: {post.slug}</p>
                         <p className="text-sm text-gray-500 mt-2">
-                          {post.is_published ? '✓ Published' : '✗ Draft'} | 
+                          {post.is_published ? '✓ Published' : '✗ Draft'} |
                           Created: {new Date(post.created_at).toLocaleDateString()}
                         </p>
                       </div>

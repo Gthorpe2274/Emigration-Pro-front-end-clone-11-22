@@ -28,7 +28,7 @@ export default function EmailCaptureModal({ isOpen, onClose, onSubmit, assessmen
     setIsSubmitting(true);
 
     try {
-      // Store email lead in database
+      // Store email lead in database and create CRM record
       const response = await fetch('/api/subscribe-for-permanent-access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -39,20 +39,31 @@ export default function EmailCaptureModal({ isOpen, onClose, onSubmit, assessmen
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save email');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to save email');
       }
 
-      // Store email in sessionStorage for potential future use
-      sessionStorage.setItem('userEmail', email.toLowerCase());
+      const data = await response.json();
 
-      // Call the parent's onSubmit handler (which triggers redirect)
-      onSubmit(email.toLowerCase());
+      // Store email and session code in sessionStorage for future use
+      sessionStorage.setItem('userEmail', email.toLowerCase());
+      if (data.session_code) {
+        sessionStorage.setItem('accessToken', data.session_code);
+      }
+
+      // Redirect to report generation app (report.emigrationpro.com)
+      if (data.report_url) {
+        // Use the report URL provided by backend
+        window.location.href = data.report_url;
+      } else {
+        // Fallback: Use default report generation URL
+        window.location.href = `https://report.emigrationpro.com/?email=${encodeURIComponent(email.toLowerCase())}&session_code=${data.session_code || ''}`;
+      }
       
-      // Note: The redirect happens in the parent component
       // Keep the modal in submitting state until redirect completes
     } catch (err) {
       console.error('Error capturing email:', err);
-      setError('Failed to save email. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to save email. Please try again.');
       setIsSubmitting(false);
     }
   };

@@ -1,33 +1,36 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "01999843-1459-7daa-a0f9-c7826d9d4f7c",
+  "name": "emigration-pro",
   "main": "./src/worker/index.ts",
   "compatibility_date": "2025-06-17",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "observability": {
     "enabled": true
   },
   "upload_source_maps": true,
   "assets": {
-    "not_found_handling": "single-page-application"
+    "directory": "./dist/client",
+    "binding": "ASSETS"
   },
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "01999843-1459-7daa-a0f9-c7826d9d4f7c",
-      "database_id": "01999843-1459-7daa-a0f9-c7826d9d4f7c"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "R2_BUCKET",
-      "bucket_name": "01999843-1459-7daa-a0f9-c7826d9d4f7c"
+      "database_name": "emigration-pro-db",
+      "database_id": "50988161-3867-41b2-bb1e-174b54c167d8"
     }
   ],
   "kv_namespaces": [
     {
       "binding": "REPORTS_KV",
-      "id": "01999843-1459-7daa-a0f9-c7826d9d4f7c"
+      "id": "d9b6191b7e71482c93a3f99f70c37db9"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2_BUCKET",
+      "bucket_name": "emigration-pro-bucket"
     }
   ]
 }

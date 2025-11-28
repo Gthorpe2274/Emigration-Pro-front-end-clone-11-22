@@ -18,17 +18,9 @@ app.use('*', cors({
   credentials: false
 }));
 
-// Middleware for blog admin API authentication
+// Middleware for blog admin API authentication (simplified - no API key required)
 const blogAdminAuth = async (c: any, next: any) => {
-  const apiKey = c.req.header('X-API-Key');
-
-  if (!apiKey || apiKey !== c.env.BLOG_ADMIN_API_KEY) {
-    return c.json({
-      error: 'Unauthorized',
-      message: 'Valid API key required for blog administration'
-    }, 401);
-  }
-
+  // No authentication check - relying on frontend password protection
   await next();
 };
 
@@ -426,7 +418,8 @@ app.get("/api/assessments/:id", async (c) => {
   }
 });
 
-// Email lead capture endpoint
+// Email gateway endpoint - For report generation app access
+// Creates CRM record and redirects to report.emigrationpro.com
 const EmailLeadSchema = z.object({
   email: z.string().email(),
   assessment_id: z.number().optional()
@@ -435,25 +428,134 @@ const EmailLeadSchema = z.object({
 app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSchema), async (c) => {
   try {
     const { email, assessment_id } = c.req.valid("json");
+    const normalizedEmail = email.toLowerCase();
 
-    // Store email lead in database
-    await c.env.DB.prepare(`
-      INSERT INTO email_leads (email, assessment_id, source)
-      VALUES (?, ?, 'relocation_hub_temp_access')
-    `).bind(
-      email.toLowerCase(),
-      assessment_id || null
-    ).run();
+    // 1. Store email lead in email_leads table for tracking
+    try {
+      await c.env.DB.prepare(`
+        INSERT INTO email_leads (email, assessment_id, source)
+        VALUES (?, ?, 'report_generation_gateway')
+      `).bind(
+        normalizedEmail,
+        assessment_id || null
+      ).run();
+    } catch (leadError) {
+      // Continue even if email_leads insert fails
+      console.warn("Could not save to email_leads:", leadError);
+    }
 
-    console.log(`Email lead captured: ${email} for assessment ${assessment_id || 'none'}`);
+    // 2. Check if relocation_hub_access (CRM record) already exists for this email
+    // If no assessment_id, we'll need to create a placeholder assessment or use null
+    let existingAccess = null;
+    
+    if (assessment_id) {
+      existingAccess = await c.env.DB.prepare(`
+        SELECT * FROM relocation_hub_access 
+        WHERE email = ? AND assessment_id = ?
+      `).bind(normalizedEmail, assessment_id).first();
+    }
 
+    let sessionCode: string;
+    let accessId: number;
+    let finalAssessmentId: number | null = assessment_id || null;
+
+    if (existingAccess) {
+      // Use existing CRM record
+      sessionCode = existingAccess.session_code;
+      accessId = existingAccess.id;
+      finalAssessmentId = existingAccess.assessment_id;
+      console.log(`Using existing CRM record for ${normalizedEmail}, session: ${sessionCode}`);
+    } else {
+      // 3. Generate unique session code (format: XXXX-XXXX-XXXX)
+      const generateSessionCode = () => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const segments = [];
+        for (let i = 0; i < 3; i++) {
+          let segment = '';
+          for (let j = 0; j < 4; j++) {
+            segment += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          segments.push(segment);
+        }
+        return segments.join('-');
+      };
+
+      sessionCode = generateSessionCode();
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      // Ensure session code is unique
+      while (attempts < maxAttempts) {
+        const existing = await c.env.DB.prepare(
+          "SELECT id FROM relocation_hub_access WHERE session_code = ?"
+        ).bind(sessionCode).first();
+
+        if (!existing) break;
+        sessionCode = generateSessionCode();
+        attempts++;
+      }
+
+      if (attempts >= maxAttempts) {
+        return c.json({ error: "Failed to generate unique session code" }, 500);
+      }
+
+      // 4. Create or find an assessment for CRM record
+      // For report generation, we may not have an assessment yet, so create a minimal one if needed
+      if (!finalAssessmentId) {
+        // Create a minimal assessment record for CRM tracking (assessment_id is required)
+        const newAssessment = await c.env.DB.prepare(`
+          INSERT INTO assessments (created_at)
+          VALUES (CURRENT_TIMESTAMP)
+        `).run();
+        
+        finalAssessmentId = newAssessment.meta?.last_row_id || null;
+        
+        if (!finalAssessmentId) {
+          return c.json({ error: "Failed to create assessment record" }, 500);
+        }
+      }
+
+      // 5. Set expiration (1 year from now)
+      const expires_at = new Date();
+      expires_at.setFullYear(expires_at.getFullYear() + 1);
+
+      // 6. Create relocation_hub_access record in CRM (this is what CRM reads from)
+      const result = await c.env.DB.prepare(`
+        INSERT INTO relocation_hub_access (
+          assessment_id, email, session_code, is_active, purchase_confirmed, expires_at
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `).bind(
+        finalAssessmentId,
+        normalizedEmail,
+        sessionCode,
+        1, // is_active
+        0, // purchase_confirmed (false - they're accessing report generation)
+        expires_at.toISOString()
+      ).run();
+
+      accessId = result.meta?.last_row_id || 0;
+
+      console.log(`Email gateway: Created CRM record for ${normalizedEmail}, session: ${sessionCode}, assessment: ${finalAssessmentId}`);
+    }
+
+    // 7. Return success with redirect URL to report generation app
+    const reportAppUrl = `https://report.emigrationpro.com/?email=${encodeURIComponent(normalizedEmail)}&session_code=${sessionCode}`;
+    
     return c.json({
       success: true,
-      message: "Email successfully captured. You'll receive information about permanent access soon."
+      message: "Email captured successfully. Redirecting to report generation...",
+      session_code: sessionCode,
+      access_id: accessId,
+      email: normalizedEmail,
+      // Redirect URL to report generation app
+      report_url: reportAppUrl
     });
   } catch (error) {
-    console.error("Error capturing email lead:", error);
-    return c.json({ error: "Failed to capture email" }, 500);
+    console.error("Error in email gateway:", error);
+    return c.json({ 
+      error: "Failed to process email",
+      details: error instanceof Error ? error.message : "Unknown error"
+    }, 500);
   }
 });
 
@@ -691,13 +793,23 @@ app.get("/api/admin/email-leads", async (c) => {
 const BlogPostSchema = z.object({
   title: z.string().min(1).max(500),
   slug: z.string().min(1).max(200),
-  featured_image: z.string().optional(),
+  featured_image: z.string().optional().or(z.literal('')),
   body: z.string().min(1),
-  excerpt: z.string().optional(),
-  published_date: z.string().optional(),
-  is_published: z.boolean().default(false),
-  allow_comments: z.boolean().default(true),
-  author: z.string().optional()
+  excerpt: z.string().optional().or(z.literal('')),
+  published_date: z.string().optional().or(z.literal('')),
+  is_published: z.union([z.boolean(), z.number(), z.string()]).transform(val => {
+    if (typeof val === 'boolean') return val;
+    if (typeof val === 'number') return val === 1;
+    if (typeof val === 'string') return val === 'true' || val === '1';
+    return false;
+  }),
+  allow_comments: z.union([z.boolean(), z.number(), z.string()]).transform(val => {
+    if (typeof val === 'boolean') return val;
+    if (typeof val === 'number') return val === 1;
+    if (typeof val === 'string') return val === 'true' || val === '1';
+    return true;
+  }),
+  author: z.string().optional().or(z.literal(''))
 });
 
 // Get all published blog posts
@@ -867,6 +979,9 @@ app.delete("/api/admin/blog/posts/:id", blogAdminAuth, async (c) => {
       success: true,
       message: "Blog post deleted successfully"
     });
+  } catch (error) {
+    console.error("Error deleting blog post:", error);
+    return c.json({ error: "Failed to delete blog post" }, 500);
   }
 });
 
@@ -1012,20 +1127,76 @@ app.get('/ping', async (c) => {
   });
 });
 
-// Serve static files for React app (simple HTML fallback for SPA)
+// Serve robots.txt to block all search engines (TESTING MODE)
+app.get('/robots.txt', async (c) => {
+  return c.text(`# TESTING MODE - Prevent all search engine crawling
+# This Cloudflare Workers site is in testing phase
+# Remove these directives when ready to go live
+
+User-agent: *
+Disallow: /`, 200, {
+    'Content-Type': 'text/plain',
+    'X-Robots-Tag': 'noindex, nofollow'
+  });
+});
+
+// Serve static files for React app using ASSETS binding
 app.get('*', async (c) => {
-  return c.html(`<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Emigration Pro</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/react-app/main.tsx"></script>
-  </body>
-</html>`);
+  try {
+    const url = new URL(c.req.url);
+    
+    // Try to serve from ASSETS binding (the built React app)
+    const assetResponse = await c.env.ASSETS.fetch(c.req.raw);
+
+    // If asset found, add noindex headers for HTML responses (TESTING MODE)
+    if (assetResponse.status !== 404) {
+      const contentType = assetResponse.headers.get('content-type') || '';
+      
+      // Add noindex headers to HTML responses to prevent indexing
+      if (contentType.includes('text/html')) {
+        const clonedResponse = new Response(assetResponse.body, {
+          status: assetResponse.status,
+          statusText: assetResponse.statusText,
+          headers: new Headers(assetResponse.headers)
+        });
+        
+        // Add multiple headers to prevent indexing
+        clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+        clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        
+        return clonedResponse;
+      }
+      
+      return assetResponse;
+    }
+
+    // For SPA routing, serve index.html for non-API routes
+    if (!url.pathname.startsWith('/api/')) {
+      const indexResponse = await c.env.ASSETS.fetch(new Request(new URL('/', url.origin)));
+      
+      // Add noindex headers to index.html
+      if (indexResponse.status !== 404) {
+        const clonedResponse = new Response(indexResponse.body, {
+          status: indexResponse.status,
+          statusText: indexResponse.statusText,
+          headers: new Headers(indexResponse.headers)
+        });
+        
+        // Add multiple headers to prevent indexing
+        clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+        clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        
+        return clonedResponse;
+      }
+      
+      return indexResponse;
+    }
+
+    return assetResponse;
+  } catch (error) {
+    console.error('Asset serving error:', error);
+    return c.json({ error: 'Page not found' }, 404);
+  }
 });
 
 // Handle scheduled events (cron jobs)

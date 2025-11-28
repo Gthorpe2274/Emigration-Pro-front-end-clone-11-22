@@ -10,8 +10,8 @@ export default function Home() {
 
   const handleEmailSubmit = () => {
     // Email is already stored by the modal component
-    // Redirect to external report generation site
-    window.location.href = 'https://emipro-warp-11-13.netlify.app/';
+    // Redirect will be handled by EmailCaptureModal after email is saved to CRM
+    // Redirects to report.emigrationpro.com
   };
 
   return (
@@ -51,10 +51,12 @@ export default function Home() {
               </span>
             </h2>
             
-            <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto font-medium">
-              Get personalized emigration guidance with comprehensive reports covering immigration requirements, 
-              cost analysis, healthcare systems, and step-by-step relocation timelines.
-            </p>
+            <div className="inline-block bg-white px-8 py-6 border-2 border-gray-300 shadow-xl mb-10 mx-auto max-w-3xl">
+              <p className="text-2xl text-gray-900 font-medium">
+                Get step-by-step emigration guidance with dour PERSONALIZED comprehensive report covering immigration requirements, 
+                cost analysis, healthcare systems, and relocation timelines and more.
+              </p>
+            </div>
             
             <div className="flex flex-row gap-6 justify-center items-center mb-12">
               <Link 
