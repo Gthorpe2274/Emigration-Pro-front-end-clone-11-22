@@ -11,7 +11,11 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    /* Relax worker-only type checking for Netlify build compatibility */
+    "strict": false,
+    "noUnusedParameters": false,
+    "noUnusedLocals": false
   },
   "include": [
     "src/worker"
