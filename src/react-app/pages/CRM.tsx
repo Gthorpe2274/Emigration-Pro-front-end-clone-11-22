@@ -28,6 +28,7 @@ export default function CRM() {
   const [purchasers, setPurchasers] = useState<Purchaser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchDate, setSearchDate] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
 
   // Handle login
@@ -73,17 +74,32 @@ export default function CRM() {
   };
 
   const filteredPurchasers = purchasers.filter(purchaser => {
+    // Search by email or session code
     const matchesSearch = 
       purchaser.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       purchaser.session_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       purchaser.preferred_country?.toLowerCase().includes(searchTerm.toLowerCase());
 
+    // Filter by active status
     const matchesFilter = 
       filterActive === 'all' ||
       (filterActive === 'active' && purchaser.is_active === 1) ||
       (filterActive === 'inactive' && purchaser.is_active === 0);
 
-    return matchesSearch && matchesFilter;
+    // Filter by date if date search is provided
+    let matchesDate = true;
+    if (searchDate) {
+      const searchDateObj = new Date(searchDate);
+      const purchaserDate = new Date(purchaser.created_at);
+      
+      // Compare dates (year, month, day only - ignore time)
+      matchesDate = 
+        searchDateObj.getFullYear() === purchaserDate.getFullYear() &&
+        searchDateObj.getMonth() === purchaserDate.getMonth() &&
+        searchDateObj.getDate() === purchaserDate.getDate();
+    }
+
+    return matchesSearch && matchesFilter && matchesDate;
   });
 
   const exportToCSV = () => {
@@ -235,49 +251,89 @@ export default function CRM() {
             </div>
 
             {/* Search and Filter */}
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search by email, session code, or country..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+            <div className="space-y-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Email/Session Code Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="text"
+                    placeholder="Search by email or session code..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                
+                {/* Date Search */}
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="date"
+                    placeholder="Filter by date..."
+                    value={searchDate}
+                    onChange={(e) => setSearchDate(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  {searchDate && (
+                    <button
+                      onClick={() => setSearchDate('')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      title="Clear date filter"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+
+                {/* Status Filter */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setFilterActive('all')}
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+                      filterActive === 'all'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setFilterActive('active')}
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+                      filterActive === 'active'
+                        ? 'bg-green-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    Active
+                  </button>
+                  <button
+                    onClick={() => setFilterActive('inactive')}
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+                      filterActive === 'inactive'
+                        ? 'bg-red-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    Inactive
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-2">
+              
+              {/* Clear all filters button */}
+              {(searchTerm || searchDate || filterActive !== 'all') && (
                 <button
-                  onClick={() => setFilterActive('all')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    filterActive === 'all'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSearchDate('');
+                    setFilterActive('all');
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-700 underline"
                 >
-                  All
+                  Clear all filters
                 </button>
-                <button
-                  onClick={() => setFilterActive('active')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    filterActive === 'active'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  Active
-                </button>
-                <button
-                  onClick={() => setFilterActive('inactive')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    filterActive === 'inactive'
-                      ? 'bg-red-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  Inactive
-                </button>
-              </div>
+              )}
             </div>
           </div>
 
