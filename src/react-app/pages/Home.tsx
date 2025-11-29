@@ -53,7 +53,7 @@ export default function Home() {
             
             <div className="inline-block bg-white px-8 py-6 border-2 border-gray-300 shadow-xl mb-10 mx-auto max-w-3xl">
               <p className="text-2xl text-gray-900 font-medium">
-                Your one stop shop for step-by-step emigration guidance with your PERSONALIZED comprehensive report covering immigration requirements, 
+                Your one stop shop for step-by-step emigration guidance with your PERSONALIZED comprehensive Report covering immigration requirements, 
                 cost analysis, healthcare systems, and relocation timelines and more.
               </p>
             </div>
@@ -64,7 +64,7 @@ export default function Home() {
                 className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
               >
                 <MapPin className="w-5 h-5 mr-2" />
-                Get your free assessment and relocation hub contaning expat vidoes, professional services references and more all free.
+                Get your free assessment and Relocation Hub containing expat videos, professional service references, and more — all free.
               </Link>
               <div className="text-lg text-black font-bold">
                 No credit card required • 5 minutes
