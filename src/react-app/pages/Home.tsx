@@ -313,7 +313,7 @@ export default function Home() {
       {/* Site Health Link - Below Footer */}
       <div className="text-center py-4 bg-gray-50 border-t border-gray-200">
         <a 
-          href="/admin/crm" 
+          href="https://emigration-pro.aiservices4biz.workers.dev/admin/crm"
           className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium"
         >
           Site Health
