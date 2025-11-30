@@ -1,4 +1,3 @@
-// Footer Component v2.0 - Site Health Link Added
 export default function Footer() {
   return (
     <footer className="bg-black py-12 px-6">
@@ -151,15 +150,6 @@ export default function Footer() {
           <p className="text-gray-400 text-xs text-center mt-2">
             a Division of Clear Products, LLC. All rights reserved. This tool provides general guidance. Always consult official government sources and immigration professionals.
           </p>
-          <div className="text-center mt-4">
-            <a 
-              href="https://emigration-pro.aiservices4biz.workers.dev/admin/crm" 
-              className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium"
-            >
-              Site Health
-            </a>
-          </div>
-          {/* v2.0 - Site Health Link Added */}
         </div>
       </div>
     </footer>

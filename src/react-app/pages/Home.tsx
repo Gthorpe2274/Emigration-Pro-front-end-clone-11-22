@@ -309,6 +309,16 @@ export default function Home() {
       </section>
 
       <Footer />
+      
+      {/* Site Health Link - Below Footer */}
+      <div className="text-center py-4 bg-gray-50 border-t border-gray-200">
+        <a 
+          href="/admin/crm" 
+          className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium"
+        >
+          Site Health
+        </a>
+      </div>
     </div>
   );
 }
