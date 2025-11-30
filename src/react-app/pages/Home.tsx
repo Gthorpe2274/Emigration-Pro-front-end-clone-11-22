@@ -313,7 +313,7 @@ export default function Home() {
       {/* System Status and Run Time Links */}
       <div className="text-center py-4">
         <Link 
-          to="/system-login" 
+          to="/admin/crm" 
           className="text-xs text-gray-400 hover:text-gray-500 transition-colors"
         >
           System Status

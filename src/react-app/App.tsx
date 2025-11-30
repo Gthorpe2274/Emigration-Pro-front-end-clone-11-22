@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
 import Assessment from './pages/Assessment';
@@ -17,7 +17,6 @@ import RAGDashboard from './pages/RAGDashboard';
 import EmailTest from './pages/EmailTest';
 import JobProcessor from './pages/JobProcessor';
 import SocialLogin from './pages/SocialLogin';
-import SystemLogin from './pages/SystemLogin';
 import PermanentRelocationHub from './pages/PermanentRelocationHub';
 import CRM from './pages/CRM';
 import AdminLogin from './pages/AdminLogin';
@@ -48,7 +47,8 @@ function App() {
         <Route path="/admin/email-test" element={<EmailTest />} />
         <Route path="/admin/jobs" element={<JobProcessor />} />
         <Route path="/admin/social-login" element={<SocialLogin />} />
-        <Route path="/admin/system-login" element={<SystemLogin />} />
+        <Route path="/system-login" element={<Navigate to="/admin/crm" replace />} />
+        <Route path="/admin/system-login" element={<Navigate to="/admin/crm" replace />} />
         <Route path="/admin/crm" element={<CRM />} />
         <Route path="/admin/blog" element={<ProtectedAdmin />} />
         <Route path="/access-hub" element={<PermanentRelocationHub />} />

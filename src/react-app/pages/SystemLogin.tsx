@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Lock, AlertCircle } from 'lucide-react';
 
 export default function SystemLogin() {
@@ -7,6 +7,11 @@ export default function SystemLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Debug: Log when component mounts
+  useEffect(() => {
+    console.log('SystemLogin component mounted');
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +29,10 @@ export default function SystemLogin() {
         // Force a small delay to ensure sessionStorage is set
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Redirect to test reports page
-        navigate('/test-reports', { replace: true });
+        // Check if there's a redirect parameter, otherwise go to CRM
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectTo = urlParams.get('redirect') || '/admin/crm';
+        navigate(redirectTo, { replace: true });
       } else {
         setError('Invalid password. Access denied.');
         setLoading(false);
@@ -38,14 +45,14 @@ export default function SystemLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center p-4" style={{ minHeight: '100vh' }}>
+      <div className="max-w-md w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Lock className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-3xl font-bold text-white mb-2">System Status</h2>
-          <p className="text-blue-200">Restricted Access Portal</p>
+          <p className="text-blue-200">CRM Management Access Portal</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -83,7 +90,7 @@ export default function SystemLogin() {
                 Authenticating...
               </div>
             ) : (
-              'Access System Status'
+              'Access CRM Management'
             )}
           </button>
         </form>
@@ -99,7 +106,7 @@ export default function SystemLogin() {
 
         <div className="mt-8 text-center text-xs text-blue-400">
           <p>Authorized personnel only</p>
-          <p className="mt-1">This area contains system diagnostics and testing tools</p>
+          <p className="mt-1">Access the Customer Relationship Management system</p>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Users, Mail, Key, Calendar, MapPin, Search, Download } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
@@ -18,15 +19,18 @@ interface Purchaser {
 }
 
 export default function CRM() {
-  // Authentication state
+  // Authentication state - using same pattern as BlogAdmin
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('crmAdminAuth') === 'true';
+    return sessionStorage.getItem('crmAuth') === 'true';
   });
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
   const [purchasers, setPurchasers] = useState<Purchaser[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    // Only set loading to true if already authenticated
+    return sessionStorage.getItem('crmAuth') === 'true';
+  });
   const [searchTerm, setSearchTerm] = useState('');
   const [searchDate, setSearchDate] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
@@ -35,10 +39,9 @@ export default function CRM() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === 'admin#123') {
-      sessionStorage.setItem('crmAdminAuth', 'true');
+      sessionStorage.setItem('crmAuth', 'true');
       setIsAuthenticated(true);
       setLoginError('');
-      fetchPurchasers();
     } else {
       setLoginError('Incorrect password. Please try again.');
       setPassword('');
@@ -47,16 +50,24 @@ export default function CRM() {
 
   // Handle logout
   const handleLogout = () => {
-    sessionStorage.removeItem('crmAdminAuth');
+    sessionStorage.removeItem('crmAuth');
     setIsAuthenticated(false);
     setPassword('');
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
+    // Always check authentication status on mount
+    const authStatus = sessionStorage.getItem('crmAuth') === 'true';
+    console.log('CRM Auth Check:', authStatus, 'Value:', sessionStorage.getItem('crmAuth'));
+    setIsAuthenticated(authStatus);
+    
+    if (authStatus) {
       fetchPurchasers();
+    } else {
+      // If not authenticated, ensure loading is false so login form can show
+      setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, []);
 
   const fetchPurchasers = async () => {
     try {
@@ -136,7 +147,7 @@ export default function CRM() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">CRM Admin</h1>
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">CRM Management</h1>
             <p className="text-gray-600">Enter password to access</p>
           </div>
 
@@ -169,6 +180,12 @@ export default function CRM() {
               Login
             </button>
           </form>
+
+          <div className="mt-6 text-center">
+            <Link to="/" className="text-sm text-blue-600 hover:text-blue-700">
+              ← Back to Home
+            </Link>
+          </div>
         </div>
       </div>
     );
