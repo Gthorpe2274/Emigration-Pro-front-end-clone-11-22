@@ -4,3 +4,9 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# SPA redirect rule - all routes should be handled by React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

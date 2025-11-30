@@ -318,13 +318,6 @@ export default function Home() {
         >
           Site Health
         </a>
-        <span className="mx-2 text-xs text-gray-400">•</span>
-        <a 
-          href="https://emigration-pro.aiservices4biz.workers.dev/admin/blog"
-          className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium"
-        >
-          Usage
-        </a>
       </div>
     </div>
   );
