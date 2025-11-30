@@ -309,23 +309,6 @@ export default function Home() {
       </section>
 
       <Footer />
-      
-      {/* System Status and Run Time Links */}
-      <div className="text-center py-4">
-        <Link 
-          to="/admin/crm" 
-          className="text-xs text-gray-400 hover:text-gray-500 transition-colors"
-        >
-          System Status
-        </Link>
-        <span className="mx-2 text-xs text-gray-400">•</span>
-        <Link 
-          to="/admin/config" 
-          className="text-xs text-gray-400 hover:text-gray-500 transition-colors"
-        >
-          Run Time
-        </Link>
-      </div>
     </div>
   );
 }

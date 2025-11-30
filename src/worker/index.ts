@@ -1167,6 +1167,19 @@ app.get('*', async (c) => {
         return clonedResponse;
       }
       
+      // Add cache-busting headers to JavaScript and CSS assets to ensure fresh deployment
+      if (contentType.includes('application/javascript') || contentType.includes('text/css') || contentType.includes('application/json')) {
+        const clonedResponse = new Response(assetResponse.body, {
+          status: assetResponse.status,
+          statusText: assetResponse.statusText,
+          headers: new Headers(assetResponse.headers)
+        });
+        
+        clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+        
+        return clonedResponse;
+      }
+      
       return assetResponse;
     }
 
