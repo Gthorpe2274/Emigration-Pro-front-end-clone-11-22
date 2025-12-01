@@ -2,6 +2,16 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 
+// Helper function to get API base URL
+const getApiBaseUrl = () => {
+  // If running on Netlify, use Cloudflare Workers URL
+  if (window.location.hostname.includes('netlify.app')) {
+    return 'https://emigration-pro.aiservices4biz.workers.dev';
+  }
+  // Otherwise use relative URL (works on Cloudflare Workers deployment)
+  return '';
+};
+
 interface BlogPost {
   id: number;
   title: string;
@@ -87,7 +97,8 @@ export default function BlogAdmin() {
 
   const fetchAllPosts = async () => {
     try {
-      const response = await fetch('/api/admin/blog/posts', {
+      const apiBase = getApiBaseUrl();
+      const response = await fetch(`${apiBase}/api/admin/blog/posts`, {
         headers: {
           'X-API-Key': 'admin#123'
         }
@@ -107,9 +118,10 @@ export default function BlogAdmin() {
     e.preventDefault();
 
     try {
+      const apiBase = getApiBaseUrl();
       const url = editingPost
-        ? `/api/admin/blog/posts/${editingPost.id}`
-        : '/api/admin/blog/posts';
+        ? `${apiBase}/api/admin/blog/posts/${editingPost.id}`
+        : `${apiBase}/api/admin/blog/posts`;
 
       const method = editingPost ? 'PUT' : 'POST';
 
@@ -157,7 +169,8 @@ export default function BlogAdmin() {
     if (!confirm('Are you sure you want to delete this post?')) return;
 
     try {
-      const response = await fetch(`/api/admin/blog/posts/${id}`, {
+      const apiBase = getApiBaseUrl();
+      const response = await fetch(`${apiBase}/api/admin/blog/posts/${id}`, {
         method: 'DELETE',
         headers: {
           'X-API-Key': 'admin#123'

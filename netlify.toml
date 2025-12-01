@@ -5,7 +5,14 @@
 [build.environment]
   NODE_VERSION = "22"
 
-# SPA redirect rule - all routes should be handled by React Router
+# Proxy API requests to Cloudflare Workers backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://emigration-pro.aiservices4biz.workers.dev/api/:splat"
+  status = 200
+  force = true
+
+# SPA redirect rule - all non-API routes should be handled by React Router
 [[redirects]]
   from = "/*"
   to = "/index.html"
