@@ -51,13 +51,13 @@ export default function EmailCaptureModal({ isOpen, onClose, onSubmit, assessmen
         sessionStorage.setItem('accessToken', data.session_code);
       }
 
-      // Redirect to report generation app (report.emigrationpro.com)
+      // Redirect to Stripe payment link
       if (data.report_url) {
-        // Use the report URL provided by backend
+        // Use the URL provided by backend (Stripe payment link)
         window.location.href = data.report_url;
       } else {
-        // Fallback: Use default report generation URL
-        window.location.href = `https://report.emigrationpro.com/?email=${encodeURIComponent(email.toLowerCase())}&session_code=${data.session_code || ''}`;
+        // Fallback: Use Stripe payment link
+        window.location.href = `https://buy.stripe.com/00w9AL79L9lqcTD4tTefC05`;
       }
       
       // Keep the modal in submitting state until redirect completes
