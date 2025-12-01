@@ -313,10 +313,17 @@ export default function Home() {
       {/* Footer Links - Below Footer */}
       <div className="text-center py-4 bg-gray-50 border-t border-gray-200">
         <a 
-          href="https://emi-pro-frontend.netlify.app/blog"
+          href="https://emi-pro-frontend.netlify.app/admin/blog"
           className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium"
         >
           Site Health
+        </a>
+        <span className="mx-2 text-xs text-gray-400">•</span>
+        <a 
+          href="https://emi-pro-frontend.netlify.app/admin/crm"
+          className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium"
+        >
+          Server
         </a>
       </div>
     </div>
