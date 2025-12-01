@@ -11,7 +11,7 @@ export default function Home() {
   const handleEmailSubmit = () => {
     // Email is already stored by the modal component
     // Redirect will be handled by EmailCaptureModal after email is saved to CRM
-    // Redirects to Stripe payment link
+    // Redirects to report.emigrationpro.com
   };
 
   return (
@@ -313,10 +313,17 @@ export default function Home() {
       {/* Footer Links - Below Footer */}
       <div className="text-center py-4 bg-gray-50 border-t border-gray-200">
         <a 
-          href="https://emi-pro-frontend.netlify.app/blog"
+          href="/admin/blog"
           className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium"
         >
           Site Health
+        </a>
+        <span className="mx-2 text-xs text-gray-400">•</span>
+        <a 
+          href="/admin/crm"
+          className="text-xs text-blue-600 hover:text-blue-700 transition-colors font-medium"
+        >
+          Server
         </a>
       </div>
     </div>

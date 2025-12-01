@@ -419,7 +419,7 @@ app.get("/api/assessments/:id", async (c) => {
 });
 
 // Email gateway endpoint - For report generation app access
-// Creates CRM record and redirects to Stripe payment link
+// Creates CRM record and redirects to report.emigrationpro.com
 const EmailLeadSchema = z.object({
   email: z.string().email(),
   assessment_id: z.number().optional()
@@ -538,17 +538,17 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
       console.log(`Email gateway: Created CRM record for ${normalizedEmail}, session: ${sessionCode}, assessment: ${finalAssessmentId}`);
     }
 
-    // 7. Return success with redirect URL to Stripe payment link
-    const stripePaymentUrl = `https://buy.stripe.com/00w9AL79L9lqcTD4tTefC05`;
+    // 7. Return success with redirect URL to report generation app
+    const reportAppUrl = `https://report.emigrationpro.com/?email=${encodeURIComponent(normalizedEmail)}&session_code=${sessionCode}`;
     
     return c.json({
       success: true,
-      message: "Email captured successfully. Redirecting to checkout...",
+      message: "Email captured successfully. Redirecting to report generation...",
       session_code: sessionCode,
       access_id: accessId,
       email: normalizedEmail,
-      // Redirect URL to Stripe payment link
-      report_url: stripePaymentUrl
+      // Redirect URL to report generation app
+      report_url: reportAppUrl
     });
   } catch (error) {
     console.error("Error in email gateway:", error);

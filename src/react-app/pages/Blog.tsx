@@ -59,7 +59,7 @@ export default function Blog() {
 
           <div className="text-center mb-12">
             <a
-              href="https://buy.stripe.com/00w9AL79L9lqcTD4tTefC05"
+              href="https://report.emigrationpro.com"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 text-lg"
