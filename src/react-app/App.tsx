@@ -50,7 +50,8 @@ function App() {
         <Route path="/system-login" element={<Navigate to="/admin/crm" replace />} />
         <Route path="/admin/system-login" element={<Navigate to="/admin/crm" replace />} />
         <Route path="/admin/crm" element={<CRM />} />
-        <Route path="/admin/blog" element={<ProtectedAdmin />} />
+        <Route path="/admin/blog" element={<BlogAdmin />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/access-hub" element={<PermanentRelocationHub />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
