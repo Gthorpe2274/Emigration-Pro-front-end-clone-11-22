@@ -1,5 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
+  "vars": {
+    "YOUTUBE_API_KEY": "AIzaSyDTnhQ4nyDLEu9eoVQKz0xVXpTFN08UQpw",
+    "GEMINI_API_KEY": "AIzaSyBT2qs3VtQRU_Gv9YqZFSQA3ikEiQ0CCGg"
+  },
   "name": "emigration-pro",
   "main": "./src/worker/index.ts",
   "compatibility_date": "2025-06-17",
@@ -24,7 +28,8 @@
   "kv_namespaces": [
     {
       "binding": "REPORTS_KV",
-      "id": "d9b6191b7e71482c93a3f99f70c37db9"
+      "id": "d9b6191b7e71482c93a3f99f70c37db9",
+      "preview_id": "b39c60cdd504843c7ae19dcfa590c4561"
     }
   ],
   "r2_buckets": [
@@ -32,5 +37,11 @@
       "binding": "R2_BUCKET",
       "bucket_name": "emigration-pro-bucket"
     }
-  ]
+  ],
+  "triggers": {
+    "crons": [
+      "0 2 * * *",
+      "0 3 1 */3 *"
+    ]
+  }
 }

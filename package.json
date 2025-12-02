@@ -36,7 +36,8 @@
     "check": "tsc && vite build && wrangler deploy --dry-run",
     "dev": "vite",
     "lint": "eslint .",
-    "start": "node dist/worker/index.js"
+    "start": "node dist/worker/index.js",
+    "worker": "wrangler dev"
   },
   "type": "module",
   "version": "0.0.0"

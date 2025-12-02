@@ -46,8 +46,53 @@ export default function RelocationHub() {
           const result = await response.json();
           setAssessment(result.assessment);
           
-          const countryVideos = generateVideosForCountry(result.assessment.preferred_country, result.assessment.preferred_city);
-          setVideos(countryVideos);
+          // Try to fetch videos from database (smart curated videos)
+          try {
+            const videosResponse = await fetch(`/api/relocation-hub/${id}/videos`);
+            if (videosResponse.ok) {
+              const videosData = await videosResponse.json();
+              
+              if (videosData.success && videosData.videos && videosData.videos.length > 0) {
+                // Convert database format to component format
+                const formattedVideos = videosData.videos.map((video: any) => ({
+                  id: video.video_slot.toString(),
+                  title: video.title,
+                  channel: video.channel_name || 'Unknown',
+                  thumbnail: video.thumbnail_url || 'https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?w=400&h=225&fit=crop',
+                  description: video.description || '',
+                  url: video.youtube_url
+                }));
+                setVideos(formattedVideos);
+              } else {
+                // No videos in database yet, use fallback generation
+                console.log('No videos found in database, using fallback generation');
+                const countryVideos = generateVideosForCountry(
+                  result.assessment.preferred_country,
+                  result.assessment.preferred_city
+                );
+                setVideos(countryVideos);
+                
+                // Optionally trigger video initialization in background (non-blocking)
+                fetch(`/api/relocation-hub/${id}/videos/update`, { method: 'POST' })
+                  .catch(err => console.warn('Failed to initialize videos:', err));
+              }
+            } else {
+              // API error, use fallback
+              const countryVideos = generateVideosForCountry(
+                result.assessment.preferred_country,
+                result.assessment.preferred_city
+              );
+              setVideos(countryVideos);
+            }
+          } catch (videoError) {
+            console.warn('Error fetching videos, using fallback:', videoError);
+            // Fallback to generated videos
+            const countryVideos = generateVideosForCountry(
+              result.assessment.preferred_country,
+              result.assessment.preferred_city
+            );
+            setVideos(countryVideos);
+          }
         }
       } catch (error) {
         console.error('Error fetching assessment:', error);
@@ -188,7 +233,7 @@ export default function RelocationHub() {
                       This relocation hub will <strong>remain active only until you close this browser tab</strong>. 
                       All content and resources shown here are temporary.
                     </p>
-                    <h4 className="text-2xl font-bold text-gray-900 mb-3 mt-4">Want Permanent 5 yrs. access?</h4>
+                    <h4 className="text-2xl font-bold text-gray-900 mb-3 mt-4">Want Permanent 2 yrs. access?</h4>
                     <div className="bg-green-100 border border-green-300 rounded-lg p-4 mb-4">
                       <p className="text-xl text-green-900 font-medium mb-2">
                         🎁 <strong>FREE BONUS with Full Report Purchase!</strong>

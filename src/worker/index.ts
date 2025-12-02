@@ -5,6 +5,170 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 
 import { runScheduledCleanup } from './retention-cleanup';
+import { YouTubeAPIService } from './youtube-api-service';
+import { findBestVideoReplacement } from './youtube-video-curator';
+
+// Helper function for scheduled video updates
+async function runScheduledVideoUpdates(env: Env): Promise<void> {
+  console.log('=== STARTING SCHEDULED VIDEO UPDATES ===');
+
+  try {
+    if (!env.YOUTUBE_API_KEY) {
+      console.warn('YouTube API key not configured, skipping video updates');
+      return;
+    }
+
+    // Find assessments with videos due for update (next_update_date <= today)
+    const dueForUpdate = await env.DB.prepare(`
+      SELECT DISTINCT assessment_id
+      FROM relocation_hub_videos
+      WHERE next_update_date <= datetime('now')
+      ORDER BY assessment_id
+      LIMIT 50
+    `).all();
+
+    console.log(`Found ${dueForUpdate.results.length} assessments with videos due for update`);
+
+    const youtubeService = new YouTubeAPIService(env.YOUTUBE_API_KEY);
+    let processed = 0;
+    let errors = 0;
+
+    for (const row of dueForUpdate.results) {
+      const assessmentId = (row.assessment_id as number);
+
+      try {
+        // Get assessment details
+        const assessment = await env.DB.prepare(
+          "SELECT * FROM assessments WHERE id = ?"
+        ).bind(assessmentId).first();
+
+        if (!assessment) {
+          console.warn(`Assessment ${assessmentId} not found, skipping`);
+          continue;
+        }
+
+        const country = (assessment.preferred_country as string) || '';
+        const city = assessment.preferred_city as string | undefined;
+
+        // Get current videos
+        const currentVideos = await env.DB.prepare(`
+          SELECT * FROM relocation_hub_videos
+          WHERE assessment_id = ?
+          ORDER BY video_slot ASC
+        `).bind(assessmentId).all();
+
+        if (currentVideos.results.length === 0) {
+          continue; // No videos to update
+        }
+
+        // Update each video slot
+        for (const currentVideo of currentVideos.results) {
+          try {
+            const slot = currentVideo.video_slot as number;
+            const title = currentVideo.title as string;
+            const query = title.toLowerCase()
+              .replace(/living in /g, '')
+              .replace(/ - .*/, '')
+              .replace(/ as an .*/, '')
+              .replace(/ vs .*/, '')
+              .replace(/ step by step .*/i, ' guide')
+              .replace(/ guide$/i, '')
+              + ` ${country}${city ? ` ${city}` : ''} expat`;
+
+            // Search YouTube
+            const searchResults = await youtubeService.searchVideos({
+              query: query,
+              maxResults: 10,
+              order: 'relevance'
+            });
+
+            if (searchResults.length === 0) {
+              console.warn(`No search results for slot ${slot} in assessment ${assessmentId}`);
+              continue;
+            }
+
+            // Use Gemini curation if available
+            let selectedVideo;
+            if (env.GEMINI_API_KEY) {
+              const curated = await findBestVideoReplacement(
+                {
+                  assessment_id: assessmentId,
+                  currentVideo: {
+                    video_id: currentVideo.video_id as string,
+                    title: title,
+                    channel_name: currentVideo.channel_name as string,
+                    description: currentVideo.description as string,
+                    video_slot: slot
+                  },
+                  country,
+                  city
+                },
+                searchResults,
+                env.GEMINI_API_KEY
+              );
+
+              if (curated && curated.confidence_score >= 60) {
+                selectedVideo = curated;
+              } else {
+                selectedVideo = searchResults[0];
+              }
+            } else {
+              selectedVideo = searchResults[0];
+            }
+
+            // Update video in database
+            const nextUpdateDate = new Date();
+            nextUpdateDate.setMonth(nextUpdateDate.getMonth() + 6);
+
+            await env.DB.prepare(`
+              UPDATE relocation_hub_videos
+              SET video_id = ?,
+                  title = ?,
+                  channel_name = ?,
+                  channel_id = ?,
+                  thumbnail_url = ?,
+                  description = ?,
+                  youtube_url = ?,
+                  last_updated = CURRENT_TIMESTAMP,
+                  next_update_date = ?,
+                  updated_at = CURRENT_TIMESTAMP
+              WHERE assessment_id = ? AND video_slot = ?
+            `).bind(
+              selectedVideo.video_id,
+              selectedVideo.title,
+              selectedVideo.channel_name,
+              selectedVideo.channel_id,
+              selectedVideo.thumbnail_url,
+              selectedVideo.description,
+              selectedVideo.youtube_url,
+              nextUpdateDate.toISOString(),
+              assessmentId,
+              slot
+            ).run();
+
+            console.log(`Updated video slot ${slot} for assessment ${assessmentId}`);
+          } catch (error) {
+            console.error(`Error updating video slot ${currentVideo.video_slot} for assessment ${assessmentId}:`, error);
+            errors++;
+          }
+        }
+
+        processed++;
+
+        // Rate limiting: wait 1 second between assessments to avoid API quota issues
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (error) {
+        console.error(`Error processing assessment ${assessmentId}:`, error);
+        errors++;
+      }
+    }
+
+    console.log(`=== VIDEO UPDATES COMPLETE ===`);
+    console.log(`Processed: ${processed}, Errors: ${errors}`);
+  } catch (error) {
+    console.error('Scheduled video update failed:', error);
+  }
+}
 
 // Initialize Hono app
 const app = new Hono<{ Bindings: Env }>();
@@ -17,6 +181,114 @@ app.use('*', cors({
   maxAge: 86400,
   credentials: false
 }));
+
+// Test endpoint - confirms env vars are loaded
+app.get('/api/env-test', async (c) => {
+  const hasYouTube = !!c.env.YOUTUBE_API_KEY;
+  const hasGemini = !!c.env.GEMINI_API_KEY;
+
+  console.log('Environment check:', {
+    youtube: hasYouTube,
+    gemini: hasGemini,
+    youtubeValue: c.env.YOUTUBE_API_KEY ? `${c.env.YOUTUBE_API_KEY.substring(0, 5)}...` : 'undefined',
+    geminiValue: c.env.GEMINI_API_KEY ? `${c.env.GEMINI_API_KEY.substring(0, 5)}...` : 'undefined',
+    allKeys: Object.keys(c.env)
+  });
+
+  return c.json({
+    youtube: hasYouTube ? '✅ set' : '❌ missing',
+    gemini: hasGemini ? '✅ set' : '❌ missing',
+    debug: {
+      youtubePrefix: c.env.YOUTUBE_API_KEY ? c.env.YOUTUBE_API_KEY.substring(0, 5) : 'N/A',
+      geminiPrefix: c.env.GEMINI_API_KEY ? c.env.GEMINI_API_KEY.substring(0, 5) : 'N/A',
+      envKeys: Object.keys(c.env)
+    }
+  });
+});
+
+// Debug endpoint - tests YouTube API only
+app.get('/api/debug/youtube-test', async (c) => {
+  if (!c.env.YOUTUBE_API_KEY) {
+    return c.json({ error: 'YouTube API key not configured' }, 500);
+  }
+
+  try {
+    console.log('Testing YouTube API with key:', c.env.YOUTUBE_API_KEY.substring(0, 10) + '...');
+    const yt = new YouTubeAPIService(c.env.YOUTUBE_API_KEY);
+    const searchResults = await yt.searchVideos({
+      query: 'Portugal expat guide',
+      maxResults: 3
+    });
+
+    console.log('YouTube API test successful, results:', searchResults.length);
+    return c.json({
+      success: true,
+      resultsCount: searchResults.length,
+      results: searchResults
+    });
+  } catch (error) {
+    console.error('YouTube API test failed:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+
+    return c.json({
+      success: false,
+      error: errorMessage,
+      stack: errorStack,
+      apiKeySet: !!c.env.YOUTUBE_API_KEY,
+      apiKeyPrefix: c.env.YOUTUBE_API_KEY ? c.env.YOUTUBE_API_KEY.substring(0, 10) : 'N/A'
+    }, 500);
+  }
+});
+
+// Debug endpoint - tests YouTube search and Gemini curation
+app.get('/api/debug/gemini-curate', async (c) => {
+  if (!c.env.YOUTUBE_API_KEY || !c.env.GEMINI_API_KEY) {
+    return c.json({ error: 'API keys not configured' }, 500);
+  }
+
+  try {
+    // 1. Search YouTube
+    const yt = new YouTubeAPIService(c.env.YOUTUBE_API_KEY);
+    const searchResults = await yt.searchVideos({
+      query: 'Portugal expat guide',
+      maxResults: 5
+    });
+
+    // 2. Curate with Gemini
+    // Mock current video data
+    const mockCurrentVideo = {
+      video_id: 'mock_id',
+      title: 'Old Video Title',
+      channel_name: 'Old Channel',
+      description: 'Old description',
+      video_slot: 1
+    };
+
+    const curated = await findBestVideoReplacement(
+      {
+        assessment_id: 999, // Mock ID
+        currentVideo: mockCurrentVideo,
+        country: 'Portugal',
+        city: 'Lisbon'
+      },
+      searchResults,
+      c.env.GEMINI_API_KEY
+    );
+
+    return c.json({
+      success: true,
+      searchResultsCount: searchResults.length,
+      geminiResult: curated,
+      rawSearchResults: searchResults
+    });
+  } catch (error) {
+    return c.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, 500);
+  }
+});
 
 // Middleware for blog admin API authentication (simplified - no API key required)
 const blogAdminAuth = async (c: any, next: any) => {
@@ -418,6 +690,141 @@ app.get("/api/assessments/:id", async (c) => {
   }
 });
 
+// Email sending helper function for relocation hub access
+async function sendRelocationHubAccessEmail(
+  email: string,
+  sessionCode: string,
+  resendApiKey: string | undefined,
+  assessmentId: number
+): Promise<{ success: boolean; error?: string }> {
+  if (!resendApiKey) {
+    console.warn('RESEND_API_KEY not configured, skipping email send');
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  // Determine the base URL based on deployment
+  const baseUrl = 'https://emigration-pro.aiservices4biz.workers.dev';
+  const hubAccessUrl = `${baseUrl}/access-hub`;
+
+  const emailBody = {
+    from: 'Emigration Pro <noreply@emigrationpro.com>',
+    to: email,
+    subject: 'Your Emigration Pro Relocation Hub Access Information',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(to right, #2563eb, #7c3aed); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0;">Emigration Pro</h1>
+        </div>
+        
+        <div style="background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+          <p style="font-size: 16px; color: #1f2937; margin-top: 0;">
+            Congratulations on your purchase of the personalized Emigration Pro Report. Here is your Relocation Hub access information, save it for future use.
+          </p>
+          
+          <div style="background: white; border: 2px solid #2563eb; border-radius: 8px; padding: 25px; margin: 25px 0;">
+            <h3 style="color: #1f2937; margin-top: 0; margin-bottom: 20px;">Your Relocation Hub Access Details</h3>
+            
+            <div style="margin-bottom: 20px;">
+              <div style="font-size: 14px; color: #6b7280; margin-bottom: 5px; font-weight: bold;">URL:</div>
+              <div style="font-size: 16px; color: #2563eb;">
+                <a href="${hubAccessUrl}" style="color: #2563eb; text-decoration: none; word-break: break-all;">${hubAccessUrl}</a>
+              </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+              <div style="font-size: 14px; color: #6b7280; margin-bottom: 5px; font-weight: bold;">Email (ID):</div>
+              <div style="font-size: 16px; color: #1f2937; font-family: monospace;">${email}</div>
+            </div>
+            
+            <div style="margin-bottom: 0;">
+              <div style="font-size: 14px; color: #6b7280; margin-bottom: 5px; font-weight: bold;">Password (Session Code):</div>
+              <div style="font-size: 18px; color: #2563eb; font-weight: bold; font-family: monospace; letter-spacing: 1px;">${sessionCode}</div>
+            </div>
+          </div>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${hubAccessUrl}" 
+               style="background: linear-gradient(to right, #2563eb, #7c3aed); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+              Access Your Relocation Hub
+            </a>
+          </div>
+          
+          <div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 15px; border-radius: 4px; margin: 25px 0;">
+            <p style="margin: 0; color: #991b1b;">
+              <strong>⚠️ DO NOT REPLY TO THIS EMAIL</strong><br>
+              This is an automated message from an unmonitored email address. 
+              If you need assistance, please contact us at <a href="mailto:info@emigrationpro.com" style="color: #991b1b; text-decoration: underline;">info@emigrationpro.com</a>
+            </p>
+          </div>
+          
+          <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+            This access code provides 2 years of access to your relocation hub. Keep this information safe for future reference.
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px;">
+          <p>© 2024 Emigration Pro. All rights reserved.</p>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+Congratulations on your purchase of the personalized Emigration Pro Report. Here is your Relocation Hub access information, save it for future use.
+
+Your Relocation Hub Access Details:
+
+URL: ${hubAccessUrl}
+
+Email (ID): ${email}
+
+Password (Session Code): ${sessionCode}
+
+Access Your Relocation Hub: ${hubAccessUrl}
+
+⚠️ DO NOT REPLY TO THIS EMAIL
+This is an automated message from an unmonitored email address. 
+If you need assistance, please contact us at info@emigrationpro.com
+
+This access code provides 2 years of access to your relocation hub. Keep this information safe for future reference.
+
+© 2024 Emigration Pro. All rights reserved.
+    `
+  };
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(emailBody),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Resend API error:', data);
+      return { success: false, error: data.message || 'Failed to send email' };
+    }
+
+    console.log('Email sent successfully:', data.id);
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
 // Email gateway endpoint - For report generation app access
 // Creates CRM record and redirects to report.emigrationpro.com
 const EmailLeadSchema = z.object({
@@ -447,7 +854,7 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
     // 2. Check if relocation_hub_access (CRM record) already exists for this email
     // If no assessment_id, we'll need to create a placeholder assessment or use null
     let existingAccess = null;
-    
+
     if (assessment_id) {
       existingAccess = await c.env.DB.prepare(`
         SELECT * FROM relocation_hub_access 
@@ -507,9 +914,9 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
           INSERT INTO assessments (created_at)
           VALUES (CURRENT_TIMESTAMP)
         `).run();
-        
+
         finalAssessmentId = newAssessment.meta?.last_row_id || null;
-        
+
         if (!finalAssessmentId) {
           return c.json({ error: "Failed to create assessment record" }, 500);
         }
@@ -540,7 +947,7 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
 
     // 7. Return success with redirect URL to report generation app
     const reportAppUrl = `https://report.emigrationpro.com/?email=${encodeURIComponent(normalizedEmail)}&session_code=${sessionCode}`;
-    
+
     return c.json({
       success: true,
       message: "Email captured successfully. Redirecting to report generation...",
@@ -552,7 +959,7 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
     });
   } catch (error) {
     console.error("Error in email gateway:", error);
-    return c.json({ 
+    return c.json({
       error: "Failed to process email",
       details: error instanceof Error ? error.message : "Unknown error"
     }, 500);
@@ -625,9 +1032,9 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
       return c.json({ error: "Failed to generate unique session code" }, 500);
     }
 
-    // Set expiration (5 years from now for permanent access)
+    // Set expiration (2 years from now for permanent access)
     const expires_at = new Date();
-    expires_at.setFullYear(expires_at.getFullYear() + 5);
+    expires_at.setFullYear(expires_at.getFullYear() + 2);
 
     // Create permanent access record
     await c.env.DB.prepare(`
@@ -649,6 +1056,48 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
       email,
       timestamp: new Date().toISOString()
     });
+
+    // Extend assessment retention period to 2 years if purchase is confirmed
+    // This ensures assessment data remains available for the full 2-year relocation hub access period
+    if (purchase_confirmed) {
+      // Get current retention expiry date for the assessment
+      const currentAssessment = await c.env.DB.prepare(
+        "SELECT retention_expires_at FROM assessments WHERE id = ?"
+      ).bind(assessment_id).first();
+
+      if (currentAssessment) {
+        // Calculate 2 years from now
+        const twoYearsFromNow = new Date();
+        twoYearsFromNow.setFullYear(twoYearsFromNow.getFullYear() + 2);
+
+        // Update assessment retention to 2 years (matching relocation hub access period)
+        await c.env.DB.prepare(`
+          UPDATE assessments 
+          SET retention_expires_at = ?,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE id = ?
+        `).bind(twoYearsFromNow.toISOString(), assessment_id).run();
+
+        console.log(`Extended assessment ${assessment_id} retention period to 2 years for purchase`);
+      }
+    }
+
+    // Send email with relocation hub access information (only if purchase is confirmed)
+    if (purchase_confirmed) {
+      const emailResult = await sendRelocationHubAccessEmail(
+        email.toLowerCase(),
+        sessionCode,
+        c.env.RESEND_API_KEY,
+        assessment_id
+      );
+
+      if (!emailResult.success) {
+        // Log but don't fail the request - access is already created
+        console.warn('Failed to send email to purchaser:', emailResult.error);
+      } else {
+        console.log('Purchase confirmation email sent successfully to:', email.toLowerCase());
+      }
+    }
 
     return c.json({
       success: true,
@@ -725,6 +1174,239 @@ app.post("/api/relocation-hub/access", zValidator("json", AccessRequestSchema), 
   } catch (error) {
     console.error("Error accessing relocation hub:", error);
     return c.json({ error: "Failed to access relocation hub" }, 500);
+  }
+});
+
+// Get videos for a relocation hub
+app.get("/api/relocation-hub/:assessmentId/videos", async (c) => {
+  try {
+    const assessmentId = parseInt(c.req.param("assessmentId"));
+
+    if (!assessmentId || isNaN(assessmentId)) {
+      return c.json({ error: "Invalid assessment ID" }, 400);
+    }
+
+    // Fetch videos from database
+    const videos = await c.env.DB.prepare(`
+      SELECT 
+        video_slot,
+        video_id,
+        title,
+        channel_name,
+        thumbnail_url,
+        description,
+        youtube_url,
+        last_updated
+      FROM relocation_hub_videos
+      WHERE assessment_id = ?
+      ORDER BY video_slot ASC
+    `).bind(assessmentId).all();
+
+    if (!videos.results || videos.results.length === 0) {
+      // No videos stored yet, return empty array
+      return c.json({
+        success: true,
+        videos: [],
+        message: "No videos found. Videos will be generated on first access."
+      });
+    }
+
+    return c.json({
+      success: true,
+      videos: videos.results
+    });
+  } catch (error) {
+    console.error("Error fetching videos:", error);
+    return c.json({ error: "Failed to fetch videos" }, 500);
+  }
+});
+
+// Initialize or update videos for a relocation hub (with Gemini smart curation)
+app.post("/api/relocation-hub/:assessmentId/videos/update", async (c) => {
+  try {
+    const assessmentId = parseInt(c.req.param("assessmentId"));
+
+    if (!assessmentId || isNaN(assessmentId)) {
+      return c.json({ error: "Invalid assessment ID" }, 400);
+    }
+
+    // Get assessment details
+    const assessment = await c.env.DB.prepare(
+      "SELECT * FROM assessments WHERE id = ?"
+    ).bind(assessmentId).first();
+
+    if (!assessment) {
+      return c.json({ error: "Assessment not found" }, 404);
+    }
+
+    const country = (assessment.preferred_country as string) || '';
+    const city = assessment.preferred_city as string | undefined;
+
+    // Check if YouTube and Gemini APIs are configured
+    if (!c.env.YOUTUBE_API_KEY) {
+      return c.json({ error: "YouTube API key not configured" }, 500);
+    }
+
+    const youtubeService = new YouTubeAPIService(c.env.YOUTUBE_API_KEY);
+
+    // Video slot definitions matching RelocationHub.tsx structure
+    const videoSlots = [
+      {
+        slot: 1,
+        query: `american living in ${country}${city ? ` ${city}` : ''} expat experience`,
+        title: `Living in ${country} as an American - My Experience`,
+        description: `Personal story of relocating from the US to ${country}. Covers visa process, culture shock, and daily life.`
+      },
+      {
+        slot: 2,
+        query: `cost of living ${country}${city ? ` ${city}` : ''} vs USA comparison`,
+        title: `Cost of Living in ${country} vs USA - Complete Breakdown`,
+        description: `Detailed comparison of housing, food, transportation, and healthcare costs between ${country} and the United States.`
+      },
+      {
+        slot: 3,
+        query: `${country}${city ? ` ${city}` : ''} visa immigration process guide US citizen`,
+        title: `${country} Immigration Process - Step by Step Guide`,
+        description: `Complete walkthrough of visa requirements, documentation, and immigration process for US citizens moving to ${country}.`
+      },
+      {
+        slot: 4,
+        query: `healthcare system ${country}${city ? ` ${city}` : ''} expat guide`,
+        title: `Healthcare System in ${country} - Expat Guide`,
+        description: `Everything you need to know about healthcare, insurance, and medical services in ${country} for American expats.`
+      },
+      {
+        slot: 5,
+        query: `cultural differences ${country}${city ? ` ${city}` : ''} what Americans should know`,
+        title: `Cultural Differences: What Americans Should Know About ${country}`,
+        description: `Important cultural insights, social norms, and etiquette tips for Americans adapting to life in ${country}.`
+      }
+    ];
+
+    // Add city-specific video if city is provided
+    if (city) {
+      videoSlots.push({
+        slot: 6,
+        query: `living in ${city} ${country} neighborhood guide expat`,
+        title: `Living in ${city}, ${country} - Neighborhood Guide`,
+        description: `Detailed guide to the best neighborhoods, amenities, and lifestyle in ${city} for international residents.`
+      });
+    }
+
+    const updatedVideos = [];
+    const errors = [];
+
+    for (const slot of videoSlots) {
+      try {
+        // Get current video from database (if exists)
+        const currentVideo = await c.env.DB.prepare(`
+          SELECT * FROM relocation_hub_videos
+          WHERE assessment_id = ? AND video_slot = ?
+        `).bind(assessmentId, slot.slot).first();
+
+        // Search YouTube for new videos
+        const searchResults = await youtubeService.searchVideos({
+          query: slot.query,
+          maxResults: 10,
+          order: 'relevance'
+        });
+
+        if (searchResults.length === 0) {
+          errors.push(`No videos found for slot ${slot.slot}`);
+          continue;
+        }
+
+        // Use Gemini to find best replacement
+        let selectedVideo;
+
+        if (currentVideo && c.env.GEMINI_API_KEY) {
+          // Smart curation with Gemini
+          const curated = await findBestVideoReplacement(
+            {
+              assessment_id: assessmentId,
+              currentVideo: {
+                video_id: currentVideo.video_id as string,
+                title: currentVideo.title as string,
+                channel_name: currentVideo.channel_name as string,
+                description: currentVideo.description as string,
+                video_slot: slot.slot
+              },
+              country,
+              city
+            },
+            searchResults,
+            c.env.GEMINI_API_KEY
+          );
+
+          if (curated && curated.confidence_score >= 60) {
+            selectedVideo = curated;
+          } else {
+            // Confidence too low, use fallback (first result)
+            selectedVideo = searchResults[0];
+          }
+        } else {
+          // No Gemini or no current video - use first result
+          selectedVideo = searchResults[0];
+        }
+
+        // Calculate next update date (6 months from now)
+        const nextUpdateDate = new Date();
+        nextUpdateDate.setMonth(nextUpdateDate.getMonth() + 6);
+
+        // Insert or update video in database
+        await c.env.DB.prepare(`
+          INSERT INTO relocation_hub_videos (
+            assessment_id, video_slot, video_id, title, channel_name, channel_id,
+            thumbnail_url, description, youtube_url, last_updated, next_update_date, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, CURRENT_TIMESTAMP)
+          ON CONFLICT(assessment_id, video_slot) DO UPDATE SET
+            video_id = excluded.video_id,
+            title = excluded.title,
+            channel_name = excluded.channel_name,
+            channel_id = excluded.channel_id,
+            thumbnail_url = excluded.thumbnail_url,
+            description = excluded.description,
+            youtube_url = excluded.youtube_url,
+            last_updated = CURRENT_TIMESTAMP,
+            next_update_date = excluded.next_update_date,
+            updated_at = CURRENT_TIMESTAMP
+        `).bind(
+          assessmentId,
+          slot.slot,
+          selectedVideo.video_id,
+          selectedVideo.title,
+          selectedVideo.channel_name,
+          selectedVideo.channel_id,
+          selectedVideo.thumbnail_url,
+          selectedVideo.description,
+          selectedVideo.youtube_url,
+          nextUpdateDate.toISOString()
+        ).run();
+
+        updatedVideos.push({
+          slot: slot.slot,
+          title: selectedVideo.title,
+          confidence: (selectedVideo as any).confidence_score || 100
+        });
+      } catch (error) {
+        console.error(`Error updating video slot ${slot.slot}:`, error);
+        errors.push(`Failed to update slot ${slot.slot}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+
+    return c.json({
+      success: true,
+      updated: updatedVideos.length,
+      videos: updatedVideos,
+      errors: errors.length > 0 ? errors : undefined,
+      message: `Updated ${updatedVideos.length} video(s) for relocation hub`
+    });
+  } catch (error) {
+    console.error("Error updating videos:", error);
+    return c.json({
+      error: "Failed to update videos",
+      message: error instanceof Error ? error.message : "Unknown error"
+    }, 500);
   }
 });
 
@@ -1144,14 +1826,14 @@ Disallow: /`, 200, {
 app.get('*', async (c) => {
   try {
     const url = new URL(c.req.url);
-    
+
     // Try to serve from ASSETS binding (the built React app)
     const assetResponse = await c.env.ASSETS.fetch(c.req.raw);
 
     // If asset found, add noindex headers for HTML responses (TESTING MODE)
     if (assetResponse.status !== 404) {
       const contentType = assetResponse.headers.get('content-type') || '';
-      
+
       // Add noindex headers to HTML responses to prevent indexing
       if (contentType.includes('text/html')) {
         const clonedResponse = new Response(assetResponse.body, {
@@ -1159,14 +1841,14 @@ app.get('*', async (c) => {
           statusText: assetResponse.statusText,
           headers: new Headers(assetResponse.headers)
         });
-        
+
         // Add multiple headers to prevent indexing
         clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
         clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-        
+
         return clonedResponse;
       }
-      
+
       // Add cache-busting headers to JavaScript and CSS assets to ensure fresh deployment
       if (contentType.includes('application/javascript') || contentType.includes('text/css') || contentType.includes('application/json')) {
         const clonedResponse = new Response(assetResponse.body, {
@@ -1174,19 +1856,19 @@ app.get('*', async (c) => {
           statusText: assetResponse.statusText,
           headers: new Headers(assetResponse.headers)
         });
-        
+
         clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
-        
+
         return clonedResponse;
       }
-      
+
       return assetResponse;
     }
 
     // For SPA routing, serve index.html for non-API routes
     if (!url.pathname.startsWith('/api/')) {
       const indexResponse = await c.env.ASSETS.fetch(new Request(new URL('/', url.origin)));
-      
+
       // Add noindex headers to index.html
       if (indexResponse.status !== 404) {
         const clonedResponse = new Response(indexResponse.body, {
@@ -1194,14 +1876,14 @@ app.get('*', async (c) => {
           statusText: indexResponse.statusText,
           headers: new Headers(indexResponse.headers)
         });
-        
+
         // Add multiple headers to prevent indexing
         clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
         clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-        
+
         return clonedResponse;
       }
-      
+
       return indexResponse;
     }
 
@@ -1216,10 +1898,18 @@ app.get('*', async (c) => {
 export default {
   fetch: app.fetch,
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    console.log('Scheduled event triggered:', event.cron);
+
     // Run retention cleanup daily at 2 AM UTC
     if (event.cron === '0 2 * * *') {
       console.log('Running scheduled retention cleanup...');
       ctx.waitUntil(runScheduledCleanup(env));
+    }
+
+    // Run video updates quarterly (every 3 months) on the 1st at 3 AM UTC
+    if (event.cron === '0 3 1 */3 *') {
+      console.log('Running scheduled video updates (quarterly)...');
+      ctx.waitUntil(runScheduledVideoUpdates(env));
     }
   }
 };

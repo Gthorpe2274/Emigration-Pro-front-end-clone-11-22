@@ -225,8 +225,8 @@ export default function Results() {
               
               <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 max-w-2xl mx-auto mb-6">
                 <p className="text-xl text-gray-800 leading-relaxed mb-4">
-                  Access your <strong className="text-green-700">personalized relocation hub</strong> with resources, 
-                  connections, and tools specifically curated for your emigration journey.
+                  Access your FREE <strong className="text-green-700">personalized relocation hub</strong> with resources, 
+                  connections, and tools specifically curated for your emigration.
                 </p>
                 
                 <div className="flex items-center justify-center space-x-4 flex-wrap mb-4">
