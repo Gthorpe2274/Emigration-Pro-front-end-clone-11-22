@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Key, ArrowRight } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
+import { ProtectedEmail } from '@/react-app/components/ProtectedEmail';
 
 export default function PermanentRelocationHub() {
   const [email, setEmail] = useState('');
@@ -130,14 +131,16 @@ export default function PermanentRelocationHub() {
           <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
             <h3 className="font-semibold text-blue-900 mb-2">Need Help?</h3>
             <p className="text-sm text-blue-700 mb-3">
-              Your session code was sent to your email after purchasing the Full Emigration Report. 
+              Your session code was sent to your email after purchasing the Full Emigration Report.
               It provides permanent access to your personalized relocation hub.
             </p>
             <p className="text-sm text-blue-700">
               Can't find your code? Check your spam folder or contact support at{' '}
-              <a href="mailto:info@emigrationpro.com" className="underline">
-                info@emigrationpro.com
-              </a>
+              <ProtectedEmail
+                user="info"
+                domain="emigrationpro.com"
+                className="underline"
+              />
             </p>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
+import { blogImages } from '../data/blogImages';
 
 // Helper function to get API base URL
 const getApiBaseUrl = () => {
@@ -39,6 +40,10 @@ export default function BlogAdmin() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+
+  // Image modal states
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<keyof typeof blogImages>('travel');
 
   const [formData, setFormData] = useState({
     title: '',
@@ -331,83 +336,86 @@ export default function BlogAdmin() {
                       value={formData.featured_image}
                       onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter image URL or generate one"
+                      placeholder="Enter image URL or select from library"
                     />
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const images = [
-                            'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80', // Airplane wing
-                            'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=800&q=80', // Airport terminal
-                            'https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=800&q=80', // Suitcase
-                            'https://images.unsplash.com/photo-1473625247510-8ceb1760943f?w=800&q=80', // Woman with suitcase
-                            'https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=800&q=80', // Passport
-                            'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80', // Travel planning
-                            'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=800&q=80', // Map
-                          ];
-                          setFormData(prev => ({ ...prev, featured_image: images[Math.floor(Math.random() * images.length)] }));
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition text-sm"
-                      >
-                        ✈️ Airport/Travel
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const images = [
-                            'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80', // Moving boxes
-                            'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80', // Keys/House
-                            'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80', // Modern home
-                            'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=800&q=80', // Unpacking
-                            'https://images.unsplash.com/photo-1503594384566-461fe158e797?w=800&q=80', // Moving day
-                            'https://images.unsplash.com/photo-1609220136736-443140cffec6?w=800&q=80', // Family moving
-                          ];
-                          setFormData(prev => ({ ...prev, featured_image: images[Math.floor(Math.random() * images.length)] }));
-                        }}
-                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition text-sm"
-                      >
-                        🏠 Moving/House
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const images = [
-                            'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&q=80', // Diverse group
-                            'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80', // Professional woman
-                            'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=800&q=80', // Family airport
-                            'https://images.unsplash.com/photo-1464938050520-ef2270bb8ce8?w=800&q=80', // Diverse crowd
-                            'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80', // Friends
-                            'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=800&q=80', // Portrait
-                          ];
-                          setFormData(prev => ({ ...prev, featured_image: images[Math.floor(Math.random() * images.length)] }));
-                        }}
-                        className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg transition text-sm"
-                      >
-                        👨‍👩‍👧‍👦 People/Family
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const images = [
-                            'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&q=80', // City street
-                            'https://images.unsplash.com/photo-1449824913929-79aa4361e851?w=800&q=80', // Hong Kong
-                            'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80', // Paris
-                            'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=800&q=80', // New York
-                            'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=800&q=80', // Venice
-                            'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80', // Street view
-                          ];
-                          setFormData(prev => ({ ...prev, featured_image: images[Math.floor(Math.random() * images.length)] }));
-                        }}
-                        className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-lg transition text-sm"
-                      >
-                        🌍 Foreign Cities
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowImageModal(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center"
+                    >
+                      🖼️ Browse Library
+                    </button>
                   </div>
+
+                  {/* Image Selection Modal */}
+                  {showImageModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex flex-col">
+                        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+                          <h3 className="text-xl font-bold text-gray-800">Select Featured Image</h3>
+                          <button
+                            onClick={() => setShowImageModal(false)}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        <div className="p-4 border-b border-gray-200 flex space-x-4 overflow-x-auto">
+                          {(['travel', 'moving', 'people', 'cities'] as const).map((cat) => (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => setSelectedCategory(cat)}
+                              className={`px-4 py-2 rounded-lg capitalize whitespace-nowrap ${selectedCategory === cat
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                            >
+                              {cat === 'travel' && '✈️ '}
+                              {cat === 'moving' && '🏠 '}
+                              {cat === 'people' && '👨‍👩‍👧‍👦 '}
+                              {cat === 'cities' && '🌍 '}
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-6">
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                            {blogImages[selectedCategory].map((img, index) => (
+                              <button
+                                key={index}
+                                type="button"
+                                onClick={() => {
+                                  setFormData({ ...formData, featured_image: img });
+                                  setShowImageModal(false);
+                                }}
+                                className="group relative aspect-video rounded-lg overflow-hidden border-2 border-transparent hover:border-blue-500 focus:outline-none focus:border-blue-500 transition"
+                              >
+                                <img
+                                  src={img}
+                                  alt={`${selectedCategory} ${index + 1}`}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                                  loading="lazy"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="p-4 border-t border-gray-200 bg-gray-50 text-right">
+                          <button
+                            onClick={() => setShowImageModal(false)}
+                            className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {formData.featured_image && (
                     <div className="mt-2">
                       <p className="text-sm text-gray-600 mb-1">Preview:</p>
