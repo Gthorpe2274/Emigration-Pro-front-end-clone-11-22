@@ -654,6 +654,69 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
   }
 });
 
+// Subscribe for permanent access (lead capture)
+app.post('/api/subscribe-for-permanent-access', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { email, assessment_id } = body;
+
+    if (!email) {
+      return c.json({ error: 'Email is required' }, 400);
+    }
+
+    const sessionCode = crypto.randomUUID();
+
+    // 1. Store in email_leads
+    try {
+      await c.env.DB.prepare(`
+        INSERT INTO email_leads (email, assessment_id, source)
+        VALUES (?, ?, 'relocation_hub_permanent_access')
+      `).bind(email, assessment_id || null).run();
+    } catch (e) {
+      console.error('Error inserting into email_leads:', e);
+      // Continue even if lead capture fails, as we want to generate the session code
+    }
+
+    // 2. Create access record
+    try {
+      // Check if access already exists
+      const existing = await c.env.DB.prepare(`
+        SELECT session_code FROM relocation_hub_access WHERE email = ? AND assessment_id = ?
+      `).bind(email, assessment_id || 0).first();
+
+      if (existing) {
+        // Return existing session code
+        const reportUrl = `https://report.emigrationpro.com/?email=${encodeURIComponent(email)}&session_code=${existing.session_code}`;
+        return c.json({
+          success: true,
+          session_code: existing.session_code,
+          report_url: reportUrl
+        });
+      }
+
+      await c.env.DB.prepare(`
+        INSERT INTO relocation_hub_access (assessment_id, email, session_code, is_active, purchase_confirmed)
+        VALUES (?, ?, ?, 1, 0)
+      `).bind(assessment_id || 0, email, sessionCode).run();
+    } catch (e) {
+      console.error('Error inserting into relocation_hub_access:', e);
+      throw e;
+    }
+
+    // 3. Generate report URL
+    const reportUrl = `https://report.emigrationpro.com/?email=${encodeURIComponent(email)}&session_code=${sessionCode}`;
+
+    return c.json({
+      success: true,
+      session_code: sessionCode,
+      report_url: reportUrl
+    });
+  } catch (error) {
+    console.error('Error in subscribe-for-permanent-access:', error);
+    return c.json({ error: 'Failed to process subscription' }, 500);
+  }
+});
+
 // Get assessment result endpoint
 app.get("/api/assessments/:id", async (c) => {
   try {

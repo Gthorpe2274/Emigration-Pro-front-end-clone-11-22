@@ -36,7 +36,7 @@ export default function RelocationHub() {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const accessToken = urlParams.get('access_token');
-        
+
         if (accessToken) {
           setIsPermanentAccess(true);
         }
@@ -45,13 +45,13 @@ export default function RelocationHub() {
         if (response.ok) {
           const result = await response.json();
           setAssessment(result.assessment);
-          
+
           // Try to fetch videos from database (smart curated videos)
           try {
             const videosResponse = await fetch(`/api/relocation-hub/${id}/videos`);
             if (videosResponse.ok) {
               const videosData = await videosResponse.json();
-              
+
               if (videosData.success && videosData.videos && videosData.videos.length > 0) {
                 // Convert database format to component format
                 const formattedVideos = videosData.videos.map((video: any) => ({
@@ -71,7 +71,7 @@ export default function RelocationHub() {
                   result.assessment.preferred_city
                 );
                 setVideos(countryVideos);
-                
+
                 // Optionally trigger video initialization in background (non-blocking)
                 fetch(`/api/relocation-hub/${id}/videos/update`, { method: 'POST' })
                   .catch(err => console.warn('Failed to initialize videos:', err));
@@ -168,7 +168,7 @@ export default function RelocationHub() {
     return baseVideos;
   };
 
-  
+
 
   if (loading) {
     return (
@@ -208,7 +208,7 @@ export default function RelocationHub() {
           <div className="text-center mb-12">
             <div className="inline-flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-lg font-medium mb-4">
               <Users className="w-4 h-4 mr-2" />
-              {isPermanentAccess ? 'Your Permanent Relocation Hub' : 'Your Relocation Hub'}
+              {isPermanentAccess ? 'Your 2-Year Relocation Hub' : 'Your Relocation Hub'}
             </div>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               {assessment.preferred_country} Relocation Hub
@@ -230,16 +230,16 @@ export default function RelocationHub() {
                   <div className="flex-1 text-left">
                     <h3 className="text-2xl font-semibold text-yellow-900 mb-2">⏱️ Temporary Access Notice</h3>
                     <p className="text-lg text-yellow-800 mb-3">
-                      This relocation hub will <strong>remain active only until you close this browser tab</strong>. 
+                      This relocation hub will <strong>remain active only until you close this browser tab</strong>.
                       All content and resources shown here are temporary.
                     </p>
-                    <h4 className="text-2xl font-bold text-gray-900 mb-3 mt-4">Want Permanent 2 yrs. access?</h4>
+                    <h4 className="text-2xl font-bold text-gray-900 mb-3 mt-4">Want 2 yrs. access?</h4>
                     <div className="bg-green-100 border border-green-300 rounded-lg p-4 mb-4">
                       <p className="text-xl text-green-900 font-medium mb-2">
                         🎁 <strong>FREE BONUS with Full Report Purchase!</strong>
                       </p>
                       <p className="text-lg text-green-800">
-                        Purchase your <strong>Full Emigration Pro Report</strong> and receive <strong>permanent access</strong> to 
+                        Purchase your <strong>Full Emigration Pro Report</strong> and receive <strong>2 years access</strong> to
                         this relocation hub page! Access it anytime using your email and session code.
                       </p>
                     </div>
@@ -248,7 +248,7 @@ export default function RelocationHub() {
                       onClick={handleGetPermanentAccess}
                       className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold text-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                     >
-                      Get Your Full Report & Permanent Access
+                      Get Your Full Report & 2 Years Access
                     </button>
                   </div>
                 </div>
@@ -259,17 +259,17 @@ export default function RelocationHub() {
                   <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <h3 className="text-lg font-semibold text-green-900">✅ Permanent Access Activated</h3>
+                  <h3 className="text-lg font-semibold text-green-900">✅ 2 Years Access Activated</h3>
                 </div>
                 <p className="text-base text-green-800">
-                  You have permanent access to this relocation hub. You can return anytime using your email and session code.
+                  You have 2 years access to this relocation hub. You can return anytime using your email and session code.
                 </p>
               </div>
             )}
 
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-w-2xl mx-auto">
               <p className="text-lg text-green-800">
-                <strong>Note:</strong> This relocation hub provides peer insights and general tips. 
+                <strong>Note:</strong> This relocation hub provides peer insights and general tips.
                 For professional emigration guidance, consider consulting with qualified immigration professionals.
               </p>
             </div>
@@ -281,16 +281,16 @@ export default function RelocationHub() {
               <div className="flex items-center justify-center mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
                   <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-                    <path d="M14 2v6h6"/>
-                    <path d="M16 13H8"/>
-                    <path d="M16 17H8"/>
-                    <path d="M10 9H8"/>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
+                    <path d="M14 2v6h6" />
+                    <path d="M16 13H8" />
+                    <path d="M16 17H8" />
+                    <path d="M10 9H8" />
                   </svg>
                 </div>
                 <h2 className="text-4xl font-bold text-gray-900 ml-4">Complete Emigration Report</h2>
               </div>
-              
+
               <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
                 Get a comprehensive, detailed step-by-step Emigration Report based on current immigration data and requirements that guides you through your migration to a new country and city.
               </p>
@@ -309,11 +309,11 @@ export default function RelocationHub() {
                   className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-4 rounded-full text-xl font-bold shadow-xl transform hover:scale-105 transition-all duration-200"
                 >
                   <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-                    <path d="M14 2v6h6"/>
-                    <path d="M16 13H8"/>
-                    <path d="M16 17H8"/>
-                    <path d="M10 9H8"/>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
+                    <path d="M14 2v6h6" />
+                    <path d="M16 13H8" />
+                    <path d="M16 17H8" />
+                    <path d="M10 9H8" />
                   </svg>
                   Get Your Report
                 </button>
@@ -330,12 +330,12 @@ export default function RelocationHub() {
             <p className="text-gray-600 mb-8">
               Connect with verified professional service providers to handle the complex aspects of your relocation to {assessment.preferred_country}.
             </p>
-            
+
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {/* Immigration Law Services */}
-              <a 
-                href="https://www.fragomen.com/" 
-                target="_blank" 
+              <a
+                href="https://www.fragomen.com/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
               >
@@ -366,9 +366,9 @@ export default function RelocationHub() {
               </a>
 
               {/* Banking & Finance */}
-              <a 
-                href="https://www.wise.com/" 
-                target="_blank" 
+              <a
+                href="https://www.wise.com/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
               >
@@ -399,9 +399,9 @@ export default function RelocationHub() {
               </a>
 
               {/* Health Insurance */}
-              <a 
-                href="https://www.cigna.com/individuals-families/shop-plans/health-insurance-plans/" 
-                target="_blank" 
+              <a
+                href="https://www.cigna.com/individuals-families/shop-plans/health-insurance-plans/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
               >
@@ -432,9 +432,9 @@ export default function RelocationHub() {
               </a>
 
               {/* Moving & Relocation Services */}
-              <a 
-                href="https://www.sirva.com/" 
-                target="_blank" 
+              <a
+                href="https://www.sirva.com/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
               >
@@ -489,16 +489,16 @@ export default function RelocationHub() {
                 <div className="text-xs text-gray-500 mb-4">
                   <p><strong>Services:</strong> Visa Applications, Residency Permits, Immigration Consultations</p>
                 </div>
-                
+
                 <button
                   onClick={() => setVisaLocationsDropdownOpen(!visaLocationsDropdownOpen)}
                   className="w-full flex items-center justify-between text-sm text-green-600 font-medium hover:text-green-700 bg-green-50 px-4 py-2 rounded-lg transition-colors"
                 >
                   <span>View Consulates by Country</span>
-                  <svg 
-                    className={`w-5 h-5 transition-transform ${visaLocationsDropdownOpen ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    className={`w-5 h-5 transition-transform ${visaLocationsDropdownOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -640,16 +640,16 @@ export default function RelocationHub() {
                 <div className="text-xs text-gray-500 mb-4">
                   <p><strong>Services:</strong> Customs Clearance, Import Documentation, Duty Payment, Compliance</p>
                 </div>
-                
+
                 <button
                   onClick={() => setCustomsDropdownOpen(!customsDropdownOpen)}
                   className="w-full flex items-center justify-between text-sm text-indigo-600 font-medium hover:text-indigo-700 bg-indigo-50 px-4 py-2 rounded-lg transition-colors"
                 >
                   <span>View Customs Brokers by Region</span>
-                  <svg 
-                    className={`w-5 h-5 transition-transform ${customsDropdownOpen ? 'rotate-180' : ''}`} 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    className={`w-5 h-5 transition-transform ${customsDropdownOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -709,7 +709,7 @@ export default function RelocationHub() {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
               <h4 className="font-semibold text-blue-800 mb-3">✅ Professional Guidance Recommended</h4>
               <p className="text-blue-700 text-sm mb-4">
-                While this hub provides general information, professional services can provide personalized guidance 
+                While this hub provides general information, professional services can provide personalized guidance
                 for your specific situation and help navigate complex legal and financial requirements.
               </p>
             </div>
@@ -722,14 +722,14 @@ export default function RelocationHub() {
               <h3 className="text-2xl font-bold text-gray-900">Relocation Video Resources</h3>
             </div>
             <p className="text-gray-600 mb-4">
-              Watch real stories and personal experiences from Americans who have made the move to {assessment.preferred_country}. 
+              Watch real stories and personal experiences from Americans who have made the move to {assessment.preferred_country}.
               These community-shared videos provide personal perspectives and general tips.
             </p>
-            
+
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
               <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Important: Content Limitations</h4>
               <p className="text-lg text-yellow-700 mb-3">
-                While these videos provide valuable personal insights, they represent individual experiences that may not 
+                While these videos provide valuable personal insights, they represent individual experiences that may not
                 apply to your specific situation. Professional emigration requires personalized guidance.
               </p>
             </div>
@@ -738,8 +738,8 @@ export default function RelocationHub() {
               {videos.map((video) => (
                 <div key={video.id} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
                   <div className="relative">
-                    <img 
-                      src={video.thumbnail} 
+                    <img
+                      src={video.thumbnail}
                       alt={video.title}
                       className="w-full h-48 object-cover"
                     />
