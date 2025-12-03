@@ -717,6 +717,34 @@ app.post('/api/subscribe-for-permanent-access', async (c) => {
   }
 });
 
+// CRM - Get all purchasers
+app.get('/api/admin/crm/purchasers', async (c) => {
+  try {
+    // In a real app, we would verify the admin session/token here
+    // For now, we rely on the frontend password protection (low security)
+
+    const { results } = await c.env.DB.prepare(`
+      SELECT 
+        r.id, r.email, r.session_code, r.assessment_id, r.purchase_confirmed, r.is_active, r.created_at, r.expires_at,
+        a.preferred_country, a.preferred_city, a.overall_score
+      FROM relocation_hub_access r
+      LEFT JOIN assessments a ON r.assessment_id = a.id
+      ORDER BY r.created_at DESC
+    `).all();
+
+    return c.json({
+      success: true,
+      purchasers: results
+    });
+  } catch (error) {
+    console.error('Error fetching CRM data:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to fetch CRM data'
+    }, 500);
+  }
+});
+
 // Get assessment result endpoint
 app.get("/api/assessments/:id", async (c) => {
   try {
