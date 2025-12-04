@@ -233,7 +233,7 @@ export default function RelocationHub() {
                       This relocation hub will <strong>remain active only until you close this browser tab</strong>.
                       All content and resources shown here are temporary.
                     </p>
-                    <h4 className="text-2xl font-bold text-gray-900 mb-3 mt-4">Want 2 yrs. access?</h4>
+                    <h4 className="text-2xl font-bold text-gray-900 mb-3 mt-4">Want 2 yrs. access, with quarterly updates?</h4>
                     <div className="bg-green-100 border border-green-300 rounded-lg p-4 mb-4">
                       <p className="text-xl text-green-900 font-medium mb-2">
                         🎁 <strong>FREE BONUS with Full Report Purchase!</strong>
@@ -527,16 +527,16 @@ export default function RelocationHub() {
                     <div>
                       <h5 className="font-semibold text-gray-900 mb-2 text-sm">Spain Consulates in USA</h5>
                       <div className="space-y-2">
-                        <a href="http://www.exteriores.gob.es/Consulados/NUEVAYORK/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.exteriores.gob.es/Consulados/NUEVAYORK/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
                           Spanish Consulate New York
                         </a>
-                        <a href="http://www.exteriores.gob.es/Consulados/MIAMI/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.exteriores.gob.es/Consulados/MIAMI/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
                           Spanish Consulate Miami
                         </a>
-                        <a href="http://www.exteriores.gob.es/Consulados/LOSANGELES/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.exteriores.gob.es/Consulados/LOSANGELES/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
                           Spanish Consulate Los Angeles
                         </a>
-                        <a href="http://www.exteriores.gob.es/Consulados/SANFRANCISCO/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.exteriores.gob.es/Consulados/SANFRANCISCO/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
                           Spanish Consulate San Francisco
                         </a>
                       </div>
