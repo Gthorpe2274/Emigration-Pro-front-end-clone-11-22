@@ -745,6 +745,170 @@ app.get('/api/admin/crm/purchasers', async (c) => {
   }
 });
 
+// Blog Endpoints
+
+// Public: Get all published posts
+app.get('/api/blog/posts', async (c) => {
+  try {
+    let { results } = await c.env.DB.prepare(`
+      SELECT * FROM blog_posts 
+      WHERE is_published = 1 
+      ORDER BY published_date DESC
+    `).all();
+
+    // Auto-seed if empty
+    if (results.length === 0) {
+      console.log('Seeding initial blog posts...');
+      const initialPosts = [
+        {
+          title: "Top 10 Countries for US Expats in 2024",
+          slug: "top-10-countries-us-expats-2024",
+          featured_image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80",
+          body: "Discover the best destinations for Americans looking to move abroad, considering safety, healthcare, and cost of living. <br/><br/> 1. Portugal... <br/> 2. Costa Rica...",
+          excerpt: "Discover the best destinations for Americans looking to move abroad, considering safety, healthcare, and cost of living.",
+          published_date: new Date().toISOString(),
+          is_published: 1,
+          allow_comments: 1,
+          author: "Emigration Pro Team"
+        },
+        {
+          title: "The Ultimate Guide to Digital Nomad Visas",
+          slug: "ultimate-guide-digital-nomad-visas",
+          featured_image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80",
+          body: "Learn which countries offer the best digital nomad visas and how to apply for them to work remotely from paradise. <br/><br/> Digital nomad visas are becoming increasingly popular...",
+          excerpt: "Learn which countries offer the best digital nomad visas and how to apply for them to work remotely from paradise.",
+          published_date: new Date().toISOString(),
+          is_published: 1,
+          allow_comments: 1,
+          author: "Emigration Pro Team"
+        },
+        {
+          title: "Moving Abroad Checklist: What to Do Before You Go",
+          slug: "moving-abroad-checklist",
+          featured_image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+          body: "A comprehensive checklist to ensure a smooth transition to your new life abroad, from banking to packing. <br/><br/> 1. Visa... <br/> 2. Banking...",
+          excerpt: "A comprehensive checklist to ensure a smooth transition to your new life abroad, from banking to packing.",
+          published_date: new Date().toISOString(),
+          is_published: 1,
+          allow_comments: 1,
+          author: "Emigration Pro Team"
+        }
+      ];
+
+      for (const post of initialPosts) {
+        await c.env.DB.prepare(`
+          INSERT INTO blog_posts (title, slug, featured_image, body, excerpt, published_date, is_published, allow_comments, author)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          post.title, post.slug, post.featured_image, post.body, post.excerpt,
+          post.published_date, post.is_published, post.allow_comments, post.author
+        ).run();
+      }
+
+      // Re-fetch
+      const newResults = await c.env.DB.prepare(`
+        SELECT * FROM blog_posts 
+        WHERE is_published = 1 
+        ORDER BY published_date DESC
+      `).all();
+      results = newResults.results;
+    }
+
+    return c.json({ success: true, posts: results });
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    return c.json({ success: false, error: 'Failed to fetch posts' }, 500);
+  }
+});
+
+// Public: Get single post by slug
+app.get('/api/blog/posts/:slug', async (c) => {
+  try {
+    const slug = c.req.param('slug');
+    const post = await c.env.DB.prepare(`
+      SELECT * FROM blog_posts WHERE slug = ? AND is_published = 1
+    `).bind(slug).first();
+
+    if (!post) {
+      return c.json({ success: false, error: 'Post not found' }, 404);
+    }
+
+    return c.json({ success: true, post });
+  } catch (error) {
+    console.error('Error fetching blog post:', error);
+    return c.json({ success: false, error: 'Failed to fetch post' }, 500);
+  }
+});
+
+// Admin: Get all posts
+app.get('/api/admin/blog/posts', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(`
+      SELECT * FROM blog_posts ORDER BY created_at DESC
+    `).all();
+    return c.json({ success: true, posts: results });
+  } catch (error) {
+    console.error('Error fetching admin posts:', error);
+    return c.json({ success: false, error: 'Failed to fetch posts' }, 500);
+  }
+});
+
+// Admin: Create post
+app.post('/api/admin/blog/posts', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { title, slug, featured_image, body: content, excerpt, published_date, is_published, allow_comments, author } = body;
+
+    await c.env.DB.prepare(`
+      INSERT INTO blog_posts (title, slug, featured_image, body, excerpt, published_date, is_published, allow_comments, author)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      title, slug, featured_image, content, excerpt,
+      published_date, is_published ? 1 : 0, allow_comments ? 1 : 0, author
+    ).run();
+
+    return c.json({ success: true });
+  } catch (error) {
+    console.error('Error creating post:', error);
+    return c.json({ success: false, error: 'Failed to create post' }, 500);
+  }
+});
+
+// Admin: Update post
+app.put('/api/admin/blog/posts/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const body = await c.req.json();
+    const { title, slug, featured_image, body: content, excerpt, published_date, is_published, allow_comments, author } = body;
+
+    await c.env.DB.prepare(`
+      UPDATE blog_posts 
+      SET title = ?, slug = ?, featured_image = ?, body = ?, excerpt = ?, published_date = ?, is_published = ?, allow_comments = ?, author = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(
+      title, slug, featured_image, content, excerpt,
+      published_date, is_published ? 1 : 0, allow_comments ? 1 : 0, author, id
+    ).run();
+
+    return c.json({ success: true });
+  } catch (error) {
+    console.error('Error updating post:', error);
+    return c.json({ success: false, error: 'Failed to update post' }, 500);
+  }
+});
+
+// Admin: Delete post
+app.delete('/api/admin/blog/posts/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    await c.env.DB.prepare('DELETE FROM blog_posts WHERE id = ?').bind(id).run();
+    return c.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    return c.json({ success: false, error: 'Failed to delete post' }, 500);
+  }
+});
+
 // Get assessment result endpoint
 app.get("/api/assessments/:id", async (c) => {
   try {
