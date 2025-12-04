@@ -37,7 +37,7 @@ export default function Assessment() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [assessment, setAssessment] = useState<AssessmentData>({
     user_age: 30,
     user_job: '',
@@ -68,6 +68,13 @@ export default function Assessment() {
     }
   }, [assessment.preferred_country]);
 
+  // Scroll to top when error occurs
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [error]);
+
   const updateAssessment = (field: keyof AssessmentData, value: any) => {
     setAssessment(prev => ({ ...prev, [field]: value }));
     setError('');
@@ -88,7 +95,7 @@ export default function Assessment() {
         return;
       }
     }
-    
+
     if (currentStep === 2) {
       if (!assessment.preferred_country) {
         setError('Please select your preferred country');
@@ -99,7 +106,7 @@ export default function Assessment() {
         return;
       }
     }
-    
+
     setCurrentStep(prev => prev + 1);
     setError('');
   };
@@ -115,51 +122,51 @@ export default function Assessment() {
       const rating = assessment[factor.key as keyof AssessmentData] as number;
       return !rating || rating === 0;
     });
-    
+
     if (unratedFactors.length > 0) {
       setError(`Please rate all factors before submitting your assessment. You still need to rate: ${unratedFactors.map(f => f.label).join(', ')}`);
       return;
     }
-    
+
     setLoading(true);
     setError('');
-    
+
     console.log('🚀 STARTING ASSESSMENT SUBMISSION');
     console.log('Assessment data:', assessment);
     console.log('Current URL:', window.location.href);
-    
+
     try {
       console.log('📡 Making API request to /api/assessments...');
-      
+
       const response = await fetch('/api/assessments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(assessment)
       });
-      
+
       console.log('📥 Response received:', {
         status: response.status,
         statusText: response.statusText,
         ok: response.ok,
         url: response.url
       });
-      
+
       const result = await response.json();
       console.log('📋 Response body:', result);
-      
+
       if (response.ok) {
         console.log('✅ Assessment created successfully!');
         const assessmentId = result.id;
-        
+
         if (!assessmentId) {
           console.error('❌ Assessment ID is missing from response!');
           setError('Assessment was created but ID is missing. Please contact support.');
           return;
         }
-        
+
         console.log(`🎯 Assessment ID: ${assessmentId} (type: ${typeof assessmentId})`);
         console.log(`🧭 Preparing to navigate to: /results/${assessmentId}`);
-        
+
         // Add a small delay to ensure database transaction is complete
         setTimeout(() => {
           console.log(`🚀 Navigating to results page...`);
@@ -171,7 +178,7 @@ export default function Assessment() {
             setError(`Navigation failed. Please go to: /results/${assessmentId}`);
           }
         }, 100);
-        
+
       } else {
         console.error('❌ API request failed');
         // Check if this is a climate compatibility error
@@ -212,16 +219,14 @@ export default function Assessment() {
             key={rating}
             type="button"
             onClick={() => updateAssessment(fieldKey as keyof AssessmentData, rating)}
-            className={`w-8 h-8 rounded-full transition-colors ${
-              rating <= currentValue 
-                ? 'bg-yellow-400 text-white' 
+            className={`w-8 h-8 rounded-full transition-colors ${rating <= currentValue
+                ? 'bg-yellow-400 text-white'
                 : 'bg-gray-200 hover:bg-gray-300'
-            }`}
+              }`}
           >
-            <Star 
-              className={`w-5 h-5 mx-auto ${
-                rating <= currentValue ? 'fill-current' : ''
-              }`} 
+            <Star
+              className={`w-5 h-5 mx-auto ${rating <= currentValue ? 'fill-current' : ''
+                }`}
             />
           </button>
         ))}
@@ -244,25 +249,25 @@ export default function Assessment() {
               {/* Decorative Background Elements */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full -translate-y-8 translate-x-8"></div>
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-200/30 to-blue-200/30 rounded-full translate-y-6 -translate-x-6"></div>
-              
+
               <div className="relative z-10">
                 <div className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium mb-6 shadow-lg">
                   <Compass className="w-4 h-4 mr-2" />
                   Free Personalized Assessment
                 </div>
-                
+
                 <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-8 leading-tight">
                   Find Your Perfect
                   <span className="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent block pb-2">
                     New Home Country
                   </span>
                 </h1>
-                
+
                 <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto leading-relaxed font-medium">
-                  Answer a few questions about your priorities and preferences to get personalized 
+                  Answer a few questions about your priorities and preferences to get personalized
                   recommendations for your ideal emigration destination.
                 </p>
-                
+
                 {/* Enhanced Step Indicators */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
                   <div className="flex flex-col items-center space-y-3 p-4 bg-white/50 rounded-2xl border border-white/20 hover:bg-white/70 transition-all duration-200">
@@ -274,7 +279,7 @@ export default function Assessment() {
                       <span className="text-gray-700 font-medium">Personal Info</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col items-center space-y-3 p-4 bg-white/50 rounded-2xl border border-white/20 hover:bg-white/70 transition-all duration-200">
                     <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
                       <MapPin className="w-6 h-6 text-white" />
@@ -284,7 +289,7 @@ export default function Assessment() {
                       <span className="text-gray-700 font-medium">Preferences</span>
                     </div>
                   </div>
-                  
+
                   <div className="flex flex-col items-center space-y-3 p-4 bg-white/50 rounded-2xl border border-white/20 hover:bg-white/70 transition-all duration-200">
                     <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
                       <Star className="w-6 h-6 text-white" />
@@ -295,7 +300,7 @@ export default function Assessment() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-8 flex items-center justify-center space-x-4 text-base text-gray-600">
                   <div className="flex items-center space-x-2">
                     <CheckCircle className="w-4 h-4 text-green-500" />
@@ -322,7 +327,7 @@ export default function Assessment() {
               <span>{Math.round((currentStep / 3) * 100)}% Complete</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
+              <div
                 className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${(currentStep / 3) * 100}%` }}
               ></div>
@@ -338,8 +343,8 @@ export default function Assessment() {
 
           {/* Back to Home Link */}
           <div className="mb-6">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -351,7 +356,7 @@ export default function Assessment() {
           {currentStep === 1 && (
             <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20">
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Personal Information</h2>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-lg font-medium text-gray-700 mb-2">
@@ -462,7 +467,7 @@ export default function Assessment() {
           {currentStep === 2 && (
             <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20">
               <h2 className="text-3xl font-bold text-gray-900 mb-6">Destination Preferences</h2>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-lg font-medium text-gray-700 mb-2">
@@ -540,11 +545,10 @@ export default function Assessment() {
                         key={option.value}
                         type="button"
                         onClick={() => updateAssessment('location_preference', option.value)}
-                        className={`p-4 rounded-lg border-2 transition-colors text-center ${
-                          assessment.location_preference === option.value
+                        className={`p-4 rounded-lg border-2 transition-colors text-center ${assessment.location_preference === option.value
                             ? 'border-blue-500 bg-blue-50 text-blue-700'
                             : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                          }`}
                       >
                         <div className="text-2xl mb-2">{option.icon}</div>
                         <div className="font-medium">{option.label}</div>
@@ -578,7 +582,7 @@ export default function Assessment() {
               <p className="text-gray-600 mb-8">
                 Rate how important each factor is for you by selecting the number of stars in the list below.
               </p>
-              
+
               <div className="space-y-8">
                 {factors.map(factor => (
                   <div key={factor.key} className="border border-gray-200 rounded-lg p-6">
@@ -603,7 +607,7 @@ export default function Assessment() {
                 </button>
                 <button
                   onClick={submitAssessment}
-                  disabled={loading || factors.some(factor => assessment[factor.key as keyof AssessmentData] === 0)}
+                  disabled={loading}
                   className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-3 rounded-full font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {loading ? (
