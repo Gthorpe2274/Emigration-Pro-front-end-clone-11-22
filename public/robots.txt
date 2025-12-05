@@ -1,9 +1,6 @@
-# TESTING MODE - Prevent all search engine crawling
-# This Cloudflare Workers site is in testing phase
-# Remove these directives when ready to go live
-
 User-agent: *
-Disallow: /
+Allow: /
+Sitemap: https://emigrationpro.com/sitemap.xml
 
 
 

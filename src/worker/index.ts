@@ -182,6 +182,16 @@ app.use('*', cors({
   credentials: false
 }));
 
+// Security Headers Middleware
+app.use('*', async (c, next) => {
+  await next();
+  c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  c.header('X-Content-Type-Options', 'nosniff');
+  c.header('X-Frame-Options', 'DENY');
+  c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  c.header('Content-Security-Policy', "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; object-src 'none';");
+});
+
 // Test endpoint - confirms env vars are loaded
 app.get('/api/env-test', async (c) => {
   const hasYouTube = !!c.env.YOUTUBE_API_KEY;
@@ -2065,15 +2075,16 @@ app.get('/ping', async (c) => {
 });
 
 // Serve robots.txt to block all search engines (TESTING MODE)
-app.get('/robots.txt', async (c) => {
-  return c.text(`# TESTING MODE - Prevent all search engine crawling
-# This Cloudflare Workers site is in testing phase
-# Remove these directives when ready to go live
+// Serve robots.txt to allow search engine crawling
+app.get('/robots.txt', (c) => {
+  const url = new URL(c.req.url);
+  const baseUrl = url.origin;
 
-User-agent: *
-Disallow: /`, 200, {
-    'Content-Type': 'text/plain',
-    'X-Robots-Tag': 'noindex, nofollow'
+  return c.text(`User-agent: *
+Allow: /
+
+Sitemap: ${baseUrl}/sitemap.xml`, 200, {
+    'Content-Type': 'text/plain'
   });
 });
 
@@ -2098,7 +2109,9 @@ app.get('*', async (c) => {
         });
 
         // Add multiple headers to prevent indexing
-        clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+        // clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+        // SEO Indexing Enabled
+        clonedResponse.headers.set('X-Robots-Tag', 'index, follow');
         clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
 
         return clonedResponse;
@@ -2133,7 +2146,9 @@ app.get('*', async (c) => {
         });
 
         // Add multiple headers to prevent indexing
-        clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+        // clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+        // SEO Indexing Enabled
+        clonedResponse.headers.set('X-Robots-Tag', 'index, follow');
         clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
 
         return clonedResponse;
