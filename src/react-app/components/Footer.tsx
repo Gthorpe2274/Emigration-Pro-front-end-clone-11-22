@@ -1,14 +1,21 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+
 export default function Footer() {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showConsultationPopup, setShowConsultationPopup] = useState(false);
+  const [showRelocationPopup, setShowRelocationPopup] = useState(false);
+
   return (
-    <footer className="bg-black py-12 px-6">
+    <footer className="bg-black py-12 px-6 relative">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Logo and Description Section */}
           <div className="lg:col-span-2">
             <div className="mb-6">
-              <img 
-                src="https://e10922871bed0cc3848d-7d0b257190f7dc575c87f2234e91f8d7.ssl.cf5.rackcdn.com/Media/Images/logo%20only.png" 
-                alt="Emigration Pro Logo" 
+              <img
+                src="https://e10922871bed0cc3848d-7d0b257190f7dc575c87f2234e91f8d7.ssl.cf5.rackcdn.com/Media/Images/logo%20only.png"
+                alt="Emigration Pro Logo"
                 className="h-16 w-auto mb-4"
               />
             </div>
@@ -20,60 +27,60 @@ export default function Footer() {
                 <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
               </svg>
-              <img 
-                src="https://mocha-cdn.com/0198c152-69c8-7918-a1cb-a063f87c02df/image.png_6966.png" 
-                alt="Contact Email" 
+              <img
+                src="https://mocha-cdn.com/0198c152-69c8-7918-a1cb-a063f87c02df/image.png_6966.png"
+                alt="Contact Email"
                 className="h-7"
               />
             </div>
-            
+
             {/* Social Media Icons */}
             <div>
               <p className="text-gray-400 text-sm mb-3">Follow & Share</p>
               <div className="flex space-x-4">
-                <a 
-                  href="/social-login" 
+                <a
+                  href="/social-login"
                   className="group flex items-center justify-center w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-200 transform hover:scale-105"
                   title="LinkedIn"
                 >
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                   </svg>
                 </a>
-                <a 
-                  href="/social-login" 
+                <a
+                  href="/social-login"
                   className="group flex items-center justify-center w-10 h-10 bg-gray-900 hover:bg-gray-800 rounded-lg transition-all duration-200 transform hover:scale-105"
                   title="X (Twitter)"
                 >
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
                 </a>
-                <a 
-                  href="/social-login" 
+                <a
+                  href="/social-login"
                   className="group flex items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-lg transition-all duration-200 transform hover:scale-105"
                   title="Instagram"
                 >
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
                   </svg>
                 </a>
-                <a 
-                  href="/social-login" 
+                <a
+                  href="/social-login"
                   className="group flex items-center justify-center w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-200 transform hover:scale-105"
                   title="Facebook"
                 >
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
                 </a>
-                <a 
-                  href="/social-login" 
+                <a
+                  href="/social-login"
                   className="group flex items-center justify-center w-10 h-10 bg-sky-500 hover:bg-sky-600 rounded-lg transition-all duration-200 transform hover:scale-105"
                   title="Bluesky"
                 >
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 2.087.139 3.073.216 5.037.216 5.037s.098 3.186 2.19 6.748c.968 1.647 2.25 2.135 2.25 2.135 2.296.043 3.29-.96 3.29-.96C7.947 12.96 12 10.8 12 10.8s4.053 2.16 4.054 2.16S17.047 14 19.344 13.96c0 0 1.282-.488 2.25-2.135 2.092-3.562 2.19-6.748 2.19-6.748s.077-1.964-.686-2.95C22.439 1.266 21.434.944 18.798 2.805 16.046 4.747 13.087 8.686 12 10.8z"/>
+                    <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 2.087.139 3.073.216 5.037.216 5.037s.098 3.186 2.19 6.748c.968 1.647 2.25 2.135 2.25 2.135 2.296.043 3.29-.96 3.29-.96C7.947 12.96 12 10.8 12 10.8s4.053 2.16 4.054 2.16S17.047 14 19.344 13.96c0 0 1.282-.488 2.25-2.135 2.092-3.562 2.19-6.748 2.19-6.748s.077-1.964-.686-2.95C22.439 1.266 21.434.944 18.798 2.805 16.046 4.747 13.087 8.686 12 10.8z" />
                   </svg>
                 </a>
               </div>
@@ -85,19 +92,25 @@ export default function Footer() {
             <h3 className="text-white text-lg font-semibold mb-4">Services</h3>
             <ul className="space-y-3">
               <li>
-                <a href="/assessment" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link to="/assessment" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Country Assessment
-                </a>
+                </Link>
               </li>
               <li>
-                <span className="text-gray-300 text-sm">
+                <button
+                  onClick={() => setShowConsultationPopup(true)}
+                  className="text-gray-300 hover:text-white transition-colors text-sm text-left focus:outline-none"
+                >
                   Emigration Consultation
-                </span>
+                </button>
               </li>
               <li>
-                <span className="text-gray-300 text-sm">
+                <button
+                  onClick={() => setShowRelocationPopup(true)}
+                  className="text-gray-300 hover:text-white transition-colors text-sm text-left focus:outline-none"
+                >
                   Relocation Planning
-                </span>
+                </button>
               </li>
             </ul>
           </div>
@@ -106,20 +119,59 @@ export default function Footer() {
           <div>
             <h3 className="text-white text-lg font-semibold mb-4">Resources</h3>
             <ul className="space-y-3">
-              <li>
-                <span className="text-gray-300 text-sm">
-                  Country Guides
-                </span>
-              </li>
-              <li>
-                <span className="text-gray-300 text-sm">
-                  Emigration News
-                </span>
-              </li>
-              <li>
-                <span className="text-gray-300 text-sm">
-                  Cost Calculators
-                </span>
+
+              <li className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="text-gray-300 hover:text-white transition-colors text-sm flex items-center focus:outline-none"
+                  aria-expanded={isDropdownOpen}
+                  aria-haspopup="true"
+                >
+                  Calculators
+                  <svg
+                    className={`w-4 h-4 ml-1 transform transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 transform origin-top-left transition-all duration-200 ease-out">
+                    <div className="py-1" role="menu" aria-orientation="vertical">
+                      <a
+                        href="https://www.numbeo.com/cost-of-living/comparison.jsp"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                        role="menuitem"
+                      >
+                        Numbeo Cost of Living
+                      </a>
+                      <a
+                        href="https://www.expatistan.com/cost-of-living"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                        role="menuitem"
+                      >
+                        Expatistan Comparison
+                      </a>
+                      <a
+                        href="https://sirelo.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                        role="menuitem"
+                      >
+                        Sirelo Moving Costs
+                      </a>
+                    </div>
+                  </div>
+                )}
               </li>
             </ul>
           </div>
@@ -129,14 +181,14 @@ export default function Footer() {
             <h3 className="text-white text-lg font-semibold mb-4">Legal</h3>
             <ul className="space-y-3">
               <li>
-                <a href="/terms" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link to="/terms" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/privacy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link to="/privacy" className="text-gray-300 hover:text-white transition-colors text-sm">
                   Privacy Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -152,6 +204,81 @@ export default function Footer() {
           </p>
         </div>
       </div>
+
+      {/* Consultation Popup Modal */}
+      {showConsultationPopup && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative animate-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setShowConsultationPopup(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2"
+              aria-label="Close popup"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Contact Consultation Team</h3>
+
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Please send us an email with your specifics about what subject(s) you wish to have a consultation about and we will get back to you shortly.
+              </p>
+
+              <a
+                href="mailto:info@emigrationpro.com"
+                className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 w-full"
+              >
+                info@emigrationpro.com
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Relocation Planning Popup Modal */}
+      {showRelocationPopup && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative animate-in zoom-in-95 duration-200">
+            <button
+              onClick={() => setShowRelocationPopup(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-2"
+              aria-label="Close popup"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+              </div>
+
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Relocation Planning</h3>
+
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Get Your Full Relocation Planning Report for a step by step guide to relocation planning. Just click the link on this page.
+              </p>
+              <a
+                href="https://report.emigrationpro.com"
+                className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 w-full"
+              >
+                Get Full Report
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </footer>
   );
 }

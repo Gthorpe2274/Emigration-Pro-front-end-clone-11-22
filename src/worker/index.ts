@@ -766,8 +766,13 @@ app.get('/api/blog/posts', async (c) => {
       ORDER BY published_date DESC
     `).all();
 
-    // Auto-seed if empty
-    if (results.length === 0) {
+    // Check if ANY posts exist (published or draft) to decide on seeding
+    // This prevents seeding conflicts if only drafts exist
+    const totalCountResult = await c.env.DB.prepare('SELECT COUNT(*) as count FROM blog_posts').first();
+    const totalCount = totalCountResult ? (totalCountResult.count as number) : 0;
+
+    // Auto-seed only if database is completely empty
+    if (totalCount === 0) {
       console.log('Seeding initial blog posts...');
       const initialPosts = [
         {
@@ -806,8 +811,9 @@ app.get('/api/blog/posts', async (c) => {
       ];
 
       for (const post of initialPosts) {
+        // Use INSERT OR IGNORE to be extra safe against race conditions or partial failures
         await c.env.DB.prepare(`
-          INSERT INTO blog_posts (title, slug, featured_image, body, excerpt, published_date, is_published, allow_comments, author)
+          INSERT OR IGNORE INTO blog_posts (title, slug, featured_image, body, excerpt, published_date, is_published, allow_comments, author)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(
           post.title, post.slug, post.featured_image, post.body, post.excerpt,
