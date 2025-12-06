@@ -160,15 +160,7 @@ export default function Footer() {
                       >
                         Expatistan Comparison
                       </a>
-                      <a
-                        href="https://sirelo.com/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600"
-                        role="menuitem"
-                      >
-                        Sirelo Moving Costs
-                      </a>
+
                     </div>
                   </div>
                 )}
