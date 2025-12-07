@@ -58,14 +58,26 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="flex flex-row gap-6 justify-center items-center mb-12">
+            <div className="flex flex-col items-center gap-6 mb-12 max-w-4xl mx-auto">
+              {/* Information Box */}
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-6 rounded-2xl shadow-xl border-2 border-white/30">
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-6 h-6 mt-1 flex-shrink-0" />
+                  <p className="text-xl font-medium leading-relaxed">
+                    Get your free Assessment and a Relocation Hub with Expat videos, vetted service providers and more — all free.
+                  </p>
+                </div>
+              </div>
+
+              {/* Call-to-Action Button */}
               <Link
                 to="/assessment"
-                className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                className="inline-flex items-center bg-white text-blue-600 border-2 border-blue-600 px-10 py-5 rounded-full font-bold text-xl hover:bg-blue-600 hover:text-white hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
               >
-                <MapPin className="w-5 h-5 mr-2" />
-                Get your free Assessment and a Relocation Hub with Expat videos, vetted service providers and more — all free.
+                Get Your Assessment
               </Link>
+
+              {/* Trust Indicators */}
               <div className="text-lg text-black font-bold">
                 No credit card required • 5 minutes
               </div>
