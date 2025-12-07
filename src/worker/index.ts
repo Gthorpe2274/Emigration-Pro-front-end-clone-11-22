@@ -742,6 +742,10 @@ app.get('/api/admin/crm/purchasers', async (c) => {
       ORDER BY r.created_at DESC
     `).all();
 
+    // Prevent caching of CRM data
+    c.header('Cache-Control', 'no-store, no-cache, must-revalidate');
+    c.header('Pragma', 'no-cache');
+
     return c.json({
       success: true,
       purchasers: results
