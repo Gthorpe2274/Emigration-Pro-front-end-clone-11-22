@@ -149,11 +149,10 @@ export default function BestCountries() {
         {[1, 2, 3, 4, 5].map(star => (
           <Star
             key={star}
-            className={`w-4 h-4 ${
-              star <= rating
-                ? 'text-yellow-400 fill-current'
-                : 'text-gray-300'
-            }`}
+            className={`w-4 h-4 ${star <= rating
+              ? 'text-yellow-400 fill-current'
+              : 'text-gray-300'
+              }`}
           />
         ))}
       </div>
@@ -172,18 +171,18 @@ export default function BestCountries() {
               <Globe className="w-4 h-4 mr-2" />
               Top Emigration Destinations 2025
             </div>
-            
+
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               <span className="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
-                Best Countries to Move to From USA
+                Best Countries for American Expats
               </span>
             </h1>
-            
+
             <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto font-medium">
-              Discover the top-ranked destinations based on immigration policies, quality of life, 
+              Discover the top-ranked destinations based on immigration policies, quality of life,
               cost of living, and overall compatibility for US citizens seeking a new home abroad.
             </p>
-            
+
             <div className="flex flex-wrap gap-6 justify-center items-center text-lg text-gray-600">
               <div className="flex items-center space-x-2">
                 <TrendingUp className="w-5 h-5 text-green-500" />
@@ -217,8 +216,8 @@ export default function BestCountries() {
               <div key={country.name} className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
                 {/* Country Image Header */}
                 <div className="relative h-64 overflow-hidden">
-                  <img 
-                    src={country.image} 
+                  <img
+                    src={country.image}
                     alt={`${country.name} landscape`}
                     className="w-full h-full object-cover"
                   />
@@ -252,29 +251,29 @@ export default function BestCountries() {
                     {/* Key Information */}
                     <div className="space-y-4">
                       <h4 className="text-xl font-semibold text-gray-900 mb-3">Key Information</h4>
-                      
+
                       <div className="flex items-center justify-between">
                         <span className="text-gray-700">Cost of Living</span>
                         <span className={`px-3 py-1 rounded-full text-lg font-medium ${getCostColor(country.costOfLiving)}`}>
                           {country.costOfLiving}
                         </span>
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <span className="text-gray-700">Healthcare</span>
                         {renderStars(country.healthcareRating)}
                       </div>
-                      
+
                       <div className="flex items-center justify-between">
                         <span className="text-gray-700">Safety</span>
                         {renderStars(country.safetyRating)}
                       </div>
-                      
+
                       <div>
                         <span className="text-gray-700 block mb-1">Language</span>
                         <span className="text-lg text-gray-600">{country.language}</span>
                       </div>
-                      
+
                       <div>
                         <span className="text-gray-700 block mb-1">Climate</span>
                         <span className="text-lg text-gray-600">{country.climate}</span>
@@ -292,13 +291,13 @@ export default function BestCountries() {
                           </li>
                         ))}
                       </ul>
-                      
+
                       <div className="mt-6">
                         <h5 className="text-lg font-medium text-gray-900 mb-2">Popular Cities</h5>
                         <div className="flex flex-wrap gap-2">
                           {country.popularCities.map((city, index) => (
-                            <span 
-                              key={index} 
+                            <span
+                              key={index}
                               className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-lg"
                             >
                               {city}
@@ -319,7 +318,7 @@ export default function BestCountries() {
                           </li>
                         ))}
                       </ul>
-                      
+
                       <div className="mt-6">
                         <h5 className="text-lg font-medium text-gray-900 mb-2">Top Highlights</h5>
                         <div className="space-y-2">
@@ -359,7 +358,7 @@ export default function BestCountries() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">Why These Countries Top Our Rankings</h2>
-            
+
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -368,7 +367,7 @@ export default function BestCountries() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Immigration Friendly</h3>
                 <p className="text-gray-600">Clear pathways and welcoming policies for American emigrants</p>
               </div>
-              
+
               <div className="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Heart className="w-6 h-6 text-green-600" />
@@ -376,7 +375,7 @@ export default function BestCountries() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Quality Healthcare</h3>
                 <p className="text-gray-600">Universal or affordable healthcare systems with quality care</p>
               </div>
-              
+
               <div className="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <TrendingUp className="w-6 h-6 text-purple-600" />
@@ -384,7 +383,7 @@ export default function BestCountries() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Economic Opportunity</h3>
                 <p className="text-gray-600">Strong economies with opportunities for business and employment</p>
               </div>
-              
+
               <div className="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
                 <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Users className="w-6 h-6 text-orange-600" />
@@ -403,10 +402,10 @@ export default function BestCountries() {
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Find Your Perfect Match</h2>
             <p className="text-xl text-gray-700 mb-8">
-              Take our comprehensive assessment to discover which of these top countries 
+              Take our comprehensive assessment to discover which of these top countries
               best aligns with your priorities, lifestyle, and emigration goals.
             </p>
-            <Link 
+            <Link
               to="/assessment"
               className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
             >
