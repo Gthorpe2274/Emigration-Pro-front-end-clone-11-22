@@ -1750,10 +1750,14 @@ app.get("/api/admin/email-leads", async (c) => {
 const BlogPostSchema = z.object({
   title: z.string().min(1).max(500),
   slug: z.string().min(1).max(200),
-  featured_image: z.string().optional().or(z.literal('')),
+  featured_image: z.string().optional().nullable().transform(val => val || null),
   body: z.string().min(1),
-  excerpt: z.string().optional().or(z.literal('')),
-  published_date: z.string().optional().or(z.literal('')),
+  excerpt: z.string().optional().nullable().transform(val => val || null),
+  published_date: z.string().optional().nullable().transform(val => {
+    // Handle empty strings, null, undefined
+    if (!val || val.trim() === '') return null;
+    return val;
+  }),
   is_published: z.union([z.boolean(), z.number(), z.string()]).transform(val => {
     if (typeof val === 'boolean') return val;
     if (typeof val === 'number') return val === 1;
@@ -1766,7 +1770,7 @@ const BlogPostSchema = z.object({
     if (typeof val === 'string') return val === 'true' || val === '1';
     return true;
   }),
-  author: z.string().optional().or(z.literal(''))
+  author: z.string().optional().nullable().transform(val => val || null)
 });
 
 // Get all published blog posts
@@ -1831,9 +1835,24 @@ app.get("/api/admin/blog/posts", blogAdminAuth, async (c) => {
 });
 
 // Admin: Create blog post
-app.post("/api/admin/blog/posts", blogAdminAuth, zValidator("json", BlogPostSchema), async (c) => {
+app.post("/api/admin/blog/posts", blogAdminAuth, async (c) => {
   try {
-    const postData = c.req.valid("json");
+    // Parse request body
+    const body = await c.req.json();
+
+    // Validate manually to provide better error messages
+    const validation = BlogPostSchema.safeParse(body);
+
+    if (!validation.success) {
+      console.error("Blog post validation failed:", validation.error);
+      return c.json({
+        error: "Validation failed",
+        details: validation.error.errors,
+        success: false
+      }, 400);
+    }
+
+    const postData = validation.data;
 
     // Check if slug already exists
     const existing = await c.env.DB.prepare(
@@ -1841,7 +1860,7 @@ app.post("/api/admin/blog/posts", blogAdminAuth, zValidator("json", BlogPostSche
     ).bind(postData.slug).first();
 
     if (existing) {
-      return c.json({ error: "A post with this slug already exists" }, 400);
+      return c.json({ error: "A post with this slug already exists", success: false }, 400);
     }
 
     const result = await c.env.DB.prepare(`
@@ -1868,15 +1887,35 @@ app.post("/api/admin/blog/posts", blogAdminAuth, zValidator("json", BlogPostSche
     });
   } catch (error) {
     console.error("Error creating blog post:", error);
-    return c.json({ error: "Failed to create blog post" }, 500);
+    return c.json({
+      error: "Failed to create blog post",
+      details: error instanceof Error ? error.message : String(error),
+      success: false
+    }, 500);
   }
 });
 
 // Admin: Update blog post
-app.put("/api/admin/blog/posts/:id", blogAdminAuth, zValidator("json", BlogPostSchema), async (c) => {
+app.put("/api/admin/blog/posts/:id", blogAdminAuth, async (c) => {
   try {
     const id = c.req.param("id");
-    const postData = c.req.valid("json");
+
+    // Parse request body
+    const body = await c.req.json();
+
+    // Validate manually to provide better error messages
+    const validation = BlogPostSchema.safeParse(body);
+
+    if (!validation.success) {
+      console.error("Blog post validation failed:", validation.error);
+      return c.json({
+        error: "Validation failed",
+        details: validation.error.errors,
+        success: false
+      }, 400);
+    }
+
+    const postData = validation.data;
 
     // Check if another post has the same slug
     const existing = await c.env.DB.prepare(
@@ -1884,7 +1923,7 @@ app.put("/api/admin/blog/posts/:id", blogAdminAuth, zValidator("json", BlogPostS
     ).bind(postData.slug, id).first();
 
     if (existing) {
-      return c.json({ error: "Another post with this slug already exists" }, 400);
+      return c.json({ error: "Another post with this slug already exists", success: false }, 400);
     }
 
     await c.env.DB.prepare(`
@@ -1919,7 +1958,11 @@ app.put("/api/admin/blog/posts/:id", blogAdminAuth, zValidator("json", BlogPostS
     });
   } catch (error) {
     console.error("Error updating blog post:", error);
-    return c.json({ error: "Failed to update blog post" }, 500);
+    return c.json({
+      error: "Failed to update blog post",
+      details: error instanceof Error ? error.message : String(error),
+      success: false
+    }, 500);
   }
 });
 
