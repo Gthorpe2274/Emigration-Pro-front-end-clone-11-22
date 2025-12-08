@@ -759,6 +759,49 @@ app.get('/api/admin/crm/purchasers', async (c) => {
   }
 });
 
+// CRM - Update purchaser
+app.put('/api/admin/crm/purchasers/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const body = await c.req.json();
+    const { email, session_code, is_active, purchase_confirmed } = body;
+
+    if (!email || !session_code) {
+      return c.json({
+        success: false,
+        error: 'Email and session code are required'
+      }, 400);
+    }
+
+    // Update the purchaser record
+    await c.env.DB.prepare(`
+      UPDATE relocation_hub_access
+      SET email = ?,
+          session_code = ?,
+          is_active = ?,
+          purchase_confirmed = ?
+      WHERE id = ?
+    `).bind(
+      email.toLowerCase(),
+      session_code,
+      is_active ? 1 : 0,
+      purchase_confirmed ? 1 : 0,
+      id
+    ).run();
+
+    return c.json({
+      success: true,
+      message: 'Purchaser updated successfully'
+    });
+  } catch (error) {
+    console.error('Error updating purchaser:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to update purchaser'
+    }, 500);
+  }
+});
+
 // Blog Endpoints
 
 // Public: Get all published posts
