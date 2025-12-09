@@ -1253,7 +1253,7 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
         finalAssessmentId,
         normalizedEmail,
         sessionCode,
-        1, // is_active
+        0, // is_active (inactive until purchase confirmed)
         0, // purchase_confirmed (false - they're accessing report generation)
         expires_at.toISOString()
       ).run();
@@ -1308,72 +1308,107 @@ const PermanentAccessSchema = z.object({
 app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccessSchema), async (c) => {
   try {
     const { assessment_id, email, purchase_confirmed } = c.req.valid("json");
+    const normalizedEmail = email.toLowerCase();
 
-    // Log relocation hub access creation for monitoring
-    console.log('Creating relocation hub access:', {
+    // Log relocation hub access creation/update for monitoring
+    console.log('Creating/updating relocation hub access:', {
       assessment_id,
-      email,
+      email: normalizedEmail,
       purchase_confirmed,
       timestamp: new Date().toISOString()
     });
 
-    // Generate unique session code (format: XXXX-XXXX-XXXX)
-    const generateSessionCode = () => {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      const segments = [];
-      for (let i = 0; i < 3; i++) {
-        let segment = '';
-        for (let j = 0; j < 4; j++) {
-          segment += chars.charAt(Math.floor(Math.random() * chars.length));
+    // Check if access record already exists (from email capture)
+    const existingAccess = await c.env.DB.prepare(`
+      SELECT * FROM relocation_hub_access 
+      WHERE email = ? AND assessment_id = ?
+    `).bind(normalizedEmail, assessment_id).first();
+
+    let sessionCode: string;
+
+    if (existingAccess) {
+      // UPDATE existing CRM record - activate it and confirm purchase
+      sessionCode = existingAccess.session_code;
+      
+      // Set expiration (2 years from now for permanent access)
+      const expires_at = new Date();
+      expires_at.setFullYear(expires_at.getFullYear() + 2);
+
+      await c.env.DB.prepare(`
+        UPDATE relocation_hub_access
+        SET is_active = ?,
+            purchase_confirmed = ?,
+            expires_at = ?,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE email = ? AND assessment_id = ?
+      `).bind(
+        1, // is_active (activate it - purchase confirmed)
+        purchase_confirmed ? 1 : 0,
+        expires_at.toISOString(),
+        normalizedEmail,
+        assessment_id
+      ).run();
+
+      console.log(`Updated existing CRM record for ${normalizedEmail}, session: ${sessionCode}, activated: true`);
+    } else {
+      // Create new record (if no existing record found - edge case)
+      const generateSessionCode = () => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const segments = [];
+        for (let i = 0; i < 3; i++) {
+          let segment = '';
+          for (let j = 0; j < 4; j++) {
+            segment += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          segments.push(segment);
         }
-        segments.push(segment);
-      }
-      return segments.join('-');
-    };
+        return segments.join('-');
+      };
 
-    let sessionCode = generateSessionCode();
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    // Ensure session code is unique
-    while (attempts < maxAttempts) {
-      const existing = await c.env.DB.prepare(
-        "SELECT id FROM relocation_hub_access WHERE session_code = ?"
-      ).bind(sessionCode).first();
-
-      if (!existing) break;
       sessionCode = generateSessionCode();
-      attempts++;
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      // Ensure session code is unique
+      while (attempts < maxAttempts) {
+        const existing = await c.env.DB.prepare(
+          "SELECT id FROM relocation_hub_access WHERE session_code = ?"
+        ).bind(sessionCode).first();
+
+        if (!existing) break;
+        sessionCode = generateSessionCode();
+        attempts++;
+      }
+
+      if (attempts >= maxAttempts) {
+        return c.json({ error: "Failed to generate unique session code" }, 500);
+      }
+
+      // Set expiration (2 years from now for permanent access)
+      const expires_at = new Date();
+      expires_at.setFullYear(expires_at.getFullYear() + 2);
+
+      // Create permanent access record
+      await c.env.DB.prepare(`
+        INSERT INTO relocation_hub_access (
+          assessment_id, email, session_code, is_active, purchase_confirmed, expires_at
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `).bind(
+        assessment_id,
+        normalizedEmail,
+        sessionCode,
+        1, // is_active (active because purchase is confirmed)
+        purchase_confirmed ? 1 : 0,
+        expires_at.toISOString()
+      ).run();
+
+      console.log('Created new relocation hub access record:', {
+        assessment_id,
+        session_code: sessionCode,
+        email: normalizedEmail,
+        timestamp: new Date().toISOString()
+      });
     }
-
-    if (attempts >= maxAttempts) {
-      return c.json({ error: "Failed to generate unique session code" }, 500);
-    }
-
-    // Set expiration (2 years from now for permanent access)
-    const expires_at = new Date();
-    expires_at.setFullYear(expires_at.getFullYear() + 2);
-
-    // Create permanent access record
-    await c.env.DB.prepare(`
-      INSERT INTO relocation_hub_access (
-        assessment_id, email, session_code, is_active, purchase_confirmed, expires_at
-      ) VALUES (?, ?, ?, ?, ?, ?)
-    `).bind(
-      assessment_id,
-      email.toLowerCase(),
-      sessionCode,
-      1,
-      purchase_confirmed ? 1 : 0,
-      expires_at.toISOString()
-    ).run();
-
-    console.log('Relocation hub access created successfully:', {
-      assessment_id,
-      session_code: sessionCode,
-      email,
-      timestamp: new Date().toISOString()
-    });
 
     // Extend assessment retention period to 2 years if purchase is confirmed
     // This ensures assessment data remains available for the full 2-year relocation hub access period
@@ -1403,7 +1438,7 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
     // Send email with relocation hub access information (only if purchase is confirmed)
     if (purchase_confirmed) {
       const emailResult = await sendRelocationHubAccessEmail(
-        email.toLowerCase(),
+        normalizedEmail,
         sessionCode,
         c.env.RESEND_API_KEY,
         assessment_id
@@ -1413,7 +1448,7 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
         // Log but don't fail the request - access is already created
         console.warn('Failed to send email to purchaser:', emailResult.error);
       } else {
-        console.log('Purchase confirmation email sent successfully to:', email.toLowerCase());
+        console.log('Purchase confirmation email sent successfully to:', normalizedEmail);
       }
     }
 
