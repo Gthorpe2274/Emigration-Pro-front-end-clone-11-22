@@ -26,3 +26,4 @@ CREATE INDEX idx_relocation_hub_videos_video_slot ON relocation_hub_videos(asses
 -- Set initial next_update_date for existing assessments (if any videos exist)
 -- This will be set to 6 months from creation when videos are first added
 
+

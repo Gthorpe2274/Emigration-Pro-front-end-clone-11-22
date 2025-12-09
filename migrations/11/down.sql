@@ -5,3 +5,4 @@ DROP INDEX IF EXISTS idx_relocation_hub_videos_next_update;
 DROP INDEX IF EXISTS idx_relocation_hub_videos_assessment;
 DROP TABLE IF EXISTS relocation_hub_videos;
 
+
