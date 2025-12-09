@@ -54,11 +54,12 @@ Set the following secrets in Cloudflare Workers:
 
 ```bash
 # YouTube Data API v3 Key
-npx wrangler secret put YOUTUBE_API_KEY
+npx wrangler secret put YOUTUBE_API_KEY=AQ.Ab8RN6INmY2m5Dl0Icky8Tk4AgEhjNd80lcyVfONILIYyvdmgQ
+
 # Enter your YouTube API key when prompted
 
 # Gemini API Key (optional but recommended for smart curation)
-npx wrangler secret put GEMINI_API_KEY
+npx wrangler secret put GEMINI_API_KEY=AIzaSyBT2qs3VtQRU_Gv9YqZFSQA3ikEiQ0CCGg
 # Enter your Gemini API key when prompted
 ```
 
@@ -216,4 +217,5 @@ LIMIT 10;
 
 **Estimated Setup Time:** 15-20 minutes  
 **Annual Maintenance:** Minimal (monitoring only)
+
 
