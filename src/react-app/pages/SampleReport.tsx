@@ -6,7 +6,7 @@ export default function SampleReport() {
   const location = useLocation();
   const returnTo = location.state?.returnTo;
 
-  // Sample of Health Care and Financial Financial Overview Sections of a Total Report - Updated content
+  // Sample of Health Care and Financial Overview Sections of a Total Report - Updated content
 
   return (
     <div className="bg-gray-100 text-gray-800">
@@ -67,7 +67,7 @@ export default function SampleReport() {
             </div>
           )}
           
-          <h1 className="text-5xl font-bold text-gray-900 mb-8">Sample of Health Care and Financial Financial Overview Sections of a Total Report</h1>
+          <h1 className="text-5xl font-bold text-gray-900 mb-8">Sample of Health Care and Financial Overview Sections of a Total Report</h1>
           <div className="border-b-2 border-blue-500 pb-2 mb-8">
             <h2 className="text-3xl font-semibold text-gray-800">Table of Contents</h2>
           </div>
