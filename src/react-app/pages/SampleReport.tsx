@@ -6,7 +6,7 @@ export default function SampleReport() {
   const location = useLocation();
   const returnTo = location.state?.returnTo;
 
-  // Healthcare Mapping Report - Updated content
+  // Sample of Health Care and Financial Financial Overview Sections of a Total Report - Updated content
 
   return (
     <div className="bg-gray-100 text-gray-800">
@@ -67,7 +67,7 @@ export default function SampleReport() {
             </div>
           )}
           
-          <h1 className="text-5xl font-bold text-gray-900 mb-8">Healthcare Mapping Report</h1>
+          <h1 className="text-5xl font-bold text-gray-900 mb-8">Sample of Health Care and Financial Financial Overview Sections of a Total Report</h1>
           <div className="border-b-2 border-blue-500 pb-2 mb-8">
             <h2 className="text-3xl font-semibold text-gray-800">Table of Contents</h2>
           </div>
@@ -191,7 +191,7 @@ export default function SampleReport() {
         <section className="mb-12">
           <h3 className="text-3xl font-semibold text-gray-900 mb-4">Sources:</h3>
           <p className="text-lg leading-relaxed">
-            (Sources were not provided in the OCR document. This section is a placeholder.)
+            (Sources will be provided in purchased report)
           </p>
           <p className="text-gray-600 text-sm mt-8 text-right">Page 12 of 53</p>
         </section>
