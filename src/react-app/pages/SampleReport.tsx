@@ -6,6 +6,8 @@ export default function SampleReport() {
   const location = useLocation();
   const returnTo = location.state?.returnTo;
 
+  // Healthcare Mapping Report - Updated content
+
   return (
     <div className="bg-gray-100 text-gray-800">
       <Navigation />
