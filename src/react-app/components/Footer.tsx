@@ -20,7 +20,7 @@ export default function Footer() {
               />
             </div>
             <p className="text-gray-300 text-sm leading-relaxed mb-6 max-w-md">
-              Your trusted partner in international migration. We provide comprehensive assessments and professional services to help you make informed decisions about your future abroad.
+              Your trusted partner in international migration. We provide comprehensive assessments and access to professional services to help you make informed decisions about your future abroad.
             </p>
             <div className="flex items-center mb-6">
               <svg className="w-4 h-4 mr-2 text-gray-300" fill="currentColor" viewBox="0 0 20 20">

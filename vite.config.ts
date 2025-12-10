@@ -7,9 +7,22 @@ export default defineConfig({
   plugins: [react()],
   server: {
     allowedHosts: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8787',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   build: {
     chunkSizeWarningLimit: 5000,
+    rollupOptions: {
+      input: {
+        main: './index.html',
+        fileConverter: './file-converter-standalone.html',
+      },
+    },
   },
   optimizeDeps: {
     exclude: ["@hono/zod-validator", "hono", "zod", "stripe", "openai"],

@@ -24,6 +24,7 @@ import ProtectedAdmin from './components/ProtectedAdmin';
 import BlogPost from './pages/BlogPost';
 import BlogAdmin from './pages/BlogAdmin';
 import Blog from './pages/Blog';
+import FileConverter from './pages/FileConverter';
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
         <Route path="/access-hub" element={<PermanentRelocationHub />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/file-converter" element={<FileConverter />} />
       </Routes>
     </Router>
   );

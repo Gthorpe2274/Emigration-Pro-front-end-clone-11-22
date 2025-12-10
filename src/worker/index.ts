@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { runScheduledCleanup } from './retention-cleanup';
 import { YouTubeAPIService } from './youtube-api-service';
 import { findBestVideoReplacement } from './youtube-video-curator';
+import { convertMarkdownToHTML, convertPDFToHTML } from './file-converter';
 
 // Helper function for scheduled video updates
 async function runScheduledVideoUpdates(env: Env): Promise<void> {
@@ -2194,6 +2195,263 @@ async function handleGenerateImage(c: any) {
 // Admin: Generate image for blog post
 app.post("/api/admin/blog/generate-image", blogAdminAuth, async (c) => {
   return handleGenerateImage(c);
+});
+
+// File Converter API Endpoints
+
+// Upload and convert file
+app.post('/api/file-converter/upload', async (c) => {
+  try {
+    const formData = await c.req.formData();
+    const fileEntry = formData.get('file');
+
+    if (!fileEntry) {
+      return c.json({ success: false, error: 'No file provided' }, 400);
+    }
+
+    // Check if it's a File object
+    const file = fileEntry as File;
+    if (typeof file.name === 'undefined' || typeof file.size === 'undefined') {
+      return c.json({ success: false, error: 'Invalid file provided' }, 400);
+    }
+
+    // Validate file type
+    const fileName = file.name;
+    const fileExtension = fileName.split('.').pop()?.toLowerCase();
+    
+    if (fileExtension !== 'md' && fileExtension !== 'pdf') {
+      return c.json({ 
+        success: false, 
+        error: 'Invalid file type. Only .md and .pdf files are supported.' 
+      }, 400);
+    }
+
+    // Check file size (limit to 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      return c.json({ 
+        success: false, 
+        error: 'File size exceeds 10MB limit' 
+      }, 400);
+    }
+
+    // Read file content
+    const arrayBuffer = await file.arrayBuffer();
+    const fileType = fileExtension as 'md' | 'pdf';
+
+    // Convert file to HTML
+    let htmlContent: string;
+    if (fileType === 'md') {
+      const markdown = new TextDecoder().decode(arrayBuffer);
+      htmlContent = await convertMarkdownToHTML(markdown);
+    } else {
+      htmlContent = await convertPDFToHTML(arrayBuffer);
+    }
+
+    // Generate unique file ID and R2 key
+    const fileId = crypto.randomUUID();
+    const timestamp = Date.now();
+    const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const r2Key = `file-converter/${fileId}-${timestamp}-${sanitizedFileName}.html`;
+
+    // Upload converted HTML to R2
+    await c.env.R2_BUCKET.put(r2Key, htmlContent, {
+      httpMetadata: {
+        contentType: 'text/html',
+      },
+    });
+
+    // Store metadata in database
+    try {
+      await c.env.DB.prepare(`
+        INSERT INTO converted_files (id, original_name, file_name, file_type, file_size, r2_key, converted_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        fileId,
+        fileName,
+        `${sanitizedFileName}.html`,
+        fileType,
+        htmlContent.length,
+        r2Key,
+        new Date().toISOString()
+      ).run();
+    } catch (dbError) {
+      // If database insert fails, still keep the file in R2 but log the error
+      console.error('Database insert failed:', dbError);
+      // Check if it's a table missing error
+      const errorMsg = dbError instanceof Error ? dbError.message : String(dbError);
+      if (errorMsg.includes('no such table') || errorMsg.includes('converted_files')) {
+        throw new Error('Database table not found. Please run migration 12: npx wrangler d1 migrations apply emigration-pro-db');
+      }
+      throw dbError;
+    }
+
+    return c.json({
+      success: true,
+      fileId,
+      message: 'File converted successfully'
+    });
+  } catch (error) {
+    console.error('File conversion error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to convert file';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    // Log detailed error for debugging
+    console.error('Error details:', {
+      message: errorMessage,
+      stack: errorStack,
+      errorType: error?.constructor?.name
+    });
+    
+    return c.json({
+      success: false,
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? errorStack : undefined
+    }, 500);
+  }
+});
+
+// List all converted files
+app.get('/api/file-converter/files', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare(`
+      SELECT id, original_name, file_name, file_type, file_size, converted_at
+      FROM converted_files
+      ORDER BY converted_at DESC
+    `).all();
+
+    return c.json({
+      success: true,
+      files: results
+    });
+  } catch (error) {
+    console.error('Error fetching files:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to fetch files'
+    }, 500);
+  }
+});
+
+// Download converted file
+app.get('/api/file-converter/download/:id', async (c) => {
+  try {
+    const fileId = c.req.param('id');
+
+    // Get file metadata
+    const file = await c.env.DB.prepare(`
+      SELECT * FROM converted_files WHERE id = ?
+    `).bind(fileId).first();
+
+    if (!file) {
+      return c.json({ success: false, error: 'File not found' }, 404);
+    }
+
+    // Get file from R2
+    const r2Key = file.r2_key as string;
+    const object = await c.env.R2_BUCKET.get(r2Key);
+
+    if (!object) {
+      return c.json({ success: false, error: 'File not found in storage' }, 404);
+    }
+
+    // Return file with appropriate headers
+    const headers = new Headers();
+    headers.set('Content-Type', 'text/html');
+    headers.set('Content-Disposition', `attachment; filename="${file.file_name}"`);
+
+    return new Response(object.body, { headers });
+  } catch (error) {
+    console.error('Error downloading file:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to download file'
+    }, 500);
+  }
+});
+
+// Delete single file
+app.delete('/api/file-converter/delete/:id', async (c) => {
+  try {
+    const fileId = c.req.param('id');
+
+    // Get file metadata
+    const file = await c.env.DB.prepare(`
+      SELECT r2_key FROM converted_files WHERE id = ?
+    `).bind(fileId).first();
+
+    if (!file) {
+      return c.json({ success: false, error: 'File not found' }, 404);
+    }
+
+    // Delete from R2
+    const r2Key = file.r2_key as string;
+    await c.env.R2_BUCKET.delete(r2Key);
+
+    // Delete from database
+    await c.env.DB.prepare(`
+      DELETE FROM converted_files WHERE id = ?
+    `).bind(fileId).run();
+
+    return c.json({
+      success: true,
+      message: 'File deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to delete file'
+    }, 500);
+  }
+});
+
+// Delete multiple files
+app.delete('/api/file-converter/delete-multiple', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { fileIds } = body;
+
+    if (!Array.isArray(fileIds) || fileIds.length === 0) {
+      return c.json({ success: false, error: 'No file IDs provided' }, 400);
+    }
+
+    // Get file metadata for all files
+    const placeholders = fileIds.map(() => '?').join(',');
+    const files = await c.env.DB.prepare(`
+      SELECT id, r2_key FROM converted_files WHERE id IN (${placeholders})
+    `).bind(...fileIds).all();
+
+    if (files.results.length === 0) {
+      return c.json({ success: false, error: 'No files found' }, 404);
+    }
+
+    // Delete from R2
+    for (const file of files.results) {
+      const r2Key = file.r2_key as string;
+      try {
+        await c.env.R2_BUCKET.delete(r2Key);
+      } catch (error) {
+        console.error(`Error deleting R2 object ${r2Key}:`, error);
+      }
+    }
+
+    // Delete from database
+    await c.env.DB.prepare(`
+      DELETE FROM converted_files WHERE id IN (${placeholders})
+    `).bind(...fileIds).run();
+
+    return c.json({
+      success: true,
+      message: `${files.results.length} file(s) deleted successfully`
+    });
+  } catch (error) {
+    console.error('Error deleting files:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to delete files'
+    }, 500);
+  }
 });
 
 // Add missing ping endpoint for health checks
