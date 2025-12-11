@@ -2519,6 +2519,20 @@ app.get('*', async (c) => {
         return clonedResponse;
       }
 
+      // Ensure images and other static assets are served with proper headers
+      if (contentType.includes('image/') || contentType.includes('font/') || contentType.includes('application/octet-stream')) {
+        const clonedResponse = new Response(assetResponse.body, {
+          status: assetResponse.status,
+          statusText: assetResponse.statusText,
+          headers: new Headers(assetResponse.headers)
+        });
+
+        // Set appropriate cache headers for images
+        clonedResponse.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+        
+        return clonedResponse;
+      }
+
       return assetResponse;
     }
 

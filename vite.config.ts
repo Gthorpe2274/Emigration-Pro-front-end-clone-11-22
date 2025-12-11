@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   plugins: [react()],
+  publicDir: 'public',
   server: {
     allowedHosts: true,
     proxy: {
@@ -17,6 +18,7 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 5000,
+    copyPublicDir: true,
     rollupOptions: {
       input: {
         main: './index.html',

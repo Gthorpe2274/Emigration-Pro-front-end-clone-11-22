@@ -172,6 +172,13 @@ export default function Home() {
                     src="/images/elderly-couple-documents.jpg" 
                     alt="Elderly couple reviewing emigration documents together" 
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      const parent = e.currentTarget.parentElement?.parentElement;
+                      if (parent) {
+                        parent.style.display = 'none';
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -205,9 +212,16 @@ export default function Home() {
               <div className="hidden md:block">
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden h-full min-h-[300px] flex items-center justify-center">
                   <img 
-                    src="/images/couple-report.jpg" 
+                    src="/images/couple-report.png" 
                     alt="Happy couple reviewing Emigration Pro Report document" 
                     className="w-full h-full object-cover"
+                    loading="lazy"
+                    onError={(e) => {
+                      const parent = e.currentTarget.parentElement?.parentElement;
+                      if (parent) {
+                        parent.style.display = 'none';
+                      }
+                    }}
                   />
                 </div>
               </div>
