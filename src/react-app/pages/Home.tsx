@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Compass, MapPin, Users, Star, CheckCircle } from 'lucide-react';
+import { MapPin, Users, Star, CheckCircle } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
@@ -39,17 +39,14 @@ export default function Home() {
         {/* Content */}
         <div className="relative z-10">
           <div className="container mx-auto max-w-4xl">
-            <div className="inline-flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-lg font-medium mb-6">
-              <Compass className="w-4 h-4 mr-2" />
-              Professional Emigration Guidance
-            </div>
-
-            <h2 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6 leading-tight">
-              Find Your Perfect
-              <span className="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent block">
-                International Destination
-              </span>
+            <h2 className="text-5xl md:text-6xl font-bold text-gray-800 mb-3 leading-tight">
+              How To Leave The U.S.
             </h2>
+            <p className="text-2xl md:text-3xl font-medium text-gray-700 mb-6 italic leading-relaxed">
+              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                Find Your Perfect International Destination
+              </span>
+            </p>
 
             <div className="inline-block bg-white px-8 py-6 border-2 border-gray-300 shadow-xl mb-10 mx-auto max-w-3xl">
               <p className="text-2xl text-gray-900 font-medium">
