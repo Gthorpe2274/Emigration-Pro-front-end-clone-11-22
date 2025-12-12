@@ -39,6 +39,12 @@ export default function AboutUs() {
                   to school due to gun violence.
                 </p>
                 <p>
+                  Our founder, an attorney and author, has traveled extensively and has been involved 
+                  with international emigration and immigration entities and other consultants for over 
+                  a decade, but realized that what was missing was a comprehensive solution to provide 
+                  those seeking to emigrate from the U.S. was missing.
+                </p>
+                <p>
                   Through extensive research across dozens of countries, we've identified destinations 
                   where life can be different – where healthcare is a right, not a privilege; where 
                   neighbors support each other regardless of politics; and where safety is not a luxury.
