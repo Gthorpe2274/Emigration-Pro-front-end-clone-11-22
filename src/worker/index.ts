@@ -2481,7 +2481,14 @@ app.get('*', async (c) => {
       }
 
       // Ensure images and other static assets are served with proper headers
-      if (contentType.includes('image/') || contentType.includes('font/') || contentType.includes('application/octet-stream')) {
+      if (contentType.includes('image/') || contentType.includes('font/') || contentType.includes('application/octet-stream') || 
+          url.pathname.includes('favicon') || url.pathname.includes('.ico')) {
+        // Handle 404 for favicon gracefully to prevent SSL errors
+        if (assetResponse.status === 404 && (url.pathname.includes('favicon') || url.pathname.includes('.ico'))) {
+          // Return empty 204 response for missing favicons instead of 404
+          return new Response(null, { status: 204 });
+        }
+        
         const clonedResponse = new Response(assetResponse.body, {
           status: assetResponse.status,
           statusText: assetResponse.statusText,

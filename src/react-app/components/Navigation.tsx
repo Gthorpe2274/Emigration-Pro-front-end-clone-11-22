@@ -24,7 +24,7 @@ export default function Navigation() {
             <Link to="/assessment" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               Assessment
             </Link>
-            <Link to="/best-countries" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Best Countries</Link>
+            <Link to="/best-countries" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Popular Countries</Link>
             <Link to="/sample-report" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Sample Report</Link>
             <Link to="/blog" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Blog</Link>
             <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">About Us</Link>

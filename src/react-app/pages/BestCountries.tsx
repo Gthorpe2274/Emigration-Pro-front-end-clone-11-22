@@ -174,7 +174,7 @@ export default function BestCountries() {
 
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               <span className="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
-                Best Countries for American Expats
+                Popular Countries for American Expats
               </span>
             </h1>
 

@@ -8,24 +8,24 @@ export default function AboutUs() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-10">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
             About <span className="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">Emigration Pro</span>
           </h1>
-          <p className="text-xl text-gray-700 mb-8 font-medium">
+          <p className="text-xl text-gray-700 mb-6 font-medium">
             Over a decade of dedicated research helping Americans find their path to a better life abroad
           </p>
         </div>
       </section>
 
       {/* Our Story */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-10">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
-              <div className="space-y-6 text-lg text-gray-700">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Story</h2>
+              <div className="space-y-4 text-lg text-gray-700">
                 <p>
                   For over a decade, we've been deeply involved in emigration research and guidance, 
                   driven by a simple yet powerful belief: everyone deserves to live without fear, 
@@ -64,9 +64,9 @@ export default function AboutUs() {
       </section>
 
       {/* The Problems We Address */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-10">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">
             The American Challenges We Help You Escape
           </h2>
           
@@ -119,12 +119,12 @@ export default function AboutUs() {
       </section>
 
       {/* Our Mission */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-10">
         <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 md:p-12">
           <div className="max-w-4xl mx-auto text-center">
-            <Globe className="w-16 h-16 text-blue-600 mx-auto mb-6" />
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Mission</h2>
-            <p className="text-xl text-gray-700 mb-8 leading-relaxed">
+            <Globe className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Mission</h2>
+            <p className="text-xl text-gray-700 mb-6 leading-relaxed">
               We believe that in 2024, no one should have to choose between their safety, their health, 
               and their financial security. Through our decade of research, we've identified countries 
               where Americans can live with dignity, peace of mind, and genuine community support.
@@ -157,16 +157,16 @@ export default function AboutUs() {
       </section>
 
       {/* Why We Do This */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-10">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">Why We Do This Work</h2>
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-6">Why We Do This Work</h2>
           <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20">
-            <blockquote className="text-xl text-gray-700 italic text-center mb-6">
+            <blockquote className="text-xl text-gray-700 italic text-center mb-4">
               "We've seen too many Americans accept that constant anxiety, political hatred, 
               and financial insecurity are just 'normal.' But they're not normal – and they 
               don't have to be your reality."
             </blockquote>
-            <div className="text-lg text-gray-700 space-y-4">
+            <div className="text-lg text-gray-700 space-y-3">
               <p>
                 Our research began when close friends and family members started asking us about 
                 life in other countries. They were exhausted by the daily stress of American life: 
@@ -189,10 +189,10 @@ export default function AboutUs() {
       </section>
 
       {/* Call to Action */}
-      <section className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-10">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">Ready to Explore Your Options?</h2>
-          <p className="text-xl text-gray-700 mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Explore Your Options?</h2>
+          <p className="text-xl text-gray-700 mb-6">
             Take our comprehensive assessment to discover which countries align with your priorities 
             and learn about the real possibilities for your family's future.
           </p>

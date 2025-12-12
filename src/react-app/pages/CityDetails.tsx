@@ -492,7 +492,7 @@ export default function CityDetails() {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">City Information Not Available</h2>
           <p className="text-gray-600 mb-6">We don't have detailed information for this city yet.</p>
           <Link to="/best-countries" className="text-blue-600 hover:text-blue-700">
-            ← Back to Best Countries
+            ← Back to Popular Countries
           </Link>
         </div>
       </div>
@@ -535,7 +535,7 @@ export default function CityDetails() {
               className="inline-flex items-center text-white/80 hover:text-white mb-4 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Best Countries
+              Back to Popular Countries
             </Link>
             <h1 className="text-5xl font-bold text-white mb-4">{cityData.name}</h1>
             <p className="text-xl text-white/90 max-w-2xl">{cityData.description}</p>
