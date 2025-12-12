@@ -108,12 +108,24 @@ export default function BlogAdmin() {
           'X-API-Key': 'admin#123'
         }
       });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to fetch posts:', response.status, errorText);
+        return;
+      }
+
       const data = await response.json();
       if (data.success) {
-        setPosts(data.posts);
+        setPosts(data.posts || []);
+      } else {
+        console.error('API returned error:', data.error);
       }
     } catch (error) {
       console.error('Error fetching posts:', error);
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error('Network error - check if the server is accessible');
+      }
     } finally {
       setLoading(false);
     }
@@ -121,6 +133,21 @@ export default function BlogAdmin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required fields
+    if (!formData.title.trim()) {
+      alert('Please enter a title');
+      return;
+    }
+    if (!formData.slug.trim()) {
+      alert('Please enter a slug (or it will be auto-generated from the title)');
+      setFormData({ ...formData, slug: generateSlug(formData.title) });
+      return;
+    }
+    if (!formData.body.trim()) {
+      alert('Please enter post content');
+      return;
+    }
 
     try {
       const apiBase = getApiBaseUrl();
@@ -139,6 +166,19 @@ export default function BlogAdmin() {
         body: JSON.stringify(formData)
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText || `HTTP ${response.status}: ${response.statusText}` };
+        }
+        console.error('API error response:', errorData);
+        alert('Error: ' + (errorData.error || errorData.details || `HTTP ${response.status}`));
+        return;
+      }
+
       const data = await response.json();
 
       if (data.success) {
@@ -146,11 +186,15 @@ export default function BlogAdmin() {
         resetForm();
         fetchAllPosts();
       } else {
-        alert('Error: ' + (data.error || JSON.stringify(data)));
+        alert('Error: ' + (data.error || data.details || JSON.stringify(data)));
       }
     } catch (error) {
       console.error('Error saving post:', error);
-      alert('Failed to save post: ' + (error instanceof Error ? error.message : String(error)));
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        alert('Failed to connect to server. Please check your connection and try again.');
+      } else {
+        alert('Failed to save post: ' + (error instanceof Error ? error.message : String(error)));
+      }
     }
   };
 

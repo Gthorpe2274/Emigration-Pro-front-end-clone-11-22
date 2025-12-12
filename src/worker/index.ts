@@ -809,9 +809,10 @@ app.put('/api/admin/crm/purchasers/:id', async (c) => {
 app.get('/api/blog/posts', async (c) => {
   try {
     let { results } = await c.env.DB.prepare(`
-      SELECT * FROM blog_posts 
+      SELECT id, title, slug, featured_image, excerpt, published_date, author
+      FROM blog_posts 
       WHERE is_published = 1 
-      ORDER BY published_date DESC
+      ORDER BY published_date DESC, created_at DESC
     `).all();
 
     // Check if ANY posts exist (published or draft) to decide on seeding
@@ -871,9 +872,10 @@ app.get('/api/blog/posts', async (c) => {
 
       // Re-fetch
       const newResults = await c.env.DB.prepare(`
-        SELECT * FROM blog_posts 
+        SELECT id, title, slug, featured_image, excerpt, published_date, author
+        FROM blog_posts 
         WHERE is_published = 1 
-        ORDER BY published_date DESC
+        ORDER BY published_date DESC, created_at DESC
       `).all();
       results = newResults.results;
     }
@@ -1852,48 +1854,7 @@ const BlogPostSchema = z.object({
   author: z.string().optional().nullable().transform(val => val || null)
 });
 
-// Get all published blog posts
-app.get("/api/blog/posts", async (c) => {
-  try {
-    const posts = await c.env.DB.prepare(`
-      SELECT id, title, slug, featured_image, excerpt, published_date, author
-      FROM blog_posts
-      WHERE is_published = 1
-      ORDER BY published_date DESC, created_at DESC
-    `).all();
-
-    return c.json({
-      success: true,
-      posts: posts.results
-    });
-  } catch (error) {
-    console.error("Error fetching blog posts:", error);
-    return c.json({ error: "Failed to fetch blog posts" }, 500);
-  }
-});
-
-// Get single blog post by slug
-app.get("/api/blog/posts/:slug", async (c) => {
-  try {
-    const slug = c.req.param("slug");
-    const post = await c.env.DB.prepare(`
-      SELECT * FROM blog_posts
-      WHERE slug = ? AND is_published = 1
-    `).bind(slug).first();
-
-    if (!post) {
-      return c.json({ error: "Post not found", success: false }, 404);
-    }
-
-    return c.json({
-      success: true,
-      post
-    });
-  } catch (error) {
-    console.error("Error fetching blog post:", error);
-    return c.json({ error: "Failed to fetch blog post" }, 500);
-  }
-});
+// Duplicate routes removed - using the ones defined above at lines 809 and 889
 
 // Admin: Get all blog posts (including drafts)
 app.get("/api/admin/blog/posts", blogAdminAuth, async (c) => {

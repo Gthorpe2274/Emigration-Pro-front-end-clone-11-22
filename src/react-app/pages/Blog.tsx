@@ -24,12 +24,25 @@ export default function Blog() {
   const fetchPosts = async () => {
     try {
       const response = await fetch('/api/blog/posts');
+      
+      if (!response.ok) {
+        console.error('Failed to fetch blog posts:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        return;
+      }
+      
       const data = await response.json();
       if (data.success) {
-        setPosts(data.posts);
+        setPosts(data.posts || []);
+      } else {
+        console.error('API returned error:', data.error);
       }
     } catch (error) {
       console.error('Error fetching blog posts:', error);
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error('Network error - check if the server is running and accessible');
+      }
     } finally {
       setLoading(false);
     }
