@@ -2506,29 +2506,52 @@ app.get('*', async (c) => {
 
     // For SPA routing, serve index.html for non-API routes
     if (!url.pathname.startsWith('/api/')) {
-      const indexResponse = await c.env.ASSETS.fetch(new Request(new URL('/', url.origin)));
-
-      // Add noindex headers to index.html
-      if (indexResponse.status !== 404) {
-        const clonedResponse = new Response(indexResponse.body, {
-          status: indexResponse.status,
-          statusText: indexResponse.statusText,
-          headers: new Headers(indexResponse.headers)
+      try {
+        const indexUrl = new URL('/', url.origin);
+        const indexRequest = new Request(indexUrl.toString(), {
+          method: 'GET',
+          headers: c.req.raw.headers
         });
+        
+        const indexResponse = await c.env.ASSETS.fetch(indexRequest);
 
-        // Add multiple headers to prevent indexing
-        // clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
-        // SEO Indexing Enabled
-        clonedResponse.headers.set('X-Robots-Tag', 'index, follow');
-        clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        // Add noindex headers to index.html
+        if (indexResponse.status !== 404 && indexResponse.ok) {
+          const clonedResponse = new Response(indexResponse.body, {
+            status: indexResponse.status,
+            statusText: indexResponse.statusText,
+            headers: new Headers(indexResponse.headers)
+          });
 
-        return clonedResponse;
+          // Add multiple headers to prevent indexing
+          // clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
+          // SEO Indexing Enabled
+          clonedResponse.headers.set('X-Robots-Tag', 'index, follow');
+          clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+          return clonedResponse;
+        }
+      } catch (spaError) {
+        console.error('SPA routing error:', spaError);
+        // Fall through to return assetResponse or error
       }
-
-      return indexResponse;
     }
 
-    return assetResponse;
+    // Return the original asset response if we got here
+    // This handles cases where asset exists but wasn't caught above
+    if (assetResponse && assetResponse.status !== 404) {
+      return assetResponse;
+    }
+
+    // If we reach here and it's a 404 for a non-API route, return index.html as last resort
+    if (!url.pathname.startsWith('/api/')) {
+      return new Response('Page not found', {
+        status: 404,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+      });
+    }
+
+    return assetResponse || new Response('Not found', { status: 404 });
   } catch (error) {
     console.error('Asset serving error:', error);
     
@@ -2573,8 +2596,23 @@ app.get('*', async (c) => {
 });
 
 // Handle scheduled events (cron jobs)
+// Wrap fetch handler to catch any unhandled errors and prevent SSL protocol errors
 export default {
-  fetch: app.fetch,
+  fetch: async (request: Request, env: any, ctx: ExecutionContext) => {
+    try {
+      return await app.fetch(request, env, ctx);
+    } catch (error) {
+      console.error('Unhandled error in Worker:', error);
+      // Always return a valid Response to prevent SSL protocol errors
+      return new Response('Internal Server Error', {
+        status: 500,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        }
+      });
+    }
+  },
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
     console.log('Scheduled event triggered:', event.cron);
 
