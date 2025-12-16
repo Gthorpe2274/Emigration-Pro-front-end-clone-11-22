@@ -2531,7 +2531,44 @@ app.get('*', async (c) => {
     return assetResponse;
   } catch (error) {
     console.error('Asset serving error:', error);
-    return c.json({ error: 'Page not found' }, 404);
+    
+    // For non-API routes, try to serve index.html as fallback (SPA routing)
+    // This ensures React Router can handle the route client-side
+    try {
+      const url = new URL(c.req.url);
+      if (!url.pathname.startsWith('/api/')) {
+        // Create a new request for index.html
+        const indexUrl = new URL('/', url.origin);
+        const indexRequest = new Request(indexUrl.toString(), {
+          method: 'GET',
+          headers: c.req.raw.headers
+        });
+        
+        const indexResponse = await c.env.ASSETS.fetch(indexRequest);
+        if (indexResponse.status !== 404 && indexResponse.ok) {
+          const clonedResponse = new Response(indexResponse.body, {
+            status: indexResponse.status,
+            statusText: indexResponse.statusText,
+            headers: new Headers(indexResponse.headers)
+          });
+          clonedResponse.headers.set('X-Robots-Tag', 'index, follow');
+          clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+          return clonedResponse;
+        }
+      }
+    } catch (fallbackError) {
+      console.error('Fallback error:', fallbackError);
+    }
+    
+    // Return proper error response instead of causing protocol errors
+    // Use plain text response to avoid JSON parsing issues
+    return new Response('Page not found', { 
+      status: 404,
+      headers: { 
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-cache'
+      }
+    });
   }
 });
 

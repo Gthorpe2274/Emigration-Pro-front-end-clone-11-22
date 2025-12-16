@@ -207,7 +207,7 @@ export default function BestCountries() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Top 6 Countries for US Emigrants</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Ranked by immigration accessibility, quality of life, cost of living, and overall suitability for American expats
+              Ranked by number of American expats living in such countries
             </p>
           </div>
 
