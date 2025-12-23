@@ -2446,153 +2446,88 @@ app.get('*', async (c) => {
     // Try to serve from ASSETS binding (the built React app)
     const assetResponse = await c.env.ASSETS.fetch(c.req.raw);
 
-    // If asset found, add noindex headers for HTML responses (TESTING MODE)
+    // If asset found, process and return it
     if (assetResponse.status !== 404) {
       const contentType = assetResponse.headers.get('content-type') || '';
+      
+      // Create mutable headers from the original response
+      const newHeaders = new Headers(assetResponse.headers);
+      
+      // CRITICAL: Remove headers that can cause protocol errors when cloning a response
+      // Cloudflare will recalculate these. Keeping them can cause ERR_SSL_PROTOCOL_ERROR.
+      newHeaders.delete('Content-Length');
+      newHeaders.delete('Transfer-Encoding');
 
-      // Add noindex headers to HTML responses to prevent indexing
+      // Ensure we have a body for the new Response
+      const responseBody = assetResponse.status === 204 || assetResponse.status === 304 
+        ? null 
+        : assetResponse.body;
+
+      // Add noindex headers for HTML responses
       if (contentType.includes('text/html')) {
-        const clonedResponse = new Response(assetResponse.body, {
-          status: assetResponse.status,
-          statusText: assetResponse.statusText,
-          headers: new Headers(assetResponse.headers)
-        });
-
-        // Add multiple headers to prevent indexing
-        // clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
-        // SEO Indexing Enabled
-        clonedResponse.headers.set('X-Robots-Tag', 'index, follow');
-        clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-
-        return clonedResponse;
+        newHeaders.set('X-Robots-Tag', 'index, follow');
+        newHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      } 
+      // Add cache-busting headers for JS/CSS/JSON
+      else if (contentType.includes('application/javascript') || contentType.includes('text/css') || contentType.includes('application/json')) {
+        newHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+      }
+      // Set long-term cache for images and other static assets
+      else if (contentType.includes('image/') || contentType.includes('font/') || contentType.includes('application/octet-stream') || 
+               url.pathname.includes('favicon') || url.pathname.includes('.ico')) {
+        newHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
       }
 
-      // Add cache-busting headers to JavaScript and CSS assets to ensure fresh deployment
-      if (contentType.includes('application/javascript') || contentType.includes('text/css') || contentType.includes('application/json')) {
-        const clonedResponse = new Response(assetResponse.body, {
-          status: assetResponse.status,
-          statusText: assetResponse.statusText,
-          headers: new Headers(assetResponse.headers)
-        });
+      return new Response(responseBody, {
+        status: assetResponse.status,
+        statusText: assetResponse.statusText,
+        headers: newHeaders
+      });
+    }
 
-        clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
-
-        return clonedResponse;
-      }
-
-      // Ensure images and other static assets are served with proper headers
-      if (contentType.includes('image/') || contentType.includes('font/') || contentType.includes('application/octet-stream') || 
-          url.pathname.includes('favicon') || url.pathname.includes('.ico')) {
-        // Handle 404 for favicon gracefully to prevent SSL errors
-        if (assetResponse.status === 404 && (url.pathname.includes('favicon') || url.pathname.includes('.ico'))) {
-          // Return empty 204 response for missing favicons instead of 404
-          return new Response(null, { status: 204 });
-        }
-        
-        const clonedResponse = new Response(assetResponse.body, {
-          status: assetResponse.status,
-          statusText: assetResponse.statusText,
-          headers: new Headers(assetResponse.headers)
-        });
-
-        // Set appropriate cache headers for images
-        clonedResponse.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-        
-        return clonedResponse;
-      }
-
-      return assetResponse;
+    // Handle 404s for favicons gracefully
+    if (url.pathname.includes('favicon') || url.pathname.includes('.ico')) {
+      return new Response(null, { status: 204 });
     }
 
     // For SPA routing, serve index.html for non-API routes
     if (!url.pathname.startsWith('/api/')) {
-      try {
-        const indexUrl = new URL('/', url.origin);
-        const indexRequest = new Request(indexUrl.toString(), {
-          method: 'GET',
-          headers: c.req.raw.headers
+      const indexRequest = new Request(new URL('/', url.origin).toString(), {
+        method: 'GET',
+        headers: c.req.raw.headers
+      });
+      
+      const indexResponse = await c.env.ASSETS.fetch(indexRequest);
+
+      if (indexResponse.status !== 404 && indexResponse.ok) {
+        const indexHeaders = new Headers(indexResponse.headers);
+        indexHeaders.delete('Content-Length');
+        indexHeaders.set('X-Robots-Tag', 'index, follow');
+        indexHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+        return new Response(indexResponse.body, {
+          status: indexResponse.status,
+          statusText: indexResponse.statusText,
+          headers: indexHeaders
         });
-        
-        const indexResponse = await c.env.ASSETS.fetch(indexRequest);
-
-        // Add noindex headers to index.html
-        if (indexResponse.status !== 404 && indexResponse.ok) {
-          const clonedResponse = new Response(indexResponse.body, {
-            status: indexResponse.status,
-            statusText: indexResponse.statusText,
-            headers: new Headers(indexResponse.headers)
-          });
-
-          // Add multiple headers to prevent indexing
-          // clonedResponse.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive, nosnippet, noimageindex');
-          // SEO Indexing Enabled
-          clonedResponse.headers.set('X-Robots-Tag', 'index, follow');
-          clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-
-          return clonedResponse;
-        }
-      } catch (spaError) {
-        console.error('SPA routing error:', spaError);
-        // Fall through to return assetResponse or error
       }
     }
 
-    // Return the original asset response if we got here
-    // This handles cases where asset exists but wasn't caught above
-    if (assetResponse && assetResponse.status !== 404) {
-      return assetResponse;
-    }
-
-    // If we reach here and it's a 404 for a non-API route, return index.html as last resort
-    if (!url.pathname.startsWith('/api/')) {
-      return new Response('Page not found', {
-        status: 404,
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-      });
-    }
-
-    return assetResponse || new Response('Not found', { status: 404 });
+    // Last resort 404
+    return new Response('Page not found', {
+      status: 404,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+    });
   } catch (error) {
     console.error('Asset serving error:', error);
-    
-    // For non-API routes, try to serve index.html as fallback (SPA routing)
-    // This ensures React Router can handle the route client-side
-    try {
-      const url = new URL(c.req.url);
-      if (!url.pathname.startsWith('/api/')) {
-        // Create a new request for index.html
-        const indexUrl = new URL('/', url.origin);
-        const indexRequest = new Request(indexUrl.toString(), {
-          method: 'GET',
-          headers: c.req.raw.headers
-        });
-        
-        const indexResponse = await c.env.ASSETS.fetch(indexRequest);
-        if (indexResponse.status !== 404 && indexResponse.ok) {
-          const clonedResponse = new Response(indexResponse.body, {
-            status: indexResponse.status,
-            statusText: indexResponse.statusText,
-            headers: new Headers(indexResponse.headers)
-          });
-          clonedResponse.headers.set('X-Robots-Tag', 'index, follow');
-          clonedResponse.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-          return clonedResponse;
-        }
-      }
-    } catch (fallbackError) {
-      console.error('Fallback error:', fallbackError);
-    }
-    
-    // Return proper error response instead of causing protocol errors
-    // Use plain text response to avoid JSON parsing issues
-    return new Response('Page not found', { 
-      status: 404,
-      headers: { 
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Cache-Control': 'no-cache'
-      }
-    });
+    return new Response('Internal Server Error', { status: 500 });
   }
+});
+
+// Hono error handler
+app.onError((err, c) => {
+  console.error('Hono error:', err);
+  return c.text('Internal Server Error', 500);
 });
 
 // Handle scheduled events (cron jobs)
@@ -2600,10 +2535,13 @@ app.get('*', async (c) => {
 export default {
   fetch: async (request: Request, env: any, ctx: ExecutionContext) => {
     try {
+      // Basic check for ASSETS binding
+      if (!env.ASSETS) {
+        console.error('ASSETS binding is missing!');
+      }
       return await app.fetch(request, env, ctx);
     } catch (error) {
       console.error('Unhandled error in Worker:', error);
-      // Always return a valid Response to prevent SSL protocol errors
       return new Response('Internal Server Error', {
         status: 500,
         headers: {

@@ -106,3 +106,5 @@ You can create favicons using:
 - Browsers cache favicons aggressively - you may need to clear cache or use incognito mode to see changes immediately
 - The favicon will be served from the root path (`/favicon.ico`) after deployment
 
+
+
