@@ -2440,116 +2440,14 @@ Sitemap: ${baseUrl}/sitemap.xml`, 200, {
 
 // Serve static files for React app using ASSETS binding
 app.get('*', async (c) => {
-  try {
-    const url = new URL(c.req.url);
-
-    // Try to serve from ASSETS binding (the built React app)
-    const assetResponse = await c.env.ASSETS.fetch(c.req.raw);
-
-    // If asset found, process and return it
-    if (assetResponse.status !== 404) {
-      const contentType = assetResponse.headers.get('content-type') || '';
-      
-      // Create mutable headers from the original response
-      const newHeaders = new Headers(assetResponse.headers);
-      
-      // CRITICAL: Remove headers that can cause protocol errors when cloning a response
-      // Cloudflare will recalculate these. Keeping them can cause ERR_SSL_PROTOCOL_ERROR.
-      newHeaders.delete('Content-Length');
-      newHeaders.delete('Transfer-Encoding');
-
-      // Ensure we have a body for the new Response
-      const responseBody = assetResponse.status === 204 || assetResponse.status === 304 
-        ? null 
-        : assetResponse.body;
-
-      // Add noindex headers for HTML responses
-      if (contentType.includes('text/html')) {
-        newHeaders.set('X-Robots-Tag', 'index, follow');
-        newHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-      } 
-      // Add cache-busting headers for JS/CSS/JSON
-      else if (contentType.includes('application/javascript') || contentType.includes('text/css') || contentType.includes('application/json')) {
-        newHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
-      }
-      // Set long-term cache for images and other static assets
-      else if (contentType.includes('image/') || contentType.includes('font/') || contentType.includes('application/octet-stream') || 
-               url.pathname.includes('favicon') || url.pathname.includes('.ico')) {
-        newHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
-      }
-
-      return new Response(responseBody, {
-        status: assetResponse.status,
-        statusText: assetResponse.statusText,
-        headers: newHeaders
-      });
-    }
-
-    // Handle 404s for favicons gracefully
-    if (url.pathname.includes('favicon') || url.pathname.includes('.ico')) {
-      return new Response(null, { status: 204 });
-    }
-
-    // For SPA routing, serve index.html for non-API routes
-    if (!url.pathname.startsWith('/api/')) {
-      const indexRequest = new Request(new URL('/', url.origin).toString(), {
-        method: 'GET',
-        headers: c.req.raw.headers
-      });
-      
-      const indexResponse = await c.env.ASSETS.fetch(indexRequest);
-
-      if (indexResponse.status !== 404 && indexResponse.ok) {
-        const indexHeaders = new Headers(indexResponse.headers);
-        indexHeaders.delete('Content-Length');
-        indexHeaders.set('X-Robots-Tag', 'index, follow');
-        indexHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-
-        return new Response(indexResponse.body, {
-          status: indexResponse.status,
-          statusText: indexResponse.statusText,
-          headers: indexHeaders
-        });
-      }
-    }
-
-    // Last resort 404
-    return new Response('Page not found', {
-      status: 404,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-    });
-  } catch (error) {
-    console.error('Asset serving error:', error);
-    return new Response('Internal Server Error', { status: 500 });
-  }
-});
-
-// Hono error handler
-app.onError((err, c) => {
-  console.error('Hono error:', err);
-  return c.text('Internal Server Error', 500);
+  return c.env.ASSETS.fetch(c.req.raw);
 });
 
 // Handle scheduled events (cron jobs)
 // Wrap fetch handler to catch any unhandled errors and prevent SSL protocol errors
 export default {
   fetch: async (request: Request, env: any, ctx: ExecutionContext) => {
-    try {
-      // Basic check for ASSETS binding
-      if (!env.ASSETS) {
-        console.error('ASSETS binding is missing!');
-      }
-      return await app.fetch(request, env, ctx);
-    } catch (error) {
-      console.error('Unhandled error in Worker:', error);
-      return new Response('Internal Server Error', {
-        status: 500,
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'Cache-Control': 'no-cache'
-        }
-      });
-    }
+    return await app.fetch(request, env, ctx);
   },
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
     console.log('Scheduled event triggered:', event.cron);

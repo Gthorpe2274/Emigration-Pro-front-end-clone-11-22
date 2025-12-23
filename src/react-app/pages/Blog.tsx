@@ -19,39 +19,29 @@ export default function Blog() {
 
   useEffect(() => {
     fetchPosts();
-    
-    // Add an event listener for visibility change to refresh posts when tab becomes active
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        fetchPosts();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  const fetchPosts = async (retryCount = 0) => {
+  const fetchPosts = async () => {
     try {
-      setLoading(true);
       const response = await fetch('/api/blog/posts');
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.error('Failed to fetch blog posts:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        return;
       }
       
       const data = await response.json();
       if (data.success) {
         setPosts(data.posts || []);
       } else {
-        throw new Error(data.error || 'Failed to fetch posts');
+        console.error('API returned error:', data.error);
       }
     } catch (error) {
       console.error('Error fetching blog posts:', error);
-      
-      // Automatic retry once after 1 second if it's a fetch error
-      if (retryCount < 1) {
-        setTimeout(() => fetchPosts(retryCount + 1), 1000);
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.error('Network error - check if the server is running and accessible');
       }
     } finally {
       setLoading(false);

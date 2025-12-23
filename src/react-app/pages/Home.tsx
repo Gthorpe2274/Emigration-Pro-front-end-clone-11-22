@@ -162,70 +162,29 @@ export default function Home() {
 
       {/* Get a Professional Report */}
       <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <div className="container mx-auto px-4 pt-16 pb-4">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 md:p-12">
-            <div className="grid md:grid-cols-3 gap-6 items-center">
-              {/* Left Image */}
-              <div className="hidden md:block">
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden h-full min-h-[300px] flex items-center justify-center">
-                  <img 
-                    src="/images/elderly-couple-documents.jpg" 
-                    alt="Elderly couple reviewing emigration documents together" 
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      const parent = e.currentTarget.parentElement?.parentElement;
-                      if (parent) {
-                        parent.style.display = 'none';
-                      }
-                    }}
-                  />
-                </div>
-              </div>
+        <div className="container mx-auto px-4 py-16">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 md:p-12 text-center max-w-4xl mx-auto">
+            <h3 className="text-3xl font-bold text-gray-900 mb-6">Get a Professional Report</h3>
 
-              {/* Center Content */}
-              <div className="text-center">
-                <h3 className="text-3xl font-bold text-gray-900 mb-6">Get a Professional Report</h3>
-
-                <div className="mb-6">
-                  <div className="inline-block bg-gradient-to-r from-red-500 via-orange-500 to-red-500 text-white px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-sm font-semibold uppercase tracking-wide">Limited Time Sale</span>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-lg font-bold line-through opacity-75">$69.99</span>
-                        <span className="text-2xl font-extrabold animate-pulse">now $49.99</span>
-                      </div>
-                    </div>
+            <div className="mb-6">
+              <div className="inline-block bg-gradient-to-r from-red-500 via-orange-500 to-red-500 text-white px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm font-semibold uppercase tracking-wide">Limited Time Sale</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg font-bold line-through opacity-75">$69.99</span>
+                    <span className="text-2xl font-extrabold animate-pulse">now $49.99</span>
                   </div>
-                </div>
-
-                <button
-                  onClick={() => setShowEmailModal(true)}
-                  className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                >
-                  <span className="mr-2">📋</span>
-                  Get Your Report
-                </button>
-              </div>
-
-              {/* Right Image */}
-              <div className="hidden md:block">
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden h-full min-h-[300px] flex items-center justify-center">
-                  <img 
-                    src="/images/couple-report.png" 
-                    alt="Happy couple reviewing Emigration Pro Report document" 
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      const parent = e.currentTarget.parentElement?.parentElement;
-                      if (parent) {
-                        parent.style.display = 'none';
-                      }
-                    }}
-                  />
                 </div>
               </div>
             </div>
+
+            <button
+              onClick={() => setShowEmailModal(true)}
+              className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+            >
+              <span className="mr-2">📋</span>
+              Get Your Report
+            </button>
           </div>
         </div>
       </section>
