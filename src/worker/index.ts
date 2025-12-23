@@ -697,7 +697,7 @@ app.post('/api/subscribe-for-permanent-access', async (c) => {
 
       if (existing) {
         // Return existing session code
-        const reportUrl = `https://report.emigrationpro.com/?email=${encodeURIComponent(email)}&session_code=${existing.session_code}`;
+        const reportUrl = `https://buy.stripe.com/28E9ALgKlgNS8Dn2lLefC02?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${existing.session_code}`;
         return c.json({
           success: true,
           session_code: existing.session_code,
@@ -715,7 +715,7 @@ app.post('/api/subscribe-for-permanent-access', async (c) => {
     }
 
     // 3. Generate report URL
-    const reportUrl = `https://report.emigrationpro.com/?email=${encodeURIComponent(email)}&session_code=${sessionCode}`;
+    const reportUrl = `https://buy.stripe.com/28E9ALgKlgNS8Dn2lLefC02?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${sessionCode}`;
 
     return c.json({
       success: true,
@@ -1267,7 +1267,7 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
     }
 
     // 7. Return success with redirect URL to report generation app
-    const reportAppUrl = `https://report.emigrationpro.com/?email=${encodeURIComponent(normalizedEmail)}&session_code=${sessionCode}`;
+    const reportAppUrl = `https://buy.stripe.com/28E9ALgKlgNS8Dn2lLefC02?prefilled_email=${encodeURIComponent(normalizedEmail)}&client_reference_id=${sessionCode}`;
 
     return c.json({
       success: true,

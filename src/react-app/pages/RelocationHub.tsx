@@ -28,7 +28,7 @@ export default function RelocationHub() {
   const handleModalEmailSubmit = () => {
     // Email is already stored by the modal component
     // Redirect will be handled by EmailCaptureModal after email is saved to CRM
-    // Redirects to report.emigrationpro.com
+    // Redirects to Stripe Checkout (buy.stripe.com)
   };
 
   useEffect(() => {

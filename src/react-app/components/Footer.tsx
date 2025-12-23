@@ -262,7 +262,7 @@ export default function Footer() {
                 Get Your Full Relocation Planning Report for a step by step guide to relocation planning. Just click the link on this page.
               </p>
               <a
-                href="https://report.emigrationpro.com"
+                href="https://buy.stripe.com/28E9ALgKlgNS8Dn2lLefC02"
                 className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 w-full"
               >
                 Get Full Report
