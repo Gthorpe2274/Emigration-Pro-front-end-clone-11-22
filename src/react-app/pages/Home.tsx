@@ -361,6 +361,20 @@ export default function Home() {
         >
           Server
         </a>
+        <span className="mx-2 text-[10px] text-gray-300">•</span>
+        <a
+          href="/admin/config"
+          className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors font-medium"
+        >
+          Config
+        </a>
+        <span className="mx-2 text-[10px] text-gray-300">•</span>
+        <a
+          href="/admin/rag"
+          className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors font-medium"
+        >
+          Report Gen
+        </a>
       </div>
     </div>
   );
