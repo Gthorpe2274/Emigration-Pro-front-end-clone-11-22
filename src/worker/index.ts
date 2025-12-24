@@ -1126,9 +1126,9 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
 
     if (existingAccess) {
       // Use existing CRM record
-      sessionCode = existingAccess.session_code;
-      accessId = existingAccess.id;
-      finalAssessmentId = existingAccess.assessment_id;
+      sessionCode = (existingAccess as any).session_code;
+      accessId = (existingAccess as any).id;
+      finalAssessmentId = (existingAccess as any).assessment_id;
       console.log(`Using existing CRM record for ${normalizedEmail}, session: ${sessionCode}`);
     } else {
       // 3. Generate unique session code (format: XXXX-XXXX-XXXX)
@@ -1162,6 +1162,22 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
 
       if (attempts >= maxAttempts) {
         return c.json({ error: "Failed to generate unique session code" }, 500);
+      }
+
+      // 4. Create or find an assessment for CRM record
+      // For report generation, we may not have an assessment yet, so create a minimal one if needed
+      if (!finalAssessmentId || finalAssessmentId === 0) {
+        // Create a minimal assessment record for CRM tracking (assessment_id is required)
+        const newAssessment = await c.env.DB.prepare(`
+          INSERT INTO assessments (created_at)
+          VALUES (CURRENT_TIMESTAMP)
+        `).run();
+
+        finalAssessmentId = newAssessment.meta?.last_row_id || 0;
+
+        if (!finalAssessmentId) {
+          return c.json({ error: "Failed to create assessment record" }, 500);
+        }
       }
 
       // 5. Set expiration (1 year from now)
@@ -2420,7 +2436,36 @@ Sitemap: ${baseUrl}/sitemap.xml`, 200, {
 
 // Serve static files for React app using ASSETS binding
 app.get('*', async (c) => {
-  return c.env.ASSETS.fetch(c.req.raw);
+  try {
+    const url = new URL(c.req.url);
+    
+    // Explicitly handle favicon and other standard assets that might be missing
+    // to prevent them from falling through to index.html and causing SSL issues
+    if (url.pathname.includes('favicon') || url.pathname.includes('.ico')) {
+      const assetResponse = await c.env.ASSETS.fetch(c.req.raw);
+      if (assetResponse.status === 404) {
+        return new Response(null, { status: 204 });
+      }
+      return assetResponse;
+    }
+
+    // Try fetching the asset
+    const response = await c.env.ASSETS.fetch(c.req.raw);
+    
+    // If asset not found and it's not an API call, serve index.html (for SPA routing)
+    if (response.status === 404 && !url.pathname.startsWith('/api/')) {
+      return await c.env.ASSETS.fetch(new URL('/', url.origin).toString());
+    }
+    
+    return response;
+  } catch (error) {
+    // If anything fails, try to return index.html as a last resort
+    try {
+      return await c.env.ASSETS.fetch(new URL('/', c.req.url).toString());
+    } catch (innerError) {
+      return new Response("Internal Server Error", { status: 500 });
+    }
+  }
 });
 
 // Handle scheduled events (cron jobs)
