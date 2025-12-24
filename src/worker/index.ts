@@ -665,69 +665,6 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
   }
 });
 
-// Subscribe for permanent access (lead capture)
-app.post('/api/subscribe-for-permanent-access', async (c) => {
-  try {
-    const body = await c.req.json();
-    const { email, assessment_id } = body;
-
-    if (!email) {
-      return c.json({ error: 'Email is required' }, 400);
-    }
-
-    const sessionCode = crypto.randomUUID();
-
-    // 1. Store in email_leads
-    try {
-      await c.env.DB.prepare(`
-        INSERT INTO email_leads (email, assessment_id, source)
-        VALUES (?, ?, 'relocation_hub_permanent_access')
-      `).bind(email, assessment_id || null).run();
-    } catch (e) {
-      console.error('Error inserting into email_leads:', e);
-      // Continue even if lead capture fails, as we want to generate the session code
-    }
-
-    // 2. Create access record
-    try {
-      // Check if access already exists
-      const existing = await c.env.DB.prepare(`
-        SELECT session_code FROM relocation_hub_access WHERE email = ? AND assessment_id = ?
-      `).bind(email, assessment_id || 0).first();
-
-      if (existing) {
-        // Return existing session code
-        const reportUrl = `https://buy.stripe.com/28E9ALgKlgNS8Dn2lLefC02?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${existing.session_code}`;
-        return c.json({
-          success: true,
-          session_code: existing.session_code,
-          report_url: reportUrl
-        });
-      }
-
-      await c.env.DB.prepare(`
-        INSERT INTO relocation_hub_access (assessment_id, email, session_code, is_active, purchase_confirmed)
-        VALUES (?, ?, ?, 1, 0)
-      `).bind(assessment_id || 0, email, sessionCode).run();
-    } catch (e) {
-      console.error('Error inserting into relocation_hub_access:', e);
-      throw e;
-    }
-
-    // 3. Generate report URL
-    const reportUrl = `https://buy.stripe.com/28E9ALgKlgNS8Dn2lLefC02?prefilled_email=${encodeURIComponent(email)}&client_reference_id=${sessionCode}`;
-
-    return c.json({
-      success: true,
-      session_code: sessionCode,
-      report_url: reportUrl
-    });
-  } catch (error) {
-    console.error('Error in subscribe-for-permanent-access:', error);
-    return c.json({ error: 'Failed to process subscription' }, 500);
-  }
-});
-
 // CRM - Get all purchasers
 app.get('/api/admin/crm/purchasers', async (c) => {
   try {
@@ -1184,8 +1121,8 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
     }
 
     let sessionCode: string;
-    let accessId: number;
-    let finalAssessmentId: number | null = assessment_id || null;
+    let accessId: number = 0;
+    let finalAssessmentId: number = assessment_id || 0;
 
     if (existingAccess) {
       // Use existing CRM record
@@ -1225,22 +1162,6 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
 
       if (attempts >= maxAttempts) {
         return c.json({ error: "Failed to generate unique session code" }, 500);
-      }
-
-      // 4. Create or find an assessment for CRM record
-      // For report generation, we may not have an assessment yet, so create a minimal one if needed
-      if (!finalAssessmentId) {
-        // Create a minimal assessment record for CRM tracking (assessment_id is required)
-        const newAssessment = await c.env.DB.prepare(`
-          INSERT INTO assessments (created_at)
-          VALUES (CURRENT_TIMESTAMP)
-        `).run();
-
-        finalAssessmentId = newAssessment.meta?.last_row_id || null;
-
-        if (!finalAssessmentId) {
-          return c.json({ error: "Failed to create assessment record" }, 500);
-        }
       }
 
       // 5. Set expiration (1 year from now)
