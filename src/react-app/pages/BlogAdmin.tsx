@@ -43,7 +43,8 @@ export default function BlogAdmin() {
 
   // Image modal states
   const [showImageModal, setShowImageModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<keyof typeof blogImages>('travel');
+  const [selectedCategory, setSelectedCategory] = useState<keyof typeof blogImages>('local');
+  const [isUploading, setIsUploading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -254,6 +255,57 @@ export default function BlogAdmin() {
     setShowForm(false);
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Basic validation
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const apiBase = getApiBaseUrl();
+      const uploadFormData = new FormData();
+      uploadFormData.append('image', file);
+
+      const response = await fetch(`${apiBase}/api/admin/blog/upload-image`, {
+        method: 'POST',
+        headers: {
+          'X-API-Key': 'admin#123'
+        },
+        body: uploadFormData
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setFormData({ ...formData, featured_image: data.url });
+        alert('Image uploaded successfully!');
+      } else {
+        alert('Error: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image');
+    } finally {
+      setIsUploading(false);
+      // Clear the input
+      e.target.value = '';
+    }
+  };
+
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
@@ -374,21 +426,37 @@ export default function BlogAdmin() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Featured Image URL</label>
-                  <div className="flex space-x-2">
-                    <input
-                      type="text"
-                      value={formData.featured_image}
-                      onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter image URL or select from library"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowImageModal(true)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center"
-                    >
-                      🖼️ Browse Library
-                    </button>
+                  <div className="flex flex-col space-y-3">
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        value={formData.featured_image}
+                        onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter image URL or select from library"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowImageModal(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition flex items-center whitespace-nowrap"
+                      >
+                        🖼️ Browse Library
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4">
+                      <label className={`relative cursor-pointer bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition flex items-center whitespace-nowrap ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                        <span>{isUploading ? '⌛ Uploading...' : '📤 Upload Custom Image'}</span>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          disabled={isUploading}
+                        />
+                      </label>
+                      <p className="text-xs text-gray-500">Max size: 5MB (JPG, PNG, WebP)</p>
+                    </div>
                   </div>
 
                   {/* Image Selection Modal */}
@@ -406,7 +474,7 @@ export default function BlogAdmin() {
                         </div>
 
                         <div className="p-4 border-b border-gray-200 flex space-x-4 overflow-x-auto">
-                          {(['travel', 'moving', 'people', 'cities'] as const).map((cat) => (
+                          {(['local', 'travel', 'moving', 'people', 'cities'] as const).map((cat) => (
                             <button
                               key={cat}
                               type="button"
@@ -416,6 +484,7 @@ export default function BlogAdmin() {
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
                             >
+                              {cat === 'local' && '📂 '}
                               {cat === 'travel' && '✈️ '}
                               {cat === 'moving' && '🏠 '}
                               {cat === 'people' && '👨‍👩‍👧‍👦 '}

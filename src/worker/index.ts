@@ -1065,7 +1065,7 @@ This access code provides 2 years of access to your relocation hub. Keep this in
       body: JSON.stringify(emailBody),
     });
 
-    const data = await response.json();
+    const data = await response.json() as any;
 
     if (!response.ok) {
       console.error('Resend API error:', data);
@@ -1252,7 +1252,7 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
 
     if (existingAccess) {
       // UPDATE existing CRM record - activate it and confirm purchase
-      sessionCode = existingAccess.session_code;
+      sessionCode = (existingAccess as any).session_code;
       
       // Set expiration (2 years from now for permanent access)
       const expires_at = new Date();
@@ -2079,6 +2079,65 @@ app.post("/api/admin/blog/generate-image", blogAdminAuth, async (c) => {
   return handleGenerateImage(c);
 });
 
+// Admin: Upload image for blog post
+app.post("/api/admin/blog/upload-image", blogAdminAuth, async (c) => {
+  try {
+    const formData = await c.req.formData();
+    const file = formData.get('image') as any as File;
+    
+    if (!file || typeof file.name === 'undefined') {
+      return c.json({ error: "No image provided" }, 400);
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      return c.json({ error: "Invalid file type. Only images are allowed." }, 400);
+    }
+
+    // Validate file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      return c.json({ error: "Image size exceeds 5MB limit" }, 400);
+    }
+    
+    const key = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    await c.env.R2_BUCKET.put(`blog-images/${key}`, file, {
+      httpMetadata: { contentType: file.type }
+    });
+    
+    return c.json({
+      success: true,
+      url: `/api/blog/images/${key}`
+    });
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    return c.json({ error: "Failed to upload image" }, 500);
+  }
+});
+
+// Serve blog images from R2
+app.get('/api/blog/images/:key', async (c) => {
+  const key = c.req.param('key');
+  try {
+    const object = await c.env.R2_BUCKET.get(`blog-images/${key}`);
+    
+    if (!object) {
+      return c.notFound();
+    }
+    
+    const headers = new Headers();
+    object.writeHttpMetadata(headers);
+    headers.set('etag', object.httpEtag);
+    headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    
+    return new Response(object.body, {
+      headers
+    });
+  } catch (error) {
+    return c.json({ error: "Failed to fetch image" }, 500);
+  }
+});
+
 // File Converter API Endpoints
 
 // Upload and convert file
@@ -2092,8 +2151,8 @@ app.post('/api/file-converter/upload', async (c) => {
     }
 
     // Check if it's a File object
-    const file = fileEntry as File;
-    if (typeof file.name === 'undefined' || typeof file.size === 'undefined') {
+    const file = fileEntry as any as File;
+    if (!file || typeof file.name === 'undefined' || typeof file.size === 'undefined') {
       return c.json({ success: false, error: 'Invalid file provided' }, 400);
     }
 
@@ -2188,7 +2247,7 @@ app.post('/api/file-converter/upload', async (c) => {
     return c.json({
       success: false,
       error: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? errorStack : undefined
+      details: errorStack
     }, 500);
   }
 });
