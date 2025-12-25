@@ -151,8 +151,17 @@ export default function AdminReportGen() {
       });
 
       if (!reportResponse.ok) {
-        const err = await reportResponse.json();
-        throw new Error(err.details || err.message || err.error || 'Report generation failed');
+        let errorMessage = `Server error (${reportResponse.status})`;
+        try {
+          const err = await reportResponse.json();
+          errorMessage = err.details || err.message || err.error || errorMessage;
+        } catch (e) {
+          try {
+            const text = await reportResponse.text();
+            if (text && text.length < 500) errorMessage = text;
+          } catch (e2) {}
+        }
+        throw new Error(errorMessage);
       }
 
       setGenerationProgress(60);

@@ -44,7 +44,6 @@ function App() {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/admin/config" element={<AdminConfig />} />
         <Route path="/admin/diagnostics" element={<WorkerDiagnostics />} />
-        <Route path="/admin/rag" element={<AdminReportGen />} />
         <Route path="/admin/rag-dashboard" element={<RAGDashboard />} />
         <Route path="/admin/email-test" element={<EmailTest />} />
         <Route path="/admin/jobs" element={<JobProcessor />} />
