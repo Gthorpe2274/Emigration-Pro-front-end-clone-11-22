@@ -1853,40 +1853,53 @@ const BlogPostSchema = z.object({
 // Admin: Generate full emigration report (No paywall)
 app.post("/api/admin/generate-full-report", async (c) => {
   try {
-    const body = await c.req.json();
-    const { assessmentData } = body;
-    const GEMINI_API_KEY = c.env.GEMINI_API_KEY;
+    let body;
+    try {
+      body = await c.req.json();
+    } catch (e) {
+      return c.json({ error: "Invalid JSON request", details: "The server received malformed data." }, 400);
+    }
 
+    const { assessmentData } = body;
+    if (!assessmentData) {
+      return c.json({ error: "Missing assessmentData" }, 400);
+    }
+
+    const GEMINI_API_KEY = c.env.GEMINI_API_KEY;
     if (!GEMINI_API_KEY) {
       return c.json({ error: "GEMINI_API_KEY not configured" }, 500);
     }
 
-    // 1. Create a "shadow" assessment record for this test report
-    // This bypasses the strict validation but ensures we have an ID for the reports table
-    const score = 85; // Default test score
+    const score = 85; 
     const matchLevel = 'very_good';
     const retention_expires_at = new Date();
     retention_expires_at.setFullYear(retention_expires_at.getFullYear() + 1);
 
     const { preferred_country, preferred_city, user_job, user_age, monthly_budget } = assessmentData;
     
-    const dbResult = await c.env.DB.prepare(`
-      INSERT INTO assessments (
-        user_age, user_job, monthly_budget, preferred_country, preferred_city, 
-        overall_score, match_level, retention_expires_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `).bind(
-      user_age || 30,
-      user_job || 'Admin Test',
-      monthly_budget || 2000,
-      preferred_country || 'Portugal',
-      preferred_city || null,
-      score,
-      matchLevel,
-      retention_expires_at.toISOString()
-    ).run();
+    let assessmentId;
+    try {
+      const dbResult = await c.env.DB.prepare(`
+        INSERT INTO assessments (
+          user_age, user_job, monthly_budget, preferred_country, preferred_city, 
+          overall_score, match_level, retention_expires_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        Number(user_age) || 30,
+        user_job || 'Admin Test',
+        Number(monthly_budget) || 2000,
+        preferred_country || 'Portugal',
+        preferred_city || null,
+        score,
+        matchLevel,
+        retention_expires_at.toISOString()
+      ).run();
+      assessmentId = dbResult.meta.last_row_id;
+    } catch (dbErr) {
+      console.error("DB Error:", dbErr);
+      assessmentId = Date.now();
+    }
 
-    const assessmentId = dbResult.meta.last_row_id;
     const locationStr = preferred_city ? `${preferred_city}, ${preferred_country}` : preferred_country;
 
     const sections = [
@@ -1925,41 +1938,31 @@ app.post("/api/admin/generate-full-report", async (c) => {
         </header>
     `;
 
-    // Generate each section using Gemini
     for (const section of sections) {
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-      
-      const response = await fetch(geminiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ 
-            parts: [{ 
-              text: `${section.prompt}\n\nFormat the output as clean HTML without <html> or <body> tags. Use <h3> for the title, <h4> for subheaders, <p> for paragraphs, and <ul><li> for lists. Do not include markdown code blocks like \`\`\`html.` 
-            }] 
-          }]
-        }),
-      });
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const response = await fetch(geminiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ 
+              parts: [{ 
+                text: `${section.prompt}\n\nFormat the output as clean HTML without <html> or <body> tags. Use <h3> for the title, <h4> for subheaders, <p> for paragraphs, and <ul><li> for lists. Do not include markdown code blocks like \`\`\`html.` 
+              }] 
+            }]
+          }),
+        });
 
-      if (response.ok) {
-        const data: any = await response.json();
-        let content = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Section content unavailable.";
-        
-        // Clean up any markdown artifacts
-        content = content.replace(/```html/g, '').replace(/```/g, '').trim();
-        
-        fullHtml += `
-          <section style="margin-bottom: 40px; padding: 25px; background: #f8fafc; border-radius: 15px; border-left: 5px solid #2563eb;">
-            ${content}
-          </section>
-        `;
-      } else {
-        fullHtml += `
-          <section style="margin-bottom: 40px; padding: 25px; background: #fff1f2; border-radius: 15px; border-left: 5px solid #e11d48;">
-            <h3>${section.title}</h3>
-            <p>Unable to generate this section at this time. Please try again later.</p>
-          </section>
-        `;
+        if (response.ok) {
+          const data: any = await response.json();
+          let content = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Section content unavailable.";
+          content = content.replace(/```html/g, '').replace(/```/g, '').trim();
+          fullHtml += `<section style="margin-bottom: 40px; padding: 25px; background: #f8fafc; border-radius: 15px; border-left: 5px solid #2563eb;">${content}</section>`;
+        } else {
+          throw new Error(`AI error: ${response.status}`);
+        }
+      } catch (err) {
+        fullHtml += `<section style="margin-bottom: 40px; padding: 25px; background: #fff1f2; border-radius: 15px; border-left: 5px solid #e11d48;"><h3>${section.title}</h3><p>Unable to generate this section. Error: ${err instanceof Error ? err.message : String(err)}</p></section>`;
       }
     }
 
@@ -1971,24 +1974,16 @@ app.post("/api/admin/generate-full-report", async (c) => {
       </div>
     `;
 
-    // 3. Save to reports table
     try {
-      await c.env.DB.prepare(`
-        INSERT INTO reports (assessment_id, report_content, created_at)
-        VALUES (?, ?, CURRENT_TIMESTAMP)
-      `).bind(assessmentId, fullHtml).run();
+      await c.env.DB.prepare(`INSERT INTO reports (assessment_id, report_content, created_at) VALUES (?, ?, CURRENT_TIMESTAMP)`).bind(assessmentId, fullHtml).run();
     } catch (dbErr) {
-      console.warn("Could not save report to DB, but returning result anyway:", dbErr);
+      console.warn("Could not save report to DB:", dbErr);
     }
 
-    return c.json({
-      success: true,
-      html: fullHtml,
-      id: assessmentId
-    });
+    return c.json({ success: true, html: fullHtml, id: assessmentId });
 
   } catch (error) {
-    console.error("Error generating full report:", error);
+    console.error("Critical error:", error);
     return c.json({
       success: false,
       error: "Failed to generate full report",
