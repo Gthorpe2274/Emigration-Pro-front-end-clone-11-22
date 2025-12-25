@@ -334,7 +334,7 @@ const AssessmentSchema = z.object({
   preferred_country: z.string().min(1).max(100),
   preferred_city: z.string().optional(),
   location_preference: z.enum(['beachside', 'rural', 'city']),
-  climate_preference: z.enum(['tropical', 'seasonal', 'dry', 'mediterranean', 'temperate', 'northern']).optional(),
+  climate_preference: z.preprocess((val) => (val === '' ? undefined : val), z.enum(['tropical', 'seasonal', 'dry', 'mediterranean', 'temperate', 'northern']).optional()),
   monthly_budget: z.number().min(100).max(50000).optional().default(2000),
   immigration_policies_importance: z.number().min(1).max(5),
   healthcare_importance: z.number().min(1).max(5),
@@ -611,20 +611,20 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
         local_acceptance_importance, overall_score, match_level, budget_compatibility, retention_expires_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
-      assessment.user_age,
-      assessment.user_job,
+      assessment.user_age ?? 30,
+      assessment.user_job ?? 'Test User',
       assessment.monthly_budget || 2000,
-      assessment.preferred_country,
+      assessment.preferred_country ?? 'Unknown',
       assessment.preferred_city || null,
-      assessment.location_preference,
+      assessment.location_preference ?? 'city',
       assessment.climate_preference || null,
-      assessment.immigration_policies_importance,
-      assessment.healthcare_importance,
-      assessment.safety_importance,
-      assessment.internet_importance,
-      assessment.emigration_process_importance,
-      assessment.ease_of_immigration_importance,
-      assessment.local_acceptance_importance,
+      assessment.immigration_policies_importance ?? 3,
+      assessment.healthcare_importance ?? 3,
+      assessment.safety_importance ?? 3,
+      assessment.internet_importance ?? 3,
+      assessment.emigration_process_importance ?? 3,
+      assessment.ease_of_immigration_importance ?? 3,
+      assessment.local_acceptance_importance ?? 3,
       score,
       matchLevel,
       budgetCompatibility,
@@ -660,7 +660,8 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
 
     return c.json({
       error: "Failed to create assessment",
-      message: error instanceof Error ? error.message : "Unknown error"
+      message: error instanceof Error ? error.message : "Unknown error",
+      details: String(error)
     }, 500);
   }
 });
@@ -1852,14 +1853,40 @@ const BlogPostSchema = z.object({
 // Admin: Generate full emigration report (No paywall)
 app.post("/api/admin/generate-full-report", async (c) => {
   try {
-    const { assessmentId, assessmentData } = await c.req.json();
+    const body = await c.req.json();
+    const { assessmentData } = body;
     const GEMINI_API_KEY = c.env.GEMINI_API_KEY;
 
     if (!GEMINI_API_KEY) {
       return c.json({ error: "GEMINI_API_KEY not configured" }, 500);
     }
 
+    // 1. Create a "shadow" assessment record for this test report
+    // This bypasses the strict validation but ensures we have an ID for the reports table
+    const score = 85; // Default test score
+    const matchLevel = 'very_good';
+    const retention_expires_at = new Date();
+    retention_expires_at.setFullYear(retention_expires_at.getFullYear() + 1);
+
     const { preferred_country, preferred_city, user_job, user_age, monthly_budget } = assessmentData;
+    
+    const dbResult = await c.env.DB.prepare(`
+      INSERT INTO assessments (
+        user_age, user_job, monthly_budget, preferred_country, preferred_city, 
+        overall_score, match_level, retention_expires_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      user_age || 30,
+      user_job || 'Admin Test',
+      monthly_budget || 2000,
+      preferred_country || 'Portugal',
+      preferred_city || null,
+      score,
+      matchLevel,
+      retention_expires_at.toISOString()
+    ).run();
+
+    const assessmentId = dbResult.meta.last_row_id;
     const locationStr = preferred_city ? `${preferred_city}, ${preferred_country}` : preferred_country;
 
     const sections = [
@@ -1944,7 +1971,7 @@ app.post("/api/admin/generate-full-report", async (c) => {
       </div>
     `;
 
-    // 3. Save to reports table (optional but good for tracking)
+    // 3. Save to reports table
     try {
       await c.env.DB.prepare(`
         INSERT INTO reports (assessment_id, report_content, created_at)
@@ -1956,7 +1983,8 @@ app.post("/api/admin/generate-full-report", async (c) => {
 
     return c.json({
       success: true,
-      html: fullHtml
+      html: fullHtml,
+      id: assessmentId
     });
 
   } catch (error) {

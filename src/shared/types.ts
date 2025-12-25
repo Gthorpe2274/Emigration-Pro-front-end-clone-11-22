@@ -7,7 +7,7 @@ export const AssessmentSchema = z.object({
   preferred_country: z.string().min(1),
   preferred_city: z.string().optional(),
   location_preference: z.enum(['beachside', 'rural', 'city']),
-  climate_preference: z.enum(['tropical', 'seasonal', 'dry', 'mediterranean', 'temperate', 'northern']),
+  climate_preference: z.enum(['tropical', 'seasonal', 'dry', 'mediterranean', 'temperate', 'northern']).optional(),
   immigration_policies_importance: z.number().min(0).max(5),
   healthcare_importance: z.number().min(0).max(5),
   safety_importance: z.number().min(0).max(5),

@@ -94,10 +94,18 @@ export default function AdminReportGen() {
         setError('Please enter your occupation');
         return;
       }
+      if (assessment.user_age < 18 || assessment.user_age > 100) {
+        setError('Please enter a valid age between 18 and 100');
+        return;
+      }
     }
     if (currentStep === 2) {
       if (!assessment.preferred_country) {
         setError('Please select a country');
+        return;
+      }
+      if (!assessment.climate_preference) {
+        setError('Please select a climate preference');
         return;
       }
     }
@@ -118,40 +126,37 @@ export default function AdminReportGen() {
     setCurrentStatus('Initializing research engines...');
 
     try {
-      // 1. Create the assessment record first
-      const assessmentResponse = await fetch('/api/assessments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(assessment),
-      });
-
-      if (!assessmentResponse.ok) {
-        const err = await assessmentResponse.json();
-        throw new Error(err.message || 'Failed to create assessment');
+      // Clean up assessment data
+      const submissionData = {
+        ...assessment,
+        user_age: isNaN(assessment.user_age) ? 30 : assessment.user_age,
+        monthly_budget: isNaN(assessment.monthly_budget) ? 2000 : assessment.monthly_budget,
+      };
+      
+      if (submissionData.climate_preference === '') {
+        delete (submissionData as any).climate_preference;
       }
 
-      const assessmentResult = await assessmentResponse.json();
-      const assessmentId = assessmentResult.id;
+      setGenerationProgress(20);
+      setCurrentStatus('Creating secure test environment...');
 
-      setGenerationProgress(30);
-      setCurrentStatus('Gathering country-specific data...');
-
-      // 2. Trigger the full report generation
+      // Trigger the unified test report generation
+      // This endpoint now handles both record creation and generation in one atomic step
       const reportResponse = await fetch(`/api/admin/generate-full-report`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          assessmentId,
-          assessmentData: assessment
+          assessmentData: submissionData
         }),
       });
 
       if (!reportResponse.ok) {
-        throw new Error('Report generation failed');
+        const err = await reportResponse.json();
+        throw new Error(err.details || err.message || err.error || 'Report generation failed');
       }
 
-      setGenerationProgress(70);
-      setCurrentStatus('Formatting report sections...');
+      setGenerationProgress(60);
+      setCurrentStatus('Researching and formatting report sections...');
 
       const reportData = await reportResponse.json();
       
@@ -285,31 +290,70 @@ export default function AdminReportGen() {
               {/* Step 2: Destination */}
               {currentStep === 2 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div>
-                    <label className="block text-sm font-medium text-blue-200 mb-2">Preferred Country</label>
-                    <select
-                      value={assessment.preferred_country}
-                      onChange={(e) => updateAssessment('preferred_country', e.target.value)}
-                      className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                    >
-                      <option value="" className="bg-gray-900">Select a country</option>
-                      {CountryData.countries.map(c => <option key={c} value={c} className="bg-gray-900">{c}</option>)}
-                    </select>
-                  </div>
-                  {availableCities.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-blue-200 mb-2">Preferred Country</label>
+                      <select
+                        value={assessment.preferred_country}
+                        onChange={(e) => updateAssessment('preferred_country', e.target.value)}
+                        className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                      >
+                        <option value="" className="bg-gray-900">Select a country</option>
+                        {CountryData.countries.map(c => <option key={c} value={c} className="bg-gray-900">{c}</option>)}
+                      </select>
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-blue-200 mb-2">Preferred City (Optional)</label>
                       <select
                         value={assessment.preferred_city}
                         onChange={(e) => updateAssessment('preferred_city', e.target.value)}
                         className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                        disabled={!assessment.preferred_country}
                       >
                         <option value="" className="bg-gray-900">Any City</option>
                         {availableCities.map(c => <option key={c} value={c} className="bg-gray-900">{c}</option>)}
                       </select>
                     </div>
-                  )}
-                  <div className="grid grid-cols-2 gap-4">
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-blue-200 mb-2">Location Type</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {(['city', 'beachside', 'rural'] as const).map(type => (
+                          <button
+                            key={type}
+                            onClick={() => updateAssessment('location_preference', type)}
+                            className={`py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${
+                              assessment.location_preference === type 
+                                ? 'bg-blue-600 text-white shadow-lg' 
+                                : 'bg-white/5 text-white/60 hover:bg-white/10'
+                            }`}
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-blue-200 mb-2">Climate Preference</label>
+                      <select
+                        value={assessment.climate_preference}
+                        onChange={(e) => updateAssessment('climate_preference', e.target.value as any)}
+                        className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                      >
+                        <option value="" className="bg-gray-900">Select Climate</option>
+                        <option value="tropical" className="bg-gray-900">Tropical</option>
+                        <option value="mediterranean" className="bg-gray-900">Mediterranean</option>
+                        <option value="temperate" className="bg-gray-900">Temperate</option>
+                        <option value="seasonal" className="bg-gray-900">Seasonal</option>
+                        <option value="dry" className="bg-gray-900">Dry/Arid</option>
+                        <option value="northern" className="bg-gray-900">Northern/Cold</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-4">
                     <button onClick={prevStep} className="bg-white/10 hover:bg-white/20 text-white font-bold py-4 rounded-xl transition border border-white/10">Back</button>
                     <button onClick={nextStep} className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition shadow-lg">Next Step</button>
                   </div>
