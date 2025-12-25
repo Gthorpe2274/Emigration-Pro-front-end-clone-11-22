@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Activity, Database, Clock, AlertTriangle, CheckCircle, TrendingUp, Server, Zap } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
+import SystemLogin from '@/react-app/components/SystemLogin';
 
 interface RAGHealthStatus {
   status: 'healthy' | 'unhealthy' | 'not_configured';
@@ -24,12 +25,24 @@ interface RAGMetrics {
 }
 
 const RAGDashboard: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [healthStatus, setHealthStatus] = useState<RAGHealthStatus | null>(null);
   const [metrics, setMetrics] = useState<RAGMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   useEffect(() => {
+    // Check if user is authenticated
+    const authenticated = sessionStorage.getItem('adminAuth') === 'true';
+    setIsAuthenticated(authenticated);
+  }, []);
+
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
     checkHealth();
     loadMetrics();
     
@@ -39,7 +52,12 @@ const RAGDashboard: React.FC = () => {
     }, 60000); // Check every minute
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isAuthenticated]);
+
+  // If not authenticated, show login component
+  if (!isAuthenticated) {
+    return <SystemLogin onLoginSuccess={handleLoginSuccess} />;
+  }
 
   const checkHealth = async () => {
     try {

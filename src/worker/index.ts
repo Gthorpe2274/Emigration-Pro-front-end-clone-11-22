@@ -948,6 +948,62 @@ app.get("/api/assessments/:id", async (c) => {
   }
 });
 
+// GET report preview summary
+app.get("/api/assessments/:id/report-preview", async (c) => {
+  try {
+    const id = c.req.param("id");
+    const assessment = await c.env.DB.prepare(
+      "SELECT * FROM assessments WHERE id = ?"
+    ).bind(id).first() as any;
+
+    if (!assessment) {
+      return c.json({ error: "Assessment not found" }, 404);
+    }
+
+    const GEMINI_API_KEY = c.env.GEMINI_API_KEY;
+    let summary = "";
+
+    if (GEMINI_API_KEY) {
+      try {
+        const prompt = `Generate a professional, encouraging paragraph summary (about 3-4 sentences) for an emigration report for someone moving from the US to ${assessment.preferred_country}${assessment.preferred_city ? ` (${assessment.preferred_city})` : ''}. 
+        The user's overall compatibility score is ${assessment.overall_score}/100. 
+        The report will cover subjects like immigration policies, healthcare, safety, and local acceptance.
+        Focus on how the report will help them navigate these specific areas. 
+        Do not include any placeholders like [Name]. Start directly with the summary.`;
+
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const res = await fetch(geminiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          }),
+        });
+
+        if (res.ok) {
+          const data: any = await res.json();
+          summary = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        }
+      } catch (err) {
+        console.error("Gemini summary error:", err);
+      }
+    }
+
+    // Fallback if Gemini fails or is missing
+    if (!summary) {
+      summary = `Your personalized emigration report for ${assessment.preferred_country} is ready for generation. With a compatibility score of ${assessment.overall_score}/100, we've identified key areas where this destination aligns with your goals. The full report will cover detailed immigration requirements, healthcare transition plans, cost of living breakdowns for your budget, and specific steps to ensure a smooth relocation for you and your family.`;
+    }
+
+    return c.json({
+      success: true,
+      summary: summary.trim()
+    });
+  } catch (error) {
+    console.error("Error generating preview:", error);
+    return c.json({ error: "Failed to generate preview" }, 500);
+  }
+});
+
 // Email sending helper function for relocation hub access
 async function sendRelocationHubAccessEmail(
   email: string,
@@ -1792,6 +1848,126 @@ const BlogPostSchema = z.object({
 });
 
 // Duplicate routes removed - using the ones defined above at lines 809 and 889
+
+// Admin: Generate full emigration report (No paywall)
+app.post("/api/admin/generate-full-report", async (c) => {
+  try {
+    const { assessmentId, assessmentData } = await c.req.json();
+    const GEMINI_API_KEY = c.env.GEMINI_API_KEY;
+
+    if (!GEMINI_API_KEY) {
+      return c.json({ error: "GEMINI_API_KEY not configured" }, 500);
+    }
+
+    const { preferred_country, preferred_city, user_job, user_age, monthly_budget } = assessmentData;
+    const locationStr = preferred_city ? `${preferred_city}, ${preferred_country}` : preferred_country;
+
+    const sections = [
+      {
+        title: "Executive Summary",
+        prompt: `Generate a comprehensive executive summary for an emigration report for a ${user_age}-year-old ${user_job} moving to ${locationStr}. Focus on overall compatibility and why this is a good match.`
+      },
+      {
+        title: "Immigration & Visa Analysis",
+        prompt: `Provide a detailed analysis of immigration and visa options for a US citizen ${user_job} moving to ${preferred_country}. Include specific visa types (like D7, Digital Nomad, etc. if applicable) and requirements.`
+      },
+      {
+        title: "Healthcare System & Access",
+        prompt: `Research and describe the healthcare system in ${preferred_country}${preferred_city ? ` and specifically ${preferred_city}` : ''}. Include info on public vs private insurance, quality of care, and emergency procedures.`
+      },
+      {
+        title: "Cost of Living & Financial Overview",
+        prompt: `Provide a detailed cost of living breakdown for ${locationStr} for a monthly budget of $${monthly_budget}. Include housing, utilities, groceries, and taxes for a ${user_job}.`
+      },
+      {
+        title: "Quality of Life & Local Acceptance",
+        prompt: `Describe the quality of life, safety, and how US expats are accepted in ${locationStr}. Mention cultural integration and social norms.`
+      }
+    ];
+
+    let fullHtml = `
+      <div style="font-family: sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 40px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <header style="text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 30px; margin-bottom: 40px;">
+          <h1 style="color: #1e3a8a; font-size: 36px; margin-bottom: 10px;">Personalized Emigration Report</h1>
+          <h2 style="color: #2563eb; font-size: 24px; margin-top: 0;">Target Destination: ${locationStr}</h2>
+          <div style="display: flex; justify-content: center; gap: 20px; font-size: 14px; color: #666; margin-top: 20px;">
+            <span><strong>Occupation:</strong> ${user_job}</span>
+            <span><strong>Age:</strong> ${user_age}</span>
+            <span><strong>Budget:</strong> $${monthly_budget}/mo</span>
+          </div>
+        </header>
+    `;
+
+    // Generate each section using Gemini
+    for (const section of sections) {
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+      
+      const response = await fetch(geminiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ 
+            parts: [{ 
+              text: `${section.prompt}\n\nFormat the output as clean HTML without <html> or <body> tags. Use <h3> for the title, <h4> for subheaders, <p> for paragraphs, and <ul><li> for lists. Do not include markdown code blocks like \`\`\`html.` 
+            }] 
+          }]
+        }),
+      });
+
+      if (response.ok) {
+        const data: any = await response.json();
+        let content = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Section content unavailable.";
+        
+        // Clean up any markdown artifacts
+        content = content.replace(/```html/g, '').replace(/```/g, '').trim();
+        
+        fullHtml += `
+          <section style="margin-bottom: 40px; padding: 25px; background: #f8fafc; border-radius: 15px; border-left: 5px solid #2563eb;">
+            ${content}
+          </section>
+        `;
+      } else {
+        fullHtml += `
+          <section style="margin-bottom: 40px; padding: 25px; background: #fff1f2; border-radius: 15px; border-left: 5px solid #e11d48;">
+            <h3>${section.title}</h3>
+            <p>Unable to generate this section at this time. Please try again later.</p>
+          </section>
+        `;
+      }
+    }
+
+    fullHtml += `
+        <footer style="text-align: center; border-top: 1px solid #e2e8f0; padding-top: 30px; margin-top: 50px; color: #64748b; font-size: 12px;">
+          <p>© 2024 Emigration Pro. All rights reserved.</p>
+          <p>This report is for testing and research purposes only.</p>
+        </footer>
+      </div>
+    `;
+
+    // 3. Save to reports table (optional but good for tracking)
+    try {
+      await c.env.DB.prepare(`
+        INSERT INTO reports (assessment_id, report_content, created_at)
+        VALUES (?, ?, CURRENT_TIMESTAMP)
+      `).bind(assessmentId, fullHtml).run();
+    } catch (dbErr) {
+      console.warn("Could not save report to DB, but returning result anyway:", dbErr);
+    }
+
+    return c.json({
+      success: true,
+      html: fullHtml
+    });
+
+  } catch (error) {
+    console.error("Error generating full report:", error);
+    return c.json({
+      success: false,
+      error: "Failed to generate full report",
+      details: error instanceof Error ? error.message : String(error)
+    }, 500);
+  }
+});
 
 // Admin: Get all blog posts (including drafts)
 app.get("/api/admin/blog/posts", blogAdminAuth, async (c) => {

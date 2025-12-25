@@ -6,7 +6,7 @@ import SystemLogin from '@/react-app/components/SystemLogin';
 
 export default function JobProcessor() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('systemLoginAuthenticated') === 'true';
+    return sessionStorage.getItem('adminAuth') === 'true';
   });
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<any>(null);

@@ -18,7 +18,7 @@ export default function AdminConfig() {
 
   useEffect(() => {
     // Check if user is authenticated
-    const authenticated = sessionStorage.getItem('systemLoginAuthenticated') === 'true';
+    const authenticated = sessionStorage.getItem('adminAuth') === 'true';
     setIsAuthenticated(authenticated);
   }, []);
 

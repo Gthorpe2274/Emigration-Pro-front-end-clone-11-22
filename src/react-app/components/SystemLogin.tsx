@@ -22,7 +22,7 @@ export default function SystemLogin({ onLoginSuccess }: SystemLoginProps) {
 
     if (password === 'admin#123') {
       // Store login status in sessionStorage
-      sessionStorage.setItem('systemLoginAuthenticated', 'true');
+      sessionStorage.setItem('adminAuth', 'true');
       onLoginSuccess();
     } else {
       setError('Invalid password. Access denied.');

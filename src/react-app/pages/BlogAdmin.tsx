@@ -30,7 +30,7 @@ interface BlogPost {
 export default function BlogAdmin() {
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('blogAdminAuth') === 'true';
+    return sessionStorage.getItem('adminAuth') === 'true';
   });
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -62,7 +62,7 @@ export default function BlogAdmin() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === 'admin#123') {
-      sessionStorage.setItem('blogAdminAuth', 'true');
+      sessionStorage.setItem('adminAuth', 'true');
       setIsAuthenticated(true);
       setLoginError('');
     } else {
@@ -73,7 +73,7 @@ export default function BlogAdmin() {
 
   // Handle logout
   const handleLogout = () => {
-    sessionStorage.removeItem('blogAdminAuth');
+    sessionStorage.removeItem('adminAuth');
     setIsAuthenticated(false);
     setPassword('');
   };

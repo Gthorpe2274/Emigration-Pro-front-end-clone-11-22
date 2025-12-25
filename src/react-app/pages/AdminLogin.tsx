@@ -11,7 +11,7 @@ export default function AdminLogin() {
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         if (password === 'admin#123') {
-            sessionStorage.setItem('blogAdminAuth', 'true');
+            sessionStorage.setItem('adminAuth', 'true');
             setError('');
             navigate('/admin/blog');
         } else {

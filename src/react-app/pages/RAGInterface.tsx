@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, BookOpen, MapPin, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
+import SystemLogin from '@/react-app/components/SystemLogin';
 
 interface RAGResult {
   content: string;
@@ -29,12 +30,28 @@ interface RAGResponse {
 }
 
 const RAGInterface: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [query, setQuery] = useState('');
   const [country, setCountry] = useState('');
   const [category, setCategory] = useState<string>('general');
   const [results, setResults] = useState<RAGResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchType, setSearchType] = useState<'context' | 'answer'>('answer');
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const authenticated = sessionStorage.getItem('adminAuth') === 'true';
+    setIsAuthenticated(authenticated);
+  }, []);
+
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
+  // If not authenticated, show login component
+  if (!isAuthenticated) {
+    return <SystemLogin onLoginSuccess={handleLoginSuccess} />;
+  }
 
   const countries = [
     'Portugal', 'Spain', 'Mexico', 'Costa Rica', 'Panama', 'Ecuador',

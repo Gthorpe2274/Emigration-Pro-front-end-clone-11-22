@@ -21,7 +21,7 @@ interface Purchaser {
 export default function CRM() {
   // Authentication state - using same pattern as BlogAdmin
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('crmAuth') === 'true';
+    return sessionStorage.getItem('adminAuth') === 'true';
   });
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -29,7 +29,7 @@ export default function CRM() {
   const [purchasers, setPurchasers] = useState<Purchaser[]>([]);
   const [loading, setLoading] = useState(() => {
     // Only set loading to true if already authenticated
-    return sessionStorage.getItem('crmAuth') === 'true';
+    return sessionStorage.getItem('adminAuth') === 'true';
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [searchDate, setSearchDate] = useState('');
@@ -49,7 +49,7 @@ export default function CRM() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === 'admin#123') {
-      sessionStorage.setItem('crmAuth', 'true');
+      sessionStorage.setItem('adminAuth', 'true');
       setIsAuthenticated(true);
       setLoginError('');
     } else {
@@ -60,15 +60,15 @@ export default function CRM() {
 
   // Handle logout
   const handleLogout = () => {
-    sessionStorage.removeItem('crmAuth');
+    sessionStorage.removeItem('adminAuth');
     setIsAuthenticated(false);
     setPassword('');
   };
 
   useEffect(() => {
     // Always check authentication status on mount
-    const authStatus = sessionStorage.getItem('crmAuth') === 'true';
-    console.log('CRM Auth Check:', authStatus, 'Value:', sessionStorage.getItem('crmAuth'));
+    const authStatus = sessionStorage.getItem('adminAuth') === 'true';
+    console.log('CRM Auth Check:', authStatus, 'Value:', sessionStorage.getItem('adminAuth'));
     setIsAuthenticated(authStatus);
 
     if (authStatus) {

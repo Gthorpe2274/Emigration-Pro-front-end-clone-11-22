@@ -24,7 +24,7 @@ export default function SystemLogin() {
 
       if (password === 'admin#123') {
         // Store login status in sessionStorage
-        sessionStorage.setItem('systemLoginAuthenticated', 'true');
+        sessionStorage.setItem('adminAuth', 'true');
         
         // Force a small delay to ensure sessionStorage is set
         await new Promise(resolve => setTimeout(resolve, 100));

@@ -12,6 +12,9 @@ export default function Results() {
   const [assessment, setAssessment] = useState<AssessmentResultType | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [previewSummary, setPreviewSummary] = useState<string | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
   const handleEmailSubmit = () => {
     // Email is already stored by the modal component
@@ -58,6 +61,34 @@ export default function Results() {
 
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    const fetchPreview = async () => {
+      if (!id || !assessment) return;
+      
+      try {
+        setLoadingPreview(true);
+        setPreviewError(null);
+        
+        const response = await fetch(`/api/assessments/${id}/report-preview`);
+        if (response.ok) {
+          const data = await response.json();
+          setPreviewSummary(data.summary);
+        } else {
+          throw new Error('Failed to generate preview');
+        }
+      } catch (err) {
+        console.error('Error fetching preview:', err);
+        setPreviewError('Failed to generate preview');
+      } finally {
+        setLoadingPreview(false);
+      }
+    };
+
+    if (assessment) {
+      fetchPreview();
+    }
+  }, [id, assessment]);
 
   if (loading) {
     return (
@@ -188,6 +219,36 @@ export default function Results() {
                 <p className="text-xl text-gray-800 leading-relaxed mb-4">
                   Get a comprehensive, detailed step-by-step Emigration Report based on current immigration data and requirements that guides you through your migration to a new country and city.
                 </p>
+
+                {/* Report Preview Section */}
+                <div className="mt-8 border-t border-blue-100 pt-6">
+                  <h4 className="text-lg font-bold text-blue-900 mb-4 uppercase tracking-wide">
+                    Your Report Will Cover The Below Subjects
+                  </h4>
+                  
+                  {loadingPreview ? (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mr-3"></div>
+                      <span className="text-gray-600">Generating your personalized summary...</span>
+                    </div>
+                  ) : previewError ? (
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
+                      <p className="text-red-700 font-medium">Error: {previewError}</p>
+                      <button 
+                        onClick={() => window.location.reload()}
+                        className="text-sm text-red-600 underline mt-2 hover:text-red-800"
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  ) : previewSummary ? (
+                    <div className="bg-blue-50/50 rounded-xl p-6 text-left border border-blue-100">
+                      <p className="text-gray-800 leading-relaxed italic">
+                        "{previewSummary}"
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
               </div>
               
               {/* Limited Time Sale Price Display */}

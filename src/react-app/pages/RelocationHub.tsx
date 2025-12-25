@@ -24,6 +24,9 @@ export default function RelocationHub() {
   const [customsDropdownOpen, setCustomsDropdownOpen] = useState(false);
   const [visaLocationsDropdownOpen, setVisaLocationsDropdownOpen] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [previewSummary, setPreviewSummary] = useState<string | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
   const handleModalEmailSubmit = () => {
     // Email is already stored by the modal component
@@ -105,6 +108,34 @@ export default function RelocationHub() {
       fetchAssessment();
     }
   }, [id]);
+
+  useEffect(() => {
+    const fetchPreview = async () => {
+      if (!id || !assessment) return;
+      
+      try {
+        setLoadingPreview(true);
+        setPreviewError(null);
+        
+        const response = await fetch(`/api/assessments/${id}/report-preview`);
+        if (response.ok) {
+          const data = await response.json();
+          setPreviewSummary(data.summary);
+        } else {
+          throw new Error('Failed to generate preview');
+        }
+      } catch (err) {
+        console.error('Error fetching preview:', err);
+        setPreviewError('Failed to generate preview');
+      } finally {
+        setLoadingPreview(false);
+      }
+    };
+
+    if (assessment) {
+      fetchPreview();
+    }
+  }, [id, assessment]);
 
   const handleGetPermanentAccess = () => {
     setShowEmailModal(true);
@@ -294,6 +325,39 @@ export default function RelocationHub() {
               <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
                 Get a comprehensive, detailed step-by-step Emigration Report based on current immigration data and requirements that guides you through your migration to a new country and city.
               </p>
+
+              {/* Report Preview Section */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 max-w-3xl mx-auto mb-10 border border-blue-100 shadow-sm text-left">
+                <h4 className="text-lg font-bold text-blue-900 mb-4 uppercase tracking-wide flex items-center">
+                  <span className="mr-2">📝</span>
+                  Your Report Will Cover The Below Subjects
+                </h4>
+                
+                {loadingPreview ? (
+                  <div className="flex items-center justify-center py-6">
+                    <div className="animate-spin w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full mr-3"></div>
+                    <span className="text-gray-600 text-lg">Generating your personalized summary...</span>
+                  </div>
+                ) : previewError ? (
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                    <p className="text-red-700 font-bold text-lg">Error: {previewError}</p>
+                    <button 
+                      onClick={() => window.location.reload()}
+                      className="text-blue-600 underline mt-3 font-semibold hover:text-blue-800"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                ) : previewSummary ? (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                      <p className="text-gray-800 text-lg leading-relaxed italic">
+                        "{previewSummary}"
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
 
               <div className="inline-block mb-6">
                 <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-3 rounded-full shadow-lg transform -rotate-1 mb-4">
