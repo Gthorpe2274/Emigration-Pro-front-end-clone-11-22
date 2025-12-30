@@ -1159,7 +1159,7 @@ This access code provides 2 years of access to your relocation hub. Keep this in
 }
 
 // Email gateway endpoint - For report generation app access
-// Creates CRM record and redirects to https://emi-pro-report-584996805327.us-west1.run.app
+// Creates CRM record and redirects to https://emi-pro-report-584996805327.us-west1.run.app/
 const EmailLeadSchema = z.object({
   email: z.string().email(),
   assessment_id: z.number().optional()
@@ -1279,7 +1279,7 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
     }
 
     // 7. Return success with redirect URL to report generation app
-    const reportAppUrl = `https://emi-pro-report-584996805327.us-west1.run.app?prefilled_email=${encodeURIComponent(normalizedEmail)}&client_reference_id=${sessionCode}`;
+    const reportAppUrl = `https://emi-pro-report-584996805327.us-west1.run.app/?prefilled_email=${encodeURIComponent(normalizedEmail)}&client_reference_id=${sessionCode}`;
 
     return c.json({
       success: true,
