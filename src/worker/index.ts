@@ -1279,7 +1279,7 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
     }
 
     // 7. Return success with redirect URL to report generation app
-    const reportAppUrl = `https://emi-pro-report-584996805327.us-west1.run.app/?prefilled_email=${encodeURIComponent(normalizedEmail)}&client_reference_id=${sessionCode}`;
+    const reportAppUrl = `https://emi-pro-report-584996805327.us-west1.run.app/?email=${encodeURIComponent(normalizedEmail)}&session_code=${sessionCode}`;
 
     return c.json({
       success: true,

@@ -57,7 +57,7 @@ export default function EmailCaptureModal({ isOpen, onClose, onSubmit, assessmen
         window.location.href = data.report_url;
       } else {
         // Fallback: Use default report generation app link
-        window.location.href = `https://emi-pro-report-584996805327.us-west1.run.app/?prefilled_email=${encodeURIComponent(email.toLowerCase())}&client_reference_id=${data.session_code || ''}`;
+        window.location.href = `https://emi-pro-report-584996805327.us-west1.run.app/?email=${encodeURIComponent(email.toLowerCase())}&session_code=${data.session_code || ''}`;
       }
       
       // Keep the modal in submitting state until redirect completes
