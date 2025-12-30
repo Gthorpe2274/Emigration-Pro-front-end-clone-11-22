@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   plugins: [react()],
+  base: '/', // Explicit base path for root deployment
   publicDir: 'public',
   server: {
     allowedHosts: true,
@@ -17,13 +18,12 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: 'dist',
+    emptyOutDir: true,
     chunkSizeWarningLimit: 5000,
     copyPublicDir: true,
     rollupOptions: {
-      input: {
-        main: './index.html',
-        fileConverter: './file-converter-standalone.html',
-      },
+      input: './index.html', // Single entry point for main app
     },
   },
   optimizeDeps: {

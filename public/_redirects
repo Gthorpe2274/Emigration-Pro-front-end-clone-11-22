@@ -1,0 +1,5 @@
+# API proxy to Cloudflare Workers backend
+/api/*  https://emigration-pro.aiservices4biz.workers.dev/api/:splat  200
+
+# SPA fallback - all other routes should be handled by React Router
+/*  /index.html  200
