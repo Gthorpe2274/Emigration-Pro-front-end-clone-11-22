@@ -22,9 +22,6 @@ export default defineConfig({
     emptyOutDir: true,
     chunkSizeWarningLimit: 5000,
     copyPublicDir: true,
-    rollupOptions: {
-      input: './index.html', // Single entry point for main app
-    },
   },
   optimizeDeps: {
     exclude: ["@hono/zod-validator", "hono", "zod", "stripe", "openai"],
