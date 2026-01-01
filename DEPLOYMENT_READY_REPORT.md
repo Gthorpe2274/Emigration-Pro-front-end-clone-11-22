@@ -44,7 +44,7 @@ All fixes have been successfully committed:
 ### 2. ✅ Backend URL Update
 - **Status:** CONFIRMED ✓
 - **Commit:** bc8ec7a
-- **New URL:** `https://emi-pro-report-584996805327.us-west1.run.app/`
+- **New URL:** `https://report.emigrationpro.com/`
 - **Files Updated:**
   - `src/react-app/components/EmailCaptureModal.tsx` ✓
   - `src/worker/index.ts` ✓

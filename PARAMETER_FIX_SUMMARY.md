@@ -12,12 +12,12 @@ Reverted query parameter names to match the original working format.
 
 **OLD CODE:**
 ```typescript
-window.location.href = `https://emi-pro-report-584996805327.us-west1.run.app/?prefilled_email=${encodeURIComponent(email.toLowerCase())}&client_reference_id=${data.session_code || ''}`;
+window.location.href = `https://report.emigrationpro.com/?prefilled_email=${encodeURIComponent(email.toLowerCase())}&client_reference_id=${data.session_code || ''}`;
 ```
 
 **NEW CODE:**
 ```typescript
-window.location.href = `https://emi-pro-report-584996805327.us-west1.run.app/?email=${encodeURIComponent(email.toLowerCase())}&session_code=${data.session_code || ''}`;
+window.location.href = `https://report.emigrationpro.com/?email=${encodeURIComponent(email.toLowerCase())}&session_code=${data.session_code || ''}`;
 ```
 
 **Changes:**
@@ -30,12 +30,12 @@ window.location.href = `https://emi-pro-report-584996805327.us-west1.run.app/?em
 
 **OLD CODE:**
 ```typescript
-const reportAppUrl = `https://emi-pro-report-584996805327.us-west1.run.app/?prefilled_email=${encodeURIComponent(normalizedEmail)}&client_reference_id=${sessionCode}`;
+const reportAppUrl = `https://report.emigrationpro.com/?prefilled_email=${encodeURIComponent(normalizedEmail)}&client_reference_id=${sessionCode}`;
 ```
 
 **NEW CODE:**
 ```typescript
-const reportAppUrl = `https://emi-pro-report-584996805327.us-west1.run.app/?email=${encodeURIComponent(normalizedEmail)}&session_code=${sessionCode}`;
+const reportAppUrl = `https://report.emigrationpro.com/?email=${encodeURIComponent(normalizedEmail)}&session_code=${sessionCode}`;
 ```
 
 **Changes:**
@@ -49,7 +49,7 @@ const reportAppUrl = `https://emi-pro-report-584996805327.us-west1.run.app/?emai
 The new backend will now receive parameters in the original working format:
 
 ```
-https://emi-pro-report-584996805327.us-west1.run.app/?email=user@example.com&session_code=ABC1-DEF2-GHI3
+https://report.emigrationpro.com/?email=user@example.com&session_code=ABC1-DEF2-GHI3
 ```
 
 ## Status

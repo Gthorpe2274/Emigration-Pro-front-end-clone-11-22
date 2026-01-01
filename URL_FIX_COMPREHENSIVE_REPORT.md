@@ -39,7 +39,7 @@ grep -rn "prefilled_email|client_reference_id" --include="*.ts" --include="*.tsx
 
 ```typescript
 // Fallback: Use default report generation app link
-window.location.href = `https://emi-pro-report-584996805327.us-west1.run.app/?email=${encodeURIComponent(email.toLowerCase())}&session_code=${data.session_code || ''}`;
+window.location.href = `https://report.emigrationpro.com/?email=${encodeURIComponent(email.toLowerCase())}&session_code=${data.session_code || ''}`;
 ```
 
 ✅ **Status:** CORRECT
@@ -53,7 +53,7 @@ window.location.href = `https://emi-pro-report-584996805327.us-west1.run.app/?em
 
 ```typescript
 // Return success with redirect URL to report generation app
-const reportAppUrl = `https://emi-pro-report-584996805327.us-west1.run.app/?email=${encodeURIComponent(normalizedEmail)}&session_code=${sessionCode}`;
+const reportAppUrl = `https://report.emigrationpro.com/?email=${encodeURIComponent(normalizedEmail)}&session_code=${sessionCode}`;
 
 return c.json({
   success: true,
@@ -76,7 +76,7 @@ return c.json({
 
 ```typescript
 // Email gateway endpoint - For report generation app access
-// Creates CRM record and redirects to https://emi-pro-report-584996805327.us-west1.run.app/
+// Creates CRM record and redirects to https://report.emigrationpro.com/
 ```
 
 ✅ **Status:** CORRECT (documentation comment)
@@ -120,12 +120,12 @@ rm -rf dist/
 After the fix, the redirect URL will be:
 
 ```
-https://emi-pro-report-584996805327.us-west1.run.app/?email=USER_EMAIL&session_code=SESSION_CODE
+https://report.emigrationpro.com/?email=USER_EMAIL&session_code=SESSION_CODE
 ```
 
 **Example:**
 ```
-https://emi-pro-report-584996805327.us-west1.run.app/?email=gthopebt%40gmail.com&session_code=a323218d-3b2a-4fdd-a939-fbe2e5e2462d
+https://report.emigrationpro.com/?email=gthopebt%40gmail.com&session_code=a323218d-3b2a-4fdd-a939-fbe2e5e2462d
 ```
 
 ---
