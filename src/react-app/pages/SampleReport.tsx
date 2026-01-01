@@ -694,7 +694,7 @@ export function SampleReport() {
           </div>
 
           <div id="section-relocation_timeline" className="mb-16 break-after-page relative pb-10">
-            <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Master Relocation Timeline & Guide</h2>
+            <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Master Relocation Timeline & Guide (full details in purchased Report)</h2>
             <div className="text-slate-900 leading-relaxed font-medium">
               <div className="prose max-w-none report-text-area">
                 <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Rio de Janeiro Relocation Roadmap</h1>
