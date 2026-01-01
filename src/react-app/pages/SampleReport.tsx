@@ -1,15 +1,16 @@
+import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import Navigation from '@/react-app/components/Navigation';
-import Footer from '@/react-app/components/Footer';
 
 export default function SampleReport() {
   const location = useLocation();
   const returnTo = location.state?.returnTo;
 
+  useEffect(() => {
+    document.title = "Sample Full Report";
+  }, []);
+
   return (
-    <div className="bg-gray-100 text-gray-800">
-      <Navigation />
-      
+    <div className="bg-gray-100 text-gray-800 min-h-screen">
       <div className="container mx-auto p-6 md:p-12 lg:p-16 bg-white shadow-lg min-h-screen">
         <style>{`
             /* Custom styling for the redacted cells in the financial overview */
@@ -58,7 +59,7 @@ export default function SampleReport() {
         {/* Page 1 - Table of Contents and Main Title Introduction */}
         <header className="mb-10 pt-4">
             {returnTo && (
-                <div className="mb-6">
+                <div className="mb-6 no-print">
                     <Link 
                         to={returnTo}
                         className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium"
@@ -281,8 +282,6 @@ export default function SampleReport() {
         <footer className="mt-12 text-center text-gray-500 text-sm">
         </footer>
       </div>
-      
-      <Footer />
     </div>
   );
 }
