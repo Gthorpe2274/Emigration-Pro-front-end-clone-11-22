@@ -9,10 +9,6 @@ export function SampleReport() {
     document.title = "Emigration Pro Report Rio de Janeiro";
   }, []);
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -727,17 +723,8 @@ export function SampleReport() {
         </div>
       </div>
       
-      {/* Floating Print Button for UX */}
-      <div className="fixed bottom-8 right-8 no-print flex gap-3">
-        <button 
-          onClick={handlePrint} 
-          className="flex items-center gap-2 bg-indigo-600 text-white font-bold py-3 px-6 rounded-full shadow-2xl hover:bg-indigo-700 transition-all hover:scale-105 active:scale-95"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-          </svg>
-          Print / Save to PDF
-        </button>
+      {/* Floating Scroll to Top Button for UX */}
+      <div className="fixed bottom-8 right-8 no-print">
         <button 
           onClick={scrollToTop} 
           className="p-3 bg-white text-slate-600 rounded-full shadow-lg border border-slate-200 hover:bg-slate-50 transition-colors" 
