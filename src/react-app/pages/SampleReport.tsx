@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-export default function SampleReport() {
+export function SampleReport() {
   const location = useLocation();
   const returnTo = location.state?.returnTo;
 
@@ -285,3 +285,5 @@ export default function SampleReport() {
     </div>
   );
 }
+
+export default SampleReport;

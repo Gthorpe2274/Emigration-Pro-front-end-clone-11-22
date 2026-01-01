@@ -7,7 +7,7 @@ import RelocationHub from './pages/RelocationHub';
 import BestCountries from './pages/BestCountries';
 import CityDetails from './pages/CityDetails';
 import AboutUs from './pages/AboutUs';
-import SampleReport from './pages/SampleReport';
+import { SampleReport } from './pages/SampleReport';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import AdminConfig from './pages/AdminConfig';
