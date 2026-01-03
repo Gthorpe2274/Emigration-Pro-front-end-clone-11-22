@@ -1279,7 +1279,7 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
     }
 
     // 7. Return success with redirect URL to report generation app
-    const reportAppUrl = `https://report.emigrationpro.com/?email=${encodeURIComponent(normalizedEmail)}&session_code=${sessionCode}`;
+    const reportAppUrl = "https://report.emigrationpro.com";
 
     return c.json({
       success: true,

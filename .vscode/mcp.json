@@ -1,0 +1,13 @@
+{
+	"servers": {
+		"perplexity": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"-y",
+				"@perplexity-ai/mcp-server"
+			]
+		}
+	},
+	"inputs": []
+}
