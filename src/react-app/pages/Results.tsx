@@ -8,7 +8,7 @@ import { AssessmentResultType } from '@/shared/types';
 
 export default function Results() {
   const { id } = useParams();
-  
+
   const [assessment, setAssessment] = useState<AssessmentResultType | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -27,22 +27,22 @@ export default function Results() {
       try {
         console.log('🚀 RESULTS PAGE LOAD STARTED');
         console.log('Assessment ID:', id);
-        
+
         if (!id) {
           console.error('❌ No assessment ID provided');
           setLoading(false);
           return;
         }
-        
+
         console.log(`📊 Fetching assessment data for ID: ${id}`);
-        
+
         const assessmentResponse = await fetch(`/api/assessments/${id}`);
-        
+
         console.log('📥 Assessment API Response:', {
           status: assessmentResponse.status,
           ok: assessmentResponse.ok
         });
-        
+
         if (assessmentResponse.ok) {
           const result = await assessmentResponse.json();
           console.log('✅ Assessment data loaded successfully');
@@ -65,11 +65,11 @@ export default function Results() {
   useEffect(() => {
     const fetchPreview = async () => {
       if (!id || !assessment) return;
-      
+
       try {
         setLoadingPreview(true);
         setPreviewError(null);
-        
+
         const response = await fetch(`/api/assessments/${id}/report-preview`);
         if (response.ok) {
           const data = await response.json();
@@ -112,13 +112,10 @@ export default function Results() {
     );
   }
 
-  const getMatchLevelColor = (level: string) => {
-    switch (level) {
-      case 'perfect': return 'from-green-500 to-emerald-500';
-      case 'very_good': return 'from-blue-500 to-indigo-500';
-      case 'good': return 'from-yellow-500 to-orange-500';
-      default: return 'from-red-500 to-pink-500';
-    }
+  const getScoreColor = (score: number) => {
+    if (score > 80) return 'from-green-500 to-emerald-500';
+    if (score >= 51) return 'from-yellow-500 to-orange-500';
+    return 'from-red-500 to-pink-500';
   };
 
   const getStarRating = (score: number) => {
@@ -142,11 +139,10 @@ export default function Results() {
         {[1, 2, 3, 4, 5].map(star => (
           <Star
             key={star}
-            className={`w-8 h-8 ${
-              star <= rating
+            className={`w-8 h-8 ${star <= rating
                 ? 'text-yellow-400 fill-current'
                 : 'text-gray-300'
-            }`}
+              }`}
           />
         ))}
       </div>
@@ -189,7 +185,7 @@ export default function Results() {
           {/* Score Card */}
           <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20 mb-8">
             <div className="text-center">
-              <div className={`inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br ${getMatchLevelColor(assessment.match_level)} text-white text-4xl font-bold mb-6`}>
+              <div className={`inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br ${getScoreColor(assessment.overall_score)} text-white text-4xl font-bold mb-6`}>
                 {assessment.overall_score}
               </div>
               <h3 className="text-3xl font-bold text-gray-900 mb-2">
@@ -214,7 +210,7 @@ export default function Results() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900">Complete Emigration Report</h3>
               </div>
-              
+
               <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 max-w-2xl mx-auto mb-6">
                 <p className="text-xl text-gray-800 leading-relaxed mb-4">
                   Get a comprehensive, detailed step-by-step Emigration Report based on current immigration data and requirements that guides you through your migration to a new country and city.
@@ -225,7 +221,7 @@ export default function Results() {
                   <h4 className="text-lg font-bold text-blue-900 mb-4 uppercase tracking-wide">
                     Your Report Will Cover The Below Subjects
                   </h4>
-                  
+
                   {loadingPreview ? (
                     <div className="flex items-center justify-center py-4">
                       <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mr-3"></div>
@@ -234,7 +230,7 @@ export default function Results() {
                   ) : previewError ? (
                     <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
                       <p className="text-red-700 font-medium">Error: {previewError}</p>
-                      <button 
+                      <button
                         onClick={() => window.location.reload()}
                         className="text-sm text-red-600 underline mt-2 hover:text-red-800"
                       >
@@ -250,7 +246,7 @@ export default function Results() {
                   ) : null}
                 </div>
               </div>
-              
+
               {/* Limited Time Sale Price Display */}
               <div className="mb-6">
                 <div className="inline-block bg-gradient-to-r from-red-500 via-orange-500 to-red-500 text-white px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
@@ -263,7 +259,7 @@ export default function Results() {
                   </div>
                 </div>
               </div>
-              
+
               <button
                 onClick={() => setShowEmailModal(true)}
                 className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
@@ -283,13 +279,13 @@ export default function Results() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900">Your Relocation Hub</h3>
               </div>
-              
+
               <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 max-w-2xl mx-auto mb-6">
                 <p className="text-xl text-gray-800 leading-relaxed mb-4">
-                  Access your FREE <strong className="text-green-700">personalized relocation hub</strong> with resources, 
+                  Access your FREE <strong className="text-green-700">personalized relocation hub</strong> with resources,
                   connections, and tools specifically curated for your emigration.
                 </p>
-                
+
                 <div className="flex items-center justify-center space-x-4 flex-wrap mb-4">
                   <div className="flex items-center space-x-2 text-green-700 bg-green-50 px-3 py-2 rounded-full text-sm">
                     <span>🌟</span>
@@ -305,7 +301,7 @@ export default function Results() {
                   </div>
                 </div>
               </div>
-              
+
               <Link
                 to={`/relocation-hub/${id}`}
                 className="inline-flex items-center bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-3 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 no-underline"
@@ -325,51 +321,47 @@ export default function Results() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900">Budget Compatibility Analysis</h3>
               </div>
-              
-              <div className={`rounded-lg p-6 border-2 ${
-                assessment.budget_compatibility.startsWith('excellent') 
-                  ? 'bg-green-50 border-green-200' 
+
+              <div className={`rounded-lg p-6 border-2 ${assessment.budget_compatibility.startsWith('excellent')
+                  ? 'bg-green-50 border-green-200'
                   : assessment.budget_compatibility.startsWith('good')
-                  ? 'bg-blue-50 border-blue-200'
-                  : assessment.budget_compatibility.startsWith('tight')
-                  ? 'bg-yellow-50 border-yellow-200'
-                  : 'bg-red-50 border-red-200'
-              }`}>
+                    ? 'bg-blue-50 border-blue-200'
+                    : assessment.budget_compatibility.startsWith('tight')
+                      ? 'bg-yellow-50 border-yellow-200'
+                      : 'bg-red-50 border-red-200'
+                }`}>
                 <div className="flex items-start space-x-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    assessment.budget_compatibility.startsWith('excellent') 
-                      ? 'bg-green-500 text-white' 
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${assessment.budget_compatibility.startsWith('excellent')
+                      ? 'bg-green-500 text-white'
                       : assessment.budget_compatibility.startsWith('good')
-                      ? 'bg-blue-500 text-white'
-                      : assessment.budget_compatibility.startsWith('tight')
-                      ? 'bg-yellow-500 text-white'
-                      : 'bg-red-500 text-white'
-                  }`}>
-                    {assessment.budget_compatibility.startsWith('excellent') ? '✅' : 
-                     assessment.budget_compatibility.startsWith('good') ? '👍' : 
-                     assessment.budget_compatibility.startsWith('tight') ? '⚠️' : '❌'}
+                        ? 'bg-blue-500 text-white'
+                        : assessment.budget_compatibility.startsWith('tight')
+                          ? 'bg-yellow-500 text-white'
+                          : 'bg-red-500 text-white'
+                    }`}>
+                    {assessment.budget_compatibility.startsWith('excellent') ? '✅' :
+                      assessment.budget_compatibility.startsWith('good') ? '👍' :
+                        assessment.budget_compatibility.startsWith('tight') ? '⚠️' : '❌'}
                   </div>
                   <div className="flex-1">
-                    <h4 className={`font-semibold text-lg mb-2 ${
-                      assessment.budget_compatibility.startsWith('excellent') 
-                        ? 'text-green-800' 
+                    <h4 className={`font-semibold text-lg mb-2 ${assessment.budget_compatibility.startsWith('excellent')
+                        ? 'text-green-800'
                         : assessment.budget_compatibility.startsWith('good')
-                        ? 'text-blue-800'
-                        : assessment.budget_compatibility.startsWith('tight')
-                        ? 'text-yellow-800'
-                        : 'text-red-800'
-                    }`}>
+                          ? 'text-blue-800'
+                          : assessment.budget_compatibility.startsWith('tight')
+                            ? 'text-yellow-800'
+                            : 'text-red-800'
+                      }`}>
                       Budget Status: {assessment.budget_compatibility.split(' - ')[0].toUpperCase()}
                     </h4>
-                    <p className={`text-lg leading-relaxed ${
-                      assessment.budget_compatibility.startsWith('excellent') 
-                        ? 'text-green-700' 
+                    <p className={`text-lg leading-relaxed ${assessment.budget_compatibility.startsWith('excellent')
+                        ? 'text-green-700'
                         : assessment.budget_compatibility.startsWith('good')
-                        ? 'text-blue-700'
-                        : assessment.budget_compatibility.startsWith('tight')
-                        ? 'text-yellow-700'
-                        : 'text-red-700'
-                    }`}>
+                          ? 'text-blue-700'
+                          : assessment.budget_compatibility.startsWith('tight')
+                            ? 'text-yellow-700'
+                            : 'text-red-700'
+                      }`}>
                       {assessment.budget_compatibility.split(' - ')[1] || assessment.budget_compatibility}
                     </p>
                   </div>
@@ -381,7 +373,7 @@ export default function Results() {
           {/* Your Preferences */}
           <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20 mb-8">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Your Assessment Ratings</h3>
-            
+
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div className="space-y-4">
                 <div>
@@ -416,31 +408,56 @@ export default function Results() {
 
             <h4 className="text-lg font-semibold text-gray-900 mb-4">Your Priority Factors</h4>
             <div className="grid md:grid-cols-2 gap-4">
-              {factors.map(factor => (
-                <div key={factor.key} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-xl">{factor.icon}</span>
-                    <span className="font-medium text-gray-900">{factor.label}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="flex space-x-1">
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <Star
-                          key={star}
-                          className={`w-4 h-4 ${
-                            star <= Number(assessment[factor.key as keyof AssessmentResultType] || 0)
-                              ? 'text-yellow-400 fill-current'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
+              {factors.map(factor => {
+                const criteriaKey = factor.key.replace('_importance', '');
+                const criteriaScore = assessment.criteriaScores ? assessment.criteriaScores[criteriaKey] : undefined;
+
+                return (
+                  <div key={factor.key} className="p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-xl">{factor.icon}</span>
+                        <span className="font-medium text-gray-900">{factor.label}</span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <div className="text-sm text-gray-500 mb-1">Importance</div>
+                        <div className="flex space-x-1">
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <Star
+                              key={star}
+                              className={`w-4 h-4 ${star <= Number(assessment[factor.key as keyof AssessmentResultType] || 0)
+                                  ? 'text-yellow-400 fill-current'
+                                  : 'text-gray-300'
+                                }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-lg font-medium text-gray-600">
-                      {assessment[factor.key as keyof AssessmentResultType]}/5
-                    </span>
+
+                    {criteriaScore !== undefined && (
+                      <div className="mt-3 bg-white rounded-md p-3 border border-gray-100">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium text-gray-600">Compatibility Score</span>
+                          <span className={`text-sm font-bold ${criteriaScore > 80 ? 'text-green-600' :
+                              criteriaScore >= 50 ? 'text-yellow-600' : 'text-red-600'
+                            }`}>
+                            {Math.round(criteriaScore)}/100
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full ${criteriaScore > 80 ? 'bg-green-500' :
+                                criteriaScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                              }`}
+                            style={{ width: `${criteriaScore}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

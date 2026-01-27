@@ -192,7 +192,7 @@ async function callGeminiAPI(prompt: string, apiKey: string): Promise<string> {
       throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!text) {
@@ -210,10 +210,10 @@ function parseGeminiResponse(responseText: string): GeminiCurationResponse {
   try {
     // Try to extract JSON from response (in case it's wrapped in markdown)
     let jsonText = responseText.trim();
-    
+
     // Remove markdown code blocks if present
     jsonText = jsonText.replace(/```json\s*/g, '').replace(/```\s*/g, '');
-    
+
     // Find JSON object in response
     const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {

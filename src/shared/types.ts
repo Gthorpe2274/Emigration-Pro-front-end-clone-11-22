@@ -37,6 +37,7 @@ export const AssessmentResultSchema = z.object({
   emigration_process_importance: z.number(),
   ease_of_immigration_importance: z.number(),
   local_acceptance_importance: z.number(),
+  criteriaScores: z.record(z.string(), z.number()).optional(),
   budget_compatibility: z.string().optional(),
   created_at: z.string(),
   updated_at: z.string(),

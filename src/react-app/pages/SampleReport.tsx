@@ -15,7 +15,7 @@ export function SampleReport() {
 
   return (
     <div className="bg-slate-50 text-slate-900 py-12 px-4 md:px-8 min-h-screen scroll-smooth">
-        <style>{`
+      <style>{`
           body {
             font-family: 'Inter', sans-serif; 
             -webkit-print-color-adjust: exact; 
@@ -43,7 +43,7 @@ export function SampleReport() {
         <div className="bg-slate-900 text-white p-8 text-center relative">
           {returnTo && (
             <div className="absolute top-4 left-8 no-print">
-              <Link 
+              <Link
                 to={returnTo}
                 className="inline-flex items-center text-slate-400 hover:text-white transition-colors font-medium text-sm"
               >
@@ -53,6 +53,9 @@ export function SampleReport() {
           )}
           <h1 className="text-3xl font-bold">Emigration Pro Report</h1>
           <p className="text-slate-400 mt-2">Personalized Analysis & Relocation Strategy</p>
+          <div className="mt-4 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+            This is a partial sample
+          </div>
         </div>
 
         <div className="p-8 md:p-16">
@@ -93,40 +96,40 @@ export function SampleReport() {
                 <li className="flex items-start gap-3">
                   <span className="text-indigo-600 font-black text-xs mt-1.5">06</span>
                   <a href="#section-utility_resilience" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Infrastructure & Power Reliability</a>
-            </li>
+                </li>
                 <li className="flex items-start gap-3">
                   <span className="text-indigo-600 font-black text-xs mt-1.5">07</span>
                   <a href="#section-retail_food" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Retail Ecosystem & Food Supply</a>
-            </li>
+                </li>
                 <li className="flex items-start gap-3">
                   <span className="text-indigo-600 font-black text-xs mt-1.5">08</span>
                   <a href="#section-transportation" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Mobility & Urban Connectivity</a>
-            </li>
+                </li>
                 <li className="flex items-start gap-3">
                   <span className="text-indigo-600 font-black text-xs mt-1.5">09</span>
                   <a href="#section-culture_entertainment" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Culture, Arts & Entertainment</a>
-            </li>
+                </li>
                 <li className="flex items-start gap-3">
                   <span className="text-indigo-600 font-black text-xs mt-1.5">10</span>
                   <a href="#section-sports_recreation" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Sports & Active Recreation</a>
-            </li>
+                </li>
                 <li className="flex items-start gap-3">
                   <span className="text-indigo-600 font-black text-xs mt-1.5">11</span>
                   <a href="#section-senior_benefits" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Senior & Retirement Benefits</a>
-            </li>
+                </li>
                 <li className="flex items-start gap-3">
                   <span className="text-indigo-600 font-black text-xs mt-1.5">12</span>
                   <a href="#section-situation" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Professional Risk Analysis</a>
-            </li>
+                </li>
                 <li className="flex items-start gap-3">
                   <span className="text-indigo-600 font-black text-xs mt-1.5">13</span>
                   <a href="#section-visa" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Legal Visa & Residency Dossier</a>
-            </li>
+                </li>
                 <li className="flex items-start gap-3">
                   <span className="text-indigo-600 font-black text-xs mt-1.5">14</span>
                   <a href="#section-relocation_timeline" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Master Relocation Timeline & Guide</a>
-            </li>
-          </ul>
+                </li>
+              </ul>
             </nav>
           </div>
 
@@ -185,21 +188,21 @@ export function SampleReport() {
                       <li><strong className="font-black text-slate-950">Primary Contact:</strong> Dial <strong className="font-black text-slate-950">192</strong>.</li>
                       <li><strong className="font-black text-slate-950">Protocol:</strong> Dispatchers categorize the emergency. If life-threatening, a "USA" (Advanced Support Unit) with a doctor is sent. Note: Public ambulances typically transport to the nearest public hospital (e.g., Miguel Couto).</li>
                     </ul>
-            </li>
-            <li>
+                  </li>
+                  <li>
                     <strong className="font-black text-slate-950">Private Ambulance & Home Care</strong>
                     <ul className="list-circle pl-6 mt-2 space-y-1">
                       <li><strong className="font-black text-slate-950">Vida Emergências Médicas:</strong> One of the most reliable private ambulance services in Rio; often included as a "concierge" add-on in premium health plans.</li>
                       <li><strong className="font-black text-slate-950">Contact Protocols:</strong> Keep the direct number for your chosen hospital's emergency room on speed dial (e.g., Copa D'Or: +55 21 2545-3600).</li>
                     </ul>
-            </li>
-            <li>
+                  </li>
+                  <li>
                     <strong className="font-black text-slate-950">Strategic Action Plan for a 78-Year-Old Professional</strong>
                     <ul className="list-circle pl-6 mt-2 space-y-1">
                       <li><strong className="font-black text-slate-950">Step 1: Secure a CPF:</strong> Essential for all health transactions, including pharmacy discounts and private insurance.</li>
                     </ul>
-            </li>
-          </ul>
+                  </li>
+                </ul>
               </div>
             </div>
             <div className="mt-12 pt-4 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-600 font-mono uppercase tracking-[0.2em] select-none font-bold">
@@ -220,7 +223,7 @@ export function SampleReport() {
                     <span>Live Conversion: Brazilian Real (BRL) to USD</span>
                   </a>
                 </div>
-                
+
                 <div className="overflow-x-auto not-prose rounded-2xl border border-slate-200 shadow-lg my-8 bg-white">
                   <table className="min-w-full text-sm border-collapse">
                     <thead className="bg-slate-900">
@@ -380,7 +383,7 @@ export function SampleReport() {
                     </tbody>
                   </table>
                 </div>
-                
+
                 <div className="my-8">
                   <h3 className="text-2xl font-black mb-4 text-slate-950 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -392,7 +395,7 @@ export function SampleReport() {
                     New residents with a permanent visa are typically exempt from import duties on used personal household goods and furniture if imported within 180 days of arrival. However, motorized vehicles are strictly taxed at approximately 100% of their value, and new electronics exceeding $1,000 USD are subject to a 60% flat import tax.
                   </div>
                 </div>
-                
+
                 <div className="my-8">
                   <h3 className="text-2xl font-black mb-4 text-slate-950 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -719,15 +722,15 @@ export function SampleReport() {
             <p className="font-semibold text-slate-600">Generated by Emigration Pro Report Generator</p>
             <p>Y-Enterprises.com - Your Guide To Moving Abroad</p>
             <p className="mt-2">© 2026 Cleer Products</p>
-        </footer>
+          </footer>
         </div>
       </div>
-      
+
       {/* Floating Scroll to Top Button for UX */}
       <div className="fixed bottom-8 right-8 no-print">
-        <button 
-          onClick={scrollToTop} 
-          className="p-3 bg-white text-slate-600 rounded-full shadow-lg border border-slate-200 hover:bg-slate-50 transition-colors" 
+        <button
+          onClick={scrollToTop}
+          className="p-3 bg-white text-slate-600 rounded-full shadow-lg border border-slate-200 hover:bg-slate-50 transition-colors"
           title="Back to top"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

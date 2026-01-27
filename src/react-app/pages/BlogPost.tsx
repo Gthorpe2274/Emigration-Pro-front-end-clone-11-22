@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+import BlogIndex from '../components/BlogIndex';
 
 interface BlogPostType {
   id: number;
@@ -92,67 +93,78 @@ export default function BlogPost() {
       <Navigation />
 
       <div className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto">
-          <Link
-            to="/blog"
-            className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-8 font-semibold"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Blog
-          </Link>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <div className="lg:w-1/4">
+            <Link
+              to="/blog"
+              className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-8 font-semibold"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Blog
+            </Link>
+            <div className="hidden lg:block">
+              {/* Dynamically imported or standard import */}
+              <BlogIndex />
+            </div>
+          </div>
 
-          <article className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          {/* Main Content */}
+          <div className="lg:w-3/4">
 
 
-            {post.featured_image && (
-              <div className="relative h-96 overflow-hidden">
-                <img
-                  src={post.featured_image}
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    console.error('Image failed to load:', post.featured_image);
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-              </div>
-            )}
+            <article className="bg-white rounded-2xl shadow-lg overflow-hidden">
 
-            <div className="p-8 md:p-12">
-              <div className="flex items-center text-sm text-gray-500 mb-4">
-                <time dateTime={post.published_date}>
-                  {formatDate(post.published_date)}
-                </time>
-                {post.author && (
-                  <>
-                    <span className="mx-2">•</span>
-                    <span>By {post.author}</span>
-                  </>
-                )}
-              </div>
 
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-                {post.title}
-              </h1>
-
-              <div
-                className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
-                dangerouslySetInnerHTML={{ __html: post.body.replace(/\n/g, '<br />') }}
-              />
-
-              {post.allow_comments && (
-                <div className="mt-12 pt-8 border-t border-gray-200">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">Comments</h3>
-                  <p className="text-gray-600">Comments feature coming soon...</p>
+              {post.featured_image && (
+                <div className="relative h-96 overflow-hidden">
+                  <img
+                    src={post.featured_image}
+                    alt={post.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error('Image failed to load:', post.featured_image);
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
                 </div>
               )}
-            </div>
-          </article>
+
+              <div className="p-8 md:p-12">
+                <div className="flex items-center text-sm text-gray-500 mb-4">
+                  <time dateTime={post.published_date}>
+                    {formatDate(post.published_date)}
+                  </time>
+                  {post.author && (
+                    <>
+                      <span className="mx-2">•</span>
+                      <span>By {post.author}</span>
+                    </>
+                  )}
+                </div>
+
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
+                  {post.title}
+                </h1>
+
+                <div
+                  className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
+                  dangerouslySetInnerHTML={{ __html: post.body.replace(/\n/g, '<br />') }}
+                />
+
+                {post.allow_comments && (
+                  <div className="mt-12 pt-8 border-t border-gray-200">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Comments</h3>
+                    <p className="text-gray-600">Comments feature coming soon...</p>
+                  </div>
+                )}
+              </div>
+            </article>
+          </div>
         </div>
       </div>
-
       <Footer />
     </div>
   );

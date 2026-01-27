@@ -168,9 +168,9 @@ export default function Home() {
               {/* Left Image */}
               <div className="hidden md:block">
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square flex items-center justify-center border-4 border-white">
-                  <img 
-                    src="/images/blk-couple-sq.png" 
-                    alt="Couple reviewing emigration documents" 
+                  <img
+                    src="/images/blk-couple-sq.png"
+                    alt="Couple reviewing emigration documents"
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
@@ -205,9 +205,9 @@ export default function Home() {
               {/* Right Image */}
               <div className="hidden md:block">
                 <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square flex items-center justify-center border-4 border-white">
-                  <img 
-                    src="/images/old-couple.png" 
-                    alt="Couple reviewing emigration report" 
+                  <img
+                    src="/images/old-couple.png"
+                    alt="Couple reviewing emigration report"
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
@@ -360,13 +360,6 @@ export default function Home() {
           className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors font-medium"
         >
           Server
-        </a>
-        <span className="mx-2 text-[10px] text-gray-300">•</span>
-        <a
-          href="/admin/config"
-          className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors font-medium"
-        >
-          Config
         </a>
       </div>
     </div>

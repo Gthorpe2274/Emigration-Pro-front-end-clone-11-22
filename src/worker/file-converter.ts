@@ -7,7 +7,7 @@ export async function convertMarkdownToHTML(markdown: string): Promise<string> {
     const html = await marked.parse(markdown, {
       gfm: true,
       breaks: true,
-    });
+    }) as string;
 
     return wrapInHTMLDocument(html as string);
   } catch (error) {
@@ -24,7 +24,7 @@ export async function convertPDFToHTML(pdfBuffer: ArrayBuffer): Promise<string> 
     // For Cloudflare Workers, we'll use a text extraction approach
     // This is a basic implementation - for production, consider using pdf.js or an external service
     const text = await extractTextFromPDF(pdfBuffer);
-    
+
     // Format text as HTML
     const htmlContent = text
       .split('\n')
@@ -54,33 +54,33 @@ async function extractTextFromPDF(buffer: ArrayBuffer): Promise<string> {
   // This is a very basic text extraction
   // In production, you'd want to use pdf.js or a proper PDF parser
   const uint8Array = new Uint8Array(buffer);
-  const textDecoder = new TextDecoder('utf-8', { fatal: false });
-  
+  const textDecoder = new TextDecoder('utf-8', { fatal: false, ignoreBOM: false });
+
   // Try to extract readable text from the PDF
   // PDFs have a specific structure, but for simplicity, we'll extract readable text
   let text = '';
   const chunkSize = 1024;
-  
+
   for (let i = 0; i < uint8Array.length; i += chunkSize) {
     const chunk = uint8Array.slice(i, i + chunkSize);
     const decoded = textDecoder.decode(chunk);
-    
+
     // Extract readable text (basic filtering)
     const readableText = decoded
       .replace(/[^\x20-\x7E\n\r\t]/g, ' ') // Remove non-printable chars except newlines/tabs
       .replace(/\s+/g, ' ') // Normalize whitespace
       .trim();
-    
+
     if (readableText.length > 10) {
       text += readableText + '\n';
     }
   }
-  
+
   // If we couldn't extract much text, return a message
   if (text.trim().length < 50) {
     return 'PDF content could not be fully extracted. This is a basic PDF converter. For better results, consider using a dedicated PDF parsing service.';
   }
-  
+
   return text;
 }
 

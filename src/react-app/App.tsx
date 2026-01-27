@@ -43,6 +43,7 @@ function App() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/admin/config" element={<AdminConfig />} />
+        <Route path="/test-reports" element={<AdminReportGen />} />
         <Route path="/admin/diagnostics" element={<WorkerDiagnostics />} />
         <Route path="/admin/rag-dashboard" element={<RAGDashboard />} />
         <Route path="/admin/email-test" element={<EmailTest />} />

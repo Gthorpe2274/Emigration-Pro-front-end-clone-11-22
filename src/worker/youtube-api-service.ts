@@ -60,13 +60,13 @@ export class YouTubeAPIService {
       );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorData = await response.json().catch(() => ({})) as any;
         throw new Error(
           `YouTube API error: ${response.status} - ${errorData.error?.message || response.statusText}`
         );
       }
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       if (!data.items || data.items.length === 0) {
         return [];
@@ -119,7 +119,7 @@ export class YouTubeAPIService {
         return [];
       }
 
-      const data = await response.json();
+      const data = await response.json() as any;
 
       return (data.items || []).map((item: any) => ({
         viewCount: parseInt(item.statistics?.viewCount || '0', 10),

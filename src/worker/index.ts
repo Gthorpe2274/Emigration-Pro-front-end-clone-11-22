@@ -177,7 +177,7 @@ const app = new Hono<{ Bindings: Env }>();
 // Global Error Handler to prevent HTML responses for API errors
 app.onError((err, c) => {
   console.error(`Global Error: ${err.message}`, err);
-  
+
   // If it's an API route, always return JSON
   if (c.req.path.startsWith('/api/')) {
     return c.json({
@@ -187,7 +187,7 @@ app.onError((err, c) => {
       path: c.req.path
     }, 500);
   }
-  
+
   // Otherwise, default behavior
   return c.text(`Internal Server Error: ${err.message}`, 500);
 });
@@ -418,7 +418,7 @@ function analyzeBudgetCompatibility(monthlyBudget: number, country: string, city
 }
 
 // Assessment scoring algorithm
-function calculateScore(assessment: any): { score: number; matchLevel: string; budgetCompatibility: string } | { error: boolean; message: string; details: string; climateConflict: any } {
+function calculateScore(assessment: any): { score: number; matchLevel: string; budgetCompatibility: string; criteriaScores: Record<string, number> } | { error: boolean; message: string; details: string; climateConflict: any } {
   // Country scoring data
   const countryScores: { [key: string]: any } = {
     'Portugal': {
@@ -528,15 +528,26 @@ function calculateScore(assessment: any): { score: number; matchLevel: string; b
   let weightedScore = 0;
   let totalImportanceWeight = 0;
 
+  const criteriaScores: Record<string, number> = {};
+
   factors.forEach(factor => {
     const importance = assessment[`${factor}_importance`];
     const countryScore = countryData[factor];
 
-    const importanceWeight = Math.pow(importance, 1.5);
+    let importanceWeight = Math.pow(importance, 1.5);
+
+    // Age weighting booster for seniors (60+)
+    if (assessment.user_age >= 60 && (factor === 'healthcare' || factor === 'safety')) {
+      importanceWeight *= 2.0;
+    }
+
     const factorScore = (countryScore / 4) * importanceWeight;
 
     weightedScore += factorScore;
     totalImportanceWeight += importanceWeight;
+
+    // Store individual criteria score (0-100)
+    criteriaScores[factor] = (countryScore / 4) * 100;
   });
 
   // Add climate scoring
@@ -587,7 +598,7 @@ function calculateScore(assessment: any): { score: number; matchLevel: string; b
     assessment.preferred_city
   );
 
-  return { score: finalScore, matchLevel, budgetCompatibility };
+  return { score: finalScore, matchLevel, budgetCompatibility, criteriaScores };
 }
 
 // Create assessment endpoint
@@ -615,7 +626,7 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
       }, 400);
     }
 
-    const { score, matchLevel, budgetCompatibility } = scoreResult;
+    const { score, matchLevel, budgetCompatibility, criteriaScores } = scoreResult;
 
     // Set retention period (2 years from now)
     const retention_expires_at = new Date();
@@ -662,7 +673,8 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
       success: true,
       id: assessmentId,
       score,
-      matchLevel
+      matchLevel,
+      criteriaScores
     });
   } catch (error) {
     console.error("Error creating assessment:", error);
@@ -1344,7 +1356,7 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
     if (existingAccess) {
       // UPDATE existing CRM record - activate it and confirm purchase
       sessionCode = (existingAccess as any).session_code;
-      
+
       // Set expiration (2 years from now for permanent access)
       const expires_at = new Date();
       expires_at.setFullYear(expires_at.getFullYear() + 2);
@@ -2175,7 +2187,7 @@ app.post("/api/admin/blog/upload-image", blogAdminAuth, async (c) => {
   try {
     const formData = await c.req.formData();
     const file = formData.get('image') as any as File;
-    
+
     if (!file || typeof file.name === 'undefined') {
       return c.json({ error: "No image provided" }, 400);
     }
@@ -2190,12 +2202,12 @@ app.post("/api/admin/blog/upload-image", blogAdminAuth, async (c) => {
     if (file.size > maxSize) {
       return c.json({ error: "Image size exceeds 5MB limit" }, 400);
     }
-    
+
     const key = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     await c.env.R2_BUCKET.put(`blog-images/${key}`, file, {
       httpMetadata: { contentType: file.type }
     });
-    
+
     return c.json({
       success: true,
       url: `/api/blog/images/${key}`
@@ -2211,16 +2223,16 @@ app.get('/api/blog/images/:key', async (c) => {
   const key = c.req.param('key');
   try {
     const object = await c.env.R2_BUCKET.get(`blog-images/${key}`);
-    
+
     if (!object) {
       return c.notFound();
     }
-    
+
     const headers = new Headers();
     object.writeHttpMetadata(headers);
     headers.set('etag', object.httpEtag);
     headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-    
+
     return new Response(object.body, {
       headers
     });
@@ -2250,20 +2262,20 @@ app.post('/api/file-converter/upload', async (c) => {
     // Validate file type
     const fileName = file.name;
     const fileExtension = fileName.split('.').pop()?.toLowerCase();
-    
+
     if (fileExtension !== 'md' && fileExtension !== 'pdf') {
-      return c.json({ 
-        success: false, 
-        error: 'Invalid file type. Only .md and .pdf files are supported.' 
+      return c.json({
+        success: false,
+        error: 'Invalid file type. Only .md and .pdf files are supported.'
       }, 400);
     }
 
     // Check file size (limit to 10MB)
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      return c.json({ 
-        success: false, 
-        error: 'File size exceeds 10MB limit' 
+      return c.json({
+        success: false,
+        error: 'File size exceeds 10MB limit'
       }, 400);
     }
 
@@ -2327,14 +2339,14 @@ app.post('/api/file-converter/upload', async (c) => {
     console.error('File conversion error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Failed to convert file';
     const errorStack = error instanceof Error ? error.stack : undefined;
-    
+
     // Log detailed error for debugging
     console.error('Error details:', {
       message: errorMessage,
       stack: errorStack,
       errorType: error?.constructor?.name
     });
-    
+
     return c.json({
       success: false,
       error: errorMessage,
@@ -2513,7 +2525,7 @@ Sitemap: ${baseUrl}/sitemap.xml`, 200, {
 app.get('*', async (c) => {
   try {
     const url = new URL(c.req.url);
-    
+
     // Explicitly handle favicon and other standard assets that might be missing
     // to prevent them from falling through to index.html and causing SSL issues
     if (url.pathname.includes('favicon') || url.pathname.includes('.ico')) {
@@ -2526,12 +2538,12 @@ app.get('*', async (c) => {
 
     // Try fetching the asset
     const response = await c.env.ASSETS.fetch(c.req.raw);
-    
+
     // If asset not found and it's not an API call, serve index.html (for SPA routing)
     if (response.status === 404 && !url.pathname.startsWith('/api/')) {
       return await c.env.ASSETS.fetch(new URL('/', url.origin).toString());
     }
-    
+
     return response;
   } catch (error) {
     // If anything fails, try to return index.html as a last resort
