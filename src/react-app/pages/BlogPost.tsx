@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import BlogIndex from '../components/BlogIndex';
+import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
 
 interface BlogPostType {
   id: number;
@@ -20,6 +21,13 @@ export default function BlogPost() {
   const [post, setPost] = useState<BlogPostType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+
+  const handleEmailSubmit = () => {
+    // Email is already stored by the modal component
+    // Redirect will be handled by EmailCaptureModal after email is saved to CRM
+    // Redirects to Stripe Checkout (buy.stripe.com)
+  };
 
   useEffect(() => {
     fetchPost();
@@ -91,6 +99,11 @@ export default function BlogPost() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
+      <EmailCaptureModal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        onSubmit={handleEmailSubmit}
+      />
 
       <div className="container mx-auto px-4 py-16">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -165,6 +178,65 @@ export default function BlogPost() {
           </div>
         </div>
       </div>
+
+      {/* Get a Professional Report Section */}
+      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-16">
+        <div className="container mx-auto px-4">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 md:p-12">
+            <div className="grid md:grid-cols-3 gap-8 items-center">
+              {/* Left Image */}
+              <div className="hidden md:block">
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square flex items-center justify-center border-4 border-white">
+                  <img
+                    src="/images/blk-couple-sq.png"
+                    alt="Couple reviewing emigration documents"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+
+              {/* Center Content */}
+              <div className="text-center">
+                <h3 className="text-3xl font-bold text-gray-900 mb-6">Get a Professional Report</h3>
+
+                <div className="mb-6">
+                  <div className="inline-block bg-gradient-to-r from-red-500 via-orange-500 to-red-500 text-white px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-sm font-semibold uppercase tracking-wide">Limited Time Sale</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-lg font-bold line-through opacity-75">$69.99</span>
+                        <span className="text-2xl font-extrabold animate-pulse">now $49.99</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowEmailModal(true)}
+                  className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                >
+                  <span className="mr-2">📋</span>
+                  Get Your Report
+                </button>
+              </div>
+
+              {/* Right Image */}
+              <div className="hidden md:block">
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square flex items-center justify-center border-4 border-white">
+                  <img
+                    src="/images/old-couple.png"
+                    alt="Couple reviewing emigration report"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
