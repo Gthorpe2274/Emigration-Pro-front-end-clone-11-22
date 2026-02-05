@@ -1,10 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
 
 export default function Footer() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showConsultationPopup, setShowConsultationPopup] = useState(false);
   const [showRelocationPopup, setShowRelocationPopup] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+
+  const handleEmailSubmit = () => {
+    // Email is already stored by the modal component
+    // Redirect will be handled by EmailCaptureModal after email is saved to CRM
+    // Redirects to Stripe Checkout (buy.stripe.com)
+  };
 
   return (
     <footer className="bg-black py-12 px-6 relative">
@@ -261,16 +269,25 @@ export default function Footer() {
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Get Your Full Relocation Planning Report for a step by step guide to relocation planning. Just click the link on this page.
               </p>
-              <a
-                href="https://buy.stripe.com/28E9ALgKlgNS8Dn2lLefC02"
+              <button
+                onClick={() => {
+                  setShowRelocationPopup(false);
+                  setShowEmailModal(true);
+                }}
                 className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 w-full"
               >
                 Get Full Report
-              </a>
+              </button>
             </div>
           </div>
         </div>
       )}
+
+      <EmailCaptureModal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        onSubmit={handleEmailSubmit}
+      />
     </footer>
   );
 }

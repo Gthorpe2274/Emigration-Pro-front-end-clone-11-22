@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
 
 interface BlogPost {
   id: number;
@@ -13,20 +14,28 @@ interface BlogPost {
   author?: string;
 }
 
+
+
 export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+
+  const handleEmailSubmit = () => {
+    // Email is already stored by the modal component
+    // Redirect will be handled by EmailCaptureModal after email is saved to CRM
+  };
 
   useEffect(() => {
     fetchPosts();
-    
+
     // Add an event listener for visibility change to refresh posts when tab becomes active
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         fetchPosts();
       }
     };
-    
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
@@ -35,11 +44,11 @@ export default function Blog() {
     try {
       setLoading(true);
       const response = await fetch('/api/blog/posts');
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       if (data.success) {
         setPosts(data.posts || []);
@@ -48,7 +57,7 @@ export default function Blog() {
       }
     } catch (error) {
       console.error('Error fetching blog posts:', error);
-      
+
       // Automatic retry once after 1 second if it's a fetch error
       if (retryCount < 1) {
         setTimeout(() => fetchPosts(retryCount + 1), 1000);
@@ -70,6 +79,11 @@ export default function Blog() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <Navigation />
+      <EmailCaptureModal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        onSubmit={handleEmailSubmit}
+      />
 
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
@@ -81,14 +95,12 @@ export default function Blog() {
           </p>
 
           <div className="text-center mb-12">
-            <a
-              href="https://buy.stripe.com/28E9ALgKlgNS8Dn2lLefC02"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => setShowEmailModal(true)}
               className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 text-lg"
             >
-              Get Your Report
-            </a>
+              Get Your Full Report
+            </button>
           </div>
 
           {loading ? (
