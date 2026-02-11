@@ -58,7 +58,7 @@ export function SampleReport() {
             )}
             <h1 className="text-3xl font-bold">Emigration Pro Report</h1>
             <p className="text-slate-400 mt-2">Personalized Analysis & Relocation Strategy</p>
-            <div className="mt-4 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+            <div className="mt-4 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
               This is a partial sample
             </div>
           </div>
