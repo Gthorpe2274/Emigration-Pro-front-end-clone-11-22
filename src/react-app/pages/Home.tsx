@@ -29,7 +29,7 @@ export default function Home() {
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: 'url(https://e10922871bed0cc3848d-7d0b257190f7dc575c87f2234e91f8d7.ssl.cf5.rackcdn.com/Media/Images/emigration-3.png)'
+            backgroundImage: 'url(/images/hero-1.png)'
           }}
         ></div>
 

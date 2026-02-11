@@ -58,7 +58,11 @@ export const CountryData = {
     'Ethiopia', 'Greece', 'Grenada', 'Haiti', 'Hungary', 'India', 'Indonesia', 'Jamaica',
     'Kenya', 'Pakistan', 'Paraguay', 'Peru', 'Poland', 'Puerto Rico', 'Romania', 'Saint Lucia',
     'Saudi Arabia', 'Senegal', 'South Africa', 'Sri Lanka', 'St. Thomas', 'Sudan', 'Tanzania',
-    'Trinidad and Tobago', 'Turkey', 'UAE', 'Uganda', 'Ukraine', 'Venezuela', 'Zimbabwe'
+    'Trinidad and Tobago', 'Turkey', 'UAE', 'Uganda', 'Ukraine', 'Venezuela', 'Zimbabwe',
+    'Croatia', 'Cyprus', 'Malta', 'Estonia', 'Latvia', 'Lithuania', 'Slovenia', 'Slovakia',
+    'Bulgaria', 'Luxembourg', 'Iceland', 'Montenegro', 'Albania', 'Saint Kitts and Nevis',
+    'Dominica', 'Saint Vincent and the Grenadines', 'Cayman Islands', 'Curaçao',
+    'Turks and Caicos Islands', 'Sint Maarten', 'British Virgin Islands'
   ],
   cities: {
     'Portugal': ['Lisbon', 'Porto', 'Faro', 'Braga', 'Coimbra'],
@@ -145,6 +149,27 @@ export const CountryData = {
     'Uganda': ['Kampala', 'Nansana', 'Kira', 'Ssabagabo', 'Mbarara'],
     'Ukraine': ['Kyiv', 'Kharkiv', 'Odesa', 'Dnipro', 'Donetsk'],
     'Venezuela': ['Caracas', 'Maracaibo', 'Valencia', 'Barquisimeto', 'Maracay'],
-    'Zimbabwe': ['Harare', 'Bulawayo', 'Chitungwiza', 'Mutare', 'Epworth']
+    'Zimbabwe': ['Harare', 'Bulawayo', 'Chitungwiza', 'Mutare', 'Epworth'],
+    'Croatia': ['Zagreb', 'Split', 'Dubrovnik', 'Rijeka', 'Zadar'],
+    'Cyprus': ['Nicosia', 'Limassol', 'Larnaca', 'Paphos', 'Famagusta'],
+    'Malta': ['Valletta', 'Birkirkara', 'Sliema', 'St. Julian\'s', 'Bugibba'],
+    'Estonia': ['Tallinn', 'Tartu', 'Narva', 'Pärnu', 'Kohtla-Järve'],
+    'Latvia': ['Riga', 'Daugavpils', 'Liepāja', 'Jelgava', 'Jūrmala'],
+    'Lithuania': ['Vilnius', 'Kaunas', 'Klaipėda', 'Šiauliai', 'Panevėžys'],
+    'Slovenia': ['Ljubljana', 'Maribor', 'Celje', 'Kranj', 'Velenje'],
+    'Slovakia': ['Bratislava', 'Košice', 'Prešov', 'Žilina', 'Nitra'],
+    'Bulgaria': ['Sofia', 'Plovdiv', 'Varna', 'Burgas', 'Ruse'],
+    'Luxembourg': ['Luxembourg City', 'Esch-sur-Alzette', 'Differdange', 'Dudelange', 'Ettelbruck'],
+    'Iceland': ['Reykjavík', 'Kópavogur', 'Hafnarfjörður', 'Akureyri', 'Reykjanesbær'],
+    'Montenegro': ['Podgorica', 'Nikšić', 'Herceg Novi', 'Pljevlja', 'Budva'],
+    'Albania': ['Tirana', 'Durrës', 'Vlorë', 'Shkodër', 'Elbasan'],
+    'Saint Kitts and Nevis': ['Basseterre', 'Charlestown', 'Sadlers', 'Cayon', 'Sandy Point Town'],
+    'Dominica': ['Roseau', 'Portsmouth', 'Marigot', 'Berekua', 'Mahaut'],
+    'Saint Vincent and the Grenadines': ['Kingstown', 'Georgetown', 'Byera Village', 'Biabou', 'Port Elizabeth'],
+    'Cayman Islands': ['George Town', 'West Bay', 'Bodden Town', 'East End', 'North Side'],
+    'Curaçao': ['Willemstad', 'Sint Michiel', 'Barber', 'Dorp Soto', 'Newport'],
+    'Turks and Caicos Islands': ['Cockburn Town', 'Providenciales', 'Balfour Town', 'Kew', 'Whitby'],
+    'Sint Maarten': ['Philipsburg', 'Lower Prince\'s Quarter', 'Cul de Sac', 'Cole Bay', 'Marigot'],
+    'British Virgin Islands': ['Road Town', 'Spanish Town', 'The Settlement', 'Great Harbour', 'East End-Long Look']
   }
 };

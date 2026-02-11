@@ -112,11 +112,11 @@ export default function RelocationHub() {
   useEffect(() => {
     const fetchPreview = async () => {
       if (!id || !assessment) return;
-      
+
       try {
         setLoadingPreview(true);
         setPreviewError(null);
-        
+
         const response = await fetch(`/api/assessments/${id}/report-preview`);
         if (response.ok) {
           const data = await response.json();
@@ -332,7 +332,7 @@ export default function RelocationHub() {
                   <span className="mr-2">📝</span>
                   Your Report Will Cover The Below Subjects
                 </h4>
-                
+
                 {loadingPreview ? (
                   <div className="flex items-center justify-center py-6">
                     <div className="animate-spin w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full mr-3"></div>
@@ -341,7 +341,7 @@ export default function RelocationHub() {
                 ) : previewError ? (
                   <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
                     <p className="text-red-700 font-bold text-lg">Error: {previewError}</p>
-                    <button 
+                    <button
                       onClick={() => window.location.reload()}
                       className="text-blue-600 underline mt-3 font-semibold hover:text-blue-800"
                     >
@@ -425,6 +425,39 @@ export default function RelocationHub() {
                 </p>
                 <div className="text-xs text-gray-500 mb-4">
                   <p><strong>Services:</strong> Visa Applications, Legal Documentation, Residency Planning</p>
+                </div>
+                <div className="text-sm text-blue-600 font-medium">Visit Website →</div>
+              </a>
+
+              {/* Henley & Partners */}
+              <a
+                href="https://www.henleyglobal.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <ExternalLink className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Henley & Partners</h4>
+                      <div className="flex items-center space-x-1">
+                        <div className="flex text-yellow-400">
+                          {'★'.repeat(5)}
+                        </div>
+                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Residence & Citizenship</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-blue-600 mb-2">Citizenship Planning</p>
+                <p className="text-sm text-gray-600 mb-3">
+                  The global leader in residence and citizenship by investment, helping you acquire alternative residence or citizenship.
+                </p>
+                <div className="text-xs text-gray-500 mb-4">
+                  <p><strong>Services:</strong> Citizenship by Investment, Residence Planning, Global Mobility</p>
                 </div>
                 <div className="text-sm text-blue-600 font-medium">Visit Website →</div>
               </a>
