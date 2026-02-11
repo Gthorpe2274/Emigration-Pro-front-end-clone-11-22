@@ -200,6 +200,14 @@ export default function Home() {
                   <span className="mr-2">📋</span>
                   Get Your Report
                 </button>
+                <div className="mt-4">
+                  <Link
+                    to="/sample-report"
+                    className="inline-flex items-center text-blue-600 hover:text-blue-700 underline px-4 py-2 rounded-full font-semibold text-lg"
+                  >
+                    View a Sample Report Section
+                  </Link>
+                </div>
               </div>
 
               {/* Right Image */}
@@ -250,14 +258,7 @@ export default function Home() {
               >
                 Start Your Assessment Now
               </Link>
-              <div className="mt-4">
-                <Link
-                  to="/sample-report"
-                  className="inline-flex items-center text-blue-600 hover:text-blue-700 underline px-4 py-2 rounded-full font-semibold text-lg"
-                >
-                  View a Sample Report Section
-                </Link>
-              </div>
+
             </div>
           </div>
         </div>
