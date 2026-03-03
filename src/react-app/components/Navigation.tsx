@@ -9,7 +9,7 @@ export default function Navigation() {
           <Link to="/" className="flex items-center space-x-3">
             <div className="inline-block">
               <img
-                src="https://e10922871bed0cc3848d-7d0b257190f7dc575c87f2234e91f8d7.ssl.cf5.rackcdn.com/Media/Images/logo%20horiaontal.png"
+                src="/images/logo-full.png"
                 alt="Emigration Pro"
                 className="h-14 w-auto"
               />

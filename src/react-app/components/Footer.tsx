@@ -22,7 +22,7 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <div className="mb-6">
               <img
-                src="https://e10922871bed0cc3848d-7d0b257190f7dc575c87f2234e91f8d7.ssl.cf5.rackcdn.com/Media/Images/logo%20only.png"
+                src="/images/logo-square.png"
                 alt="Emigration Pro Logo"
                 className="h-16 w-auto mb-4"
               />

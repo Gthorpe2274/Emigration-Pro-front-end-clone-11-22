@@ -60,7 +60,7 @@ export default function SocialLogin() {
   const handleConnect = (platform: SocialPlatform) => {
     // In a real implementation, this would handle OAuth flow
     setConnectedPlatforms(prev => [...prev, platform.name]);
-    
+
     // Simulate opening OAuth popup
     window.open(
       platform.loginUrl,
@@ -77,16 +77,16 @@ export default function SocialLogin() {
       <div className="bg-white shadow-sm border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
               Back to Emigration Pro
             </Link>
-            <img 
-              src="https://e10922871bed0cc3848d-7d0b257190f7dc575c87f2234e91f8d7.ssl.cf5.rackcdn.com/Media/Images/logo%20only.png" 
-              alt="Emigration Pro" 
+            <img
+              src="/images/logo-square.png"
+              alt="Emigration Pro"
               className="h-8"
             />
           </div>
@@ -103,7 +103,7 @@ export default function SocialLogin() {
             Connect & Share Your Journey
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Connect your social media accounts to share your emigration experience and 
+            Connect your social media accounts to share your emigration experience and
             inspire others considering their international move.
           </p>
         </div>
@@ -139,8 +139,8 @@ export default function SocialLogin() {
                 disabled={isConnected(platform.name)}
                 className={`
                   w-full flex items-center justify-center px-6 py-3 rounded-lg font-medium text-white transition-all duration-200
-                  ${isConnected(platform.name) 
-                    ? 'bg-green-500 cursor-not-allowed' 
+                  ${isConnected(platform.name)
+                    ? 'bg-green-500 cursor-not-allowed'
                     : `${platform.color} ${platform.hoverColor} transform hover:scale-105`
                   }
                 `}
