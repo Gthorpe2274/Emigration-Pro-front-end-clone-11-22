@@ -113,15 +113,16 @@ export default function Home() {
                 <span className="text-5xl font-bold text-blue-600">1</span>
               </div>
               <h4 className="text-3xl font-semibold text-gray-900 mb-3">Free Assessment</h4>
-              <p className="text-xl text-gray-600">Answer questions about your preferences, age, profession, and priorities</p>
+              <p className="text-xl text-gray-600 mb-4">Answer questions about your preferences, age, profession, and priorities</p>
+              <p className="text-xl text-gray-600">Receive an instant compatibility analysis for your chosen destination</p>
             </div>
 
             <div className="text-center">
               <div className="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-5xl font-bold text-purple-600">2</span>
               </div>
-              <h4 className="text-3xl font-semibold text-gray-900 mb-3">Get Compatibility Score</h4>
-              <p className="text-xl text-gray-600">Receive an instant compatibility analysis for your chosen destination</p>
+              <h4 className="text-3xl font-semibold text-gray-900 mb-3">Relocation Hub</h4>
+              <p className="text-xl text-gray-600">Your selected city personalized source for information including, lists of Professional service providers, expat videos, online support communities and more...</p>
             </div>
 
             <div className="text-center">
