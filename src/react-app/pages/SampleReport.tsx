@@ -142,6 +142,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Comprehensive Healthcare Mapping</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Healthcare Strategy Report: 78-Year-Old Professional in Rio de Janeiro</h1>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">Neighborhood-Specific Hospital Rankings</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
@@ -220,6 +223,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Cost of Living & Hyper-Local Financial Plan</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <div className="my-6">
                     <a href="https://www.google.com/search?q=convert+BRL+to+usd" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-3 px-6 rounded-xl text-sm transition-all border border-indigo-200 shadow-sm">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -424,6 +430,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Political Stability & Security</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <p className="leading-relaxed mb-6 text-slate-950 font-medium text-base">This analysis provides a comprehensive overview of the political and security environment in Brazil, with a specific focus on Rio de Janeiro, for the 2024–2025 period.</p>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">1. Current Political Landscape</h1>
                   <p className="leading-relaxed mb-6 text-slate-950 font-medium">The Brazilian political environment remains deeply polarized, characterized by a tension between the executive branch and segments of the opposition, as well as significant judicial activity involving high-ranking figures.</p>
@@ -466,6 +475,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Environmental & Water Quality</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Environmental Health Assessment: Rio de Janeiro</h1>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Tap Water Analysis: Potability and Risk Factors</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
@@ -501,6 +513,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Digital Connectivity & Internet</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Digital Infrastructure Report: Rio de Janeiro (2024–2025)</h1>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Home Internet: Fiber Optic Infrastructure</h2>
                   <h3 className="text-lg font-black mt-8 mb-4 text-slate-950 leading-tight uppercase tracking-wider">Major Providers and Typical Plans</h3>
@@ -529,6 +544,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Infrastructure & Power Reliability</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Critical Urban Infrastructure Analysis</h1>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Power Grid Reliability</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
@@ -554,6 +572,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Retail Ecosystem & Food Supply</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Retail and Food Supply Chain Dossier</h1>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Major Hypermarkets vs. Local Markets</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
@@ -580,6 +601,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Mobility & Urban Connectivity</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Rio de Janeiro Transportation White-Paper</h1>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Public Transit Analysis</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
@@ -600,6 +624,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Culture, Arts & Entertainment</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Rio de Janeiro Cultural and Entertainment Dossier</h1>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Annual Calendar of Major Festivals</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
@@ -624,6 +651,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Sports & Active Recreation</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Professional Sports and Personal Fitness</h1>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Professional Sports</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
@@ -644,6 +674,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Senior & Retirement Benefits</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Senior Benefits and Tax Advantages</h1>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Tax Advantages (65+)</h2>
                   <p className="leading-relaxed mb-6 text-slate-950 font-medium">Double exemption bracket for retirement income. Reciprocity treaties prevent double taxation with USA/UK/Germany.</p>
@@ -665,6 +698,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Professional Risk Analysis</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">SWOT Analysis: Retirement in Rio (Age 78)</h1>
                   <h3 className="text-lg font-black mt-8 mb-4 text-slate-950 leading-tight uppercase tracking-wider">Strengths & Opportunities</h3>
                   <p className="leading-relaxed mb-6 text-slate-950 font-medium">High purchasing power with foreign currency, world-class healthcare in Zona Sul, and strong social integration for seniors. Real estate in premium neighborhoods serves as a strong hedge.</p>
@@ -684,6 +720,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Legal Visa & Residency Dossier</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Legal Dossier: Residency in Brazil</h1>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Retirement Visa (VITEM XIV)</h2>
                   <p className="leading-relaxed mb-6 text-slate-950 font-medium">Proof of USD 2,000/mo recurring income required. Apostilled documents and sworn translations are mandatory.</p>
@@ -701,6 +740,9 @@ export function SampleReport() {
               <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Master Relocation Timeline & Guide (full details in purchased Report)</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
+                  <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
+                    This is a partial sample
+                  </div>
                   <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Rio de Janeiro Relocation Roadmap</h1>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">Chronological Checklist</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
