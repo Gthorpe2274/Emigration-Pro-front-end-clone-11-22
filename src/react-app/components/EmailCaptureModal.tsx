@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Mail, X, ArrowRight } from 'lucide-react';
 
 interface EmailCaptureModalProps {
@@ -12,6 +12,13 @@ export default function EmailCaptureModal({ isOpen, onClose, onSubmit, assessmen
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Capture affiliate ref code from URL on first load and persist it in sessionStorage
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref');
+    if (ref) sessionStorage.setItem('affiliateRef', ref);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -29,12 +36,15 @@ export default function EmailCaptureModal({ isOpen, onClose, onSubmit, assessmen
 
     try {
       // Store email lead in database and create CRM record
+      const affiliateCode = sessionStorage.getItem('affiliateRef') || null;
+
       const response = await fetch('/api/subscribe-for-permanent-access', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email.toLowerCase(),
           assessment_id: assessmentId,
+          affiliate_code: affiliateCode,
         }),
       });
 

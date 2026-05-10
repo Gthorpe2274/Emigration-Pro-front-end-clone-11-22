@@ -1238,22 +1238,24 @@ This access code provides 2 years of access to your relocation hub. Keep this in
 // Creates CRM record and redirects to https://report.emigrationpro.com
 const EmailLeadSchema = z.object({
   email: z.string().email(),
-  assessment_id: z.number().optional()
+  assessment_id: z.number().optional(),
+  affiliate_code: z.string().optional().nullable()
 });
 
 app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSchema), async (c) => {
   try {
-    const { email, assessment_id } = c.req.valid("json");
+    const { email, assessment_id, affiliate_code } = c.req.valid("json");
     const normalizedEmail = email.toLowerCase();
 
     // 1. Store email lead in email_leads table for tracking
     try {
       await c.env.DB.prepare(`
-        INSERT INTO email_leads (email, assessment_id, source)
-        VALUES (?, ?, 'report_generation_gateway')
+        INSERT INTO email_leads (email, assessment_id, source, affiliate_code)
+        VALUES (?, ?, 'report_generation_gateway', ?)
       `).bind(
         normalizedEmail,
-        assessment_id || null
+        assessment_id || null,
+        affiliate_code || null
       ).run();
     } catch (leadError) {
       // Continue even if email_leads insert fails
@@ -1280,6 +1282,12 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
       sessionCode = (existingAccess as any).session_code;
       accessId = (existingAccess as any).id;
       finalAssessmentId = (existingAccess as any).assessment_id;
+      // Store affiliate code if not already set
+      if (affiliate_code && !(existingAccess as any).affiliate_code) {
+        await c.env.DB.prepare(
+          "UPDATE relocation_hub_access SET affiliate_code = ? WHERE id = ?"
+        ).bind(affiliate_code, accessId).run();
+      }
       console.log(`Using existing CRM record for ${normalizedEmail}, session: ${sessionCode}`);
     } else {
       // 3. Generate unique session code (format: XXXX-XXXX-XXXX)
@@ -1338,15 +1346,16 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
       // 6. Create relocation_hub_access record in CRM (this is what CRM reads from)
       const result = await c.env.DB.prepare(`
         INSERT INTO relocation_hub_access (
-          assessment_id, email, session_code, is_active, purchase_confirmed, expires_at
-        ) VALUES (?, ?, ?, ?, ?, ?)
+          assessment_id, email, session_code, is_active, purchase_confirmed, expires_at, affiliate_code
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
       `).bind(
         finalAssessmentId,
         normalizedEmail,
         sessionCode,
         0, // is_active (inactive until purchase confirmed)
         0, // purchase_confirmed (false - they're accessing report generation)
-        expires_at.toISOString()
+        expires_at.toISOString(),
+        affiliate_code || null
       ).run();
 
       accessId = result.meta?.last_row_id || 0;
@@ -1388,6 +1397,63 @@ app.post("/api/admin/cleanup", async (c) => {
     }, 500);
   }
 });
+
+// Records a sale conversion in the Supabase affiliate system
+async function recordAffiliateConversion(env: Env, email: string, assessmentId: number): Promise<void> {
+  try {
+    const access = await env.DB.prepare(
+      "SELECT affiliate_code FROM relocation_hub_access WHERE email = ? AND assessment_id = ?"
+    ).bind(email, assessmentId).first();
+
+    const affiliateCode = (access as any)?.affiliate_code;
+    if (!affiliateCode) return;
+
+    const supabaseUrl = env.SUPABASE_URL;
+    const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !supabaseKey) {
+      console.warn('Supabase credentials not set — skipping affiliate conversion recording');
+      return;
+    }
+
+    // Look up affiliate by unique_affiliate_id
+    const affRes = await fetch(
+      `${supabaseUrl}/rest/v1/affiliates?unique_affiliate_id=eq.${encodeURIComponent(affiliateCode)}&select=id,commission_rate&limit=1`,
+      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+    );
+    const affiliates = await affRes.json() as any[];
+    if (!affiliates?.length) {
+      console.warn(`No affiliate found for code: ${affiliateCode}`);
+      return;
+    }
+
+    const affiliate = affiliates[0];
+    const reportPrice = parseFloat(env.REPORT_PRICE_USD || '49');
+    const commissionRate = affiliate.commission_rate ?? 35;
+    const commissionAmount = parseFloat(((reportPrice * commissionRate) / 100).toFixed(2));
+
+    await fetch(`${supabaseUrl}/rest/v1/conversions`, {
+      method: 'POST',
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify({
+        affiliate_id: affiliate.id,
+        stripe_payment_intent_id: `emipro_${Date.now()}_${affiliateCode}`,
+        gross_sale_amount: reportPrice,
+        commission_amount: commissionAmount,
+        status: 'pending'
+      })
+    });
+
+    console.log(`Affiliate conversion recorded: code=${affiliateCode}, commission=$${commissionAmount}`);
+  } catch (err) {
+    // Never block access activation due to tracking failure
+    console.error('Failed to record affiliate conversion:', err);
+  }
+}
 
 // Create permanent relocation hub access after purchase
 const PermanentAccessSchema = z.object({
@@ -1524,6 +1590,11 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
 
         console.log(`Extended assessment ${assessment_id} retention period to 2 years for purchase`);
       }
+    }
+
+    // Record affiliate conversion if this purchase came via a referral link
+    if (purchase_confirmed) {
+      await recordAffiliateConversion(c.env, normalizedEmail, assessment_id);
     }
 
     // Send email with relocation hub access information (only if purchase is confirmed)
