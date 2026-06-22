@@ -51,6 +51,22 @@ export default function BlogPost() {
     }
   };
 
+  const extractStyles = (html: string): { styles: string; body: string } => {
+    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+    let styles = '';
+    let body = html;
+
+    let match;
+    while ((match = styleRegex.exec(html)) !== null) {
+      styles += match[1] + '\n';
+    }
+
+    // Remove all style tags from body
+    body = body.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+
+    return { styles, body };
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -162,10 +178,30 @@ export default function BlogPost() {
                   {post.title}
                 </h1>
 
-                <div
-                  className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
-                  dangerouslySetInnerHTML={{ __html: post.body.replace(/\n/g, '<br />') }}
-                />
+                {(() => {
+                  const { styles, body } = extractStyles(post.body);
+                  
+                  // Detect if the content contains block-level HTML tags
+                  const hasBlockTags = /<(p|div|table|section|article|ul|ol|h[1-6]|style)/i.test(body);
+                  
+                  // Only auto-insert <br /> if no block-level HTML tags are present
+                  // This prevents breaking complex HTML structures like tables
+                  const processedBody = hasBlockTags 
+                    ? body 
+                    : body.replace(/\n/g, '<br />');
+
+                  return (
+                    <>
+                      {styles && <style>{styles}</style>}
+                      <div className="overflow-x-auto">
+                        <div
+                        className="max-w-none prose prose-lg prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900 prose-table:mt-4 prose-table:mb-4 prose-table:border-collapse prose-table:w-full prose-thead:bg-gray-50 prose-th:text-left prose-th:border prose-th:border-gray-300 prose-th:px-4 prose-th:py-2 prose-td:border prose-td:border-gray-300 prose-td:px-4 prose-td:py-2"
+                          dangerouslySetInnerHTML={{ __html: processedBody }}
+                        />
+                      </div>
+                    </>
+                  );
+                })()}
 
                 {post.allow_comments && (
                   <div className="mt-12 pt-8 border-t border-gray-200">
