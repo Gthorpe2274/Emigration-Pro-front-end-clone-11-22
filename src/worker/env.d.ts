@@ -12,6 +12,8 @@ interface Env {
   OPENAI_API_KEY?: string;
   RESEND_API_KEY?: string;
   YOUTUBE_API_KEY?: string;
+  ADMIN_USERNAME: string;
+  ADMIN_PASSWORD: string;
   // Affiliate system (Supabase) — set via wrangler secret put
   SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;

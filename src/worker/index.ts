@@ -320,10 +320,19 @@ app.get('/api/debug/gemini-curate', async (c) => {
 });
 
 // Middleware for blog admin API authentication (simplified - no API key required)
-const blogAdminAuth = async (c: any, next: any) => {
-  // No authentication check - relying on frontend password protection
+const adminAuth = async (c: any, next: any) => {
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return c.json({ error: 'Authentication required' }, 401);
+  }
+  const token = authHeader.substring(7);
+  const session = await c.env.REPORTS_KV.get(`admin_session:${token}`);
+  if (!session) {
+    return c.json({ error: 'Invalid or expired session' }, 401);
+  }
   await next();
 };
+
 
 // Health check endpoint
 app.get('/api/health', async (c) => {
@@ -343,6 +352,37 @@ app.get('/api/health', async (c) => {
       timestamp: new Date().toISOString()
     }, 500);
   }
+});
+
+// Admin login endpoint with rate limiting (5 attempts per 15 minutes)
+app.post('/api/admin/login', async (c) => {
+  const ip = c.req.header('CF-Connecting-IP') || c.req.header('X-Forwarded-For') || 'unknown';
+  const attemptsKey = `admin_login_attempts:${ip}`;
+  const attemptsRaw = await c.env.REPORTS_KV.get(attemptsKey);
+  const attempts = attemptsRaw ? parseInt(attemptsRaw) : 0;
+  if (attempts >= 5) {
+    return c.json({ error: 'Too many login attempts. Try later.' }, 429);
+  }
+  const { username, password } = await c.req.json();
+  if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+    await c.env.REPORTS_KV.put(attemptsKey, String(attempts + 1), { expirationTtl: 900 });
+    return c.json({ error: 'Invalid credentials' }, 401);
+  }
+  // Successful login: reset attempts
+  await c.env.REPORTS_KV.delete(attemptsKey);
+  const token = crypto.randomUUID();
+  await c.env.REPORTS_KV.put(`admin_session:${token}`, 'active', { expirationTtl: 86400 });
+  return c.json({ token });
+});
+
+// Rotate admin sessions endpoint
+app.post('/api/admin/rotate-sessions', adminAuth, async (c) => {
+  const list = await c.env.REPORTS_KV.list({ prefix: 'admin_session:' });
+  const keys = list.keys.map(k => k.name);
+  for (const key of keys) {
+    await c.env.REPORTS_KV.delete(key);
+  }
+  return c.json({ rotated: keys.length });
 });
 
 // Assessment submission schema - aligned with shared types
@@ -1925,37 +1965,7 @@ app.post("/api/relocation-hub/:assessmentId/videos/update", async (c) => {
   }
 });
 
-// CRM endpoint - Get all purchaser records
-app.get("/api/admin/crm/purchasers", async (c) => {
-  try {
-    const purchasers = await c.env.DB.prepare(`
-      SELECT 
-        rha.id,
-        rha.email,
-        rha.session_code,
-        rha.assessment_id,
-        rha.purchase_confirmed,
-        rha.is_active,
-        rha.created_at,
-        rha.expires_at,
-        a.preferred_country,
-        a.preferred_city,
-        a.overall_score
-      FROM relocation_hub_access rha
-      LEFT JOIN assessments a ON rha.assessment_id = a.id
-      ORDER BY rha.created_at DESC
-    `).all();
 
-    return c.json({
-      success: true,
-      purchasers: purchasers.results,
-      total: purchasers.results.length
-    });
-  } catch (error) {
-    console.error("Error fetching purchasers:", error);
-    return c.json({ error: "Failed to fetch purchaser data" }, 500);
-  }
-});
 
 // Get all email leads
 app.get("/api/admin/email-leads", async (c) => {
@@ -2016,7 +2026,7 @@ const BlogPostSchema = z.object({
 // Duplicate routes removed - using the ones defined above at lines 809 and 889
 
 // Admin: Get all blog posts (including drafts)
-app.get("/api/admin/blog/posts", blogAdminAuth, async (c) => {
+app.get("/api/admin/blog/posts", adminAuth, async (c) => {
   try {
     const posts = await c.env.DB.prepare(`
       SELECT * FROM blog_posts
@@ -2034,7 +2044,7 @@ app.get("/api/admin/blog/posts", blogAdminAuth, async (c) => {
 });
 
 // Admin: Create blog post
-app.post("/api/admin/blog/posts", blogAdminAuth, async (c) => {
+app.post("/api/admin/blog/posts", adminAuth, async (c) => {
   try {
     // Parse request body
     const body = await c.req.json();
@@ -2095,7 +2105,7 @@ app.post("/api/admin/blog/posts", blogAdminAuth, async (c) => {
 });
 
 // Admin: Update blog post
-app.put("/api/admin/blog/posts/:id", blogAdminAuth, async (c) => {
+app.put("/api/admin/blog/posts/:id", adminAuth, async (c) => {
   try {
     const id = c.req.param("id");
 
@@ -2166,7 +2176,7 @@ app.put("/api/admin/blog/posts/:id", blogAdminAuth, async (c) => {
 });
 
 // Admin: Delete blog post
-app.delete("/api/admin/blog/posts/:id", blogAdminAuth, async (c) => {
+app.delete("/api/admin/blog/posts/:id", adminAuth, async (c) => {
   try {
     const id = c.req.param("id");
 
@@ -2313,12 +2323,12 @@ async function handleGenerateImage(c: any) {
 }
 
 // Admin: Generate image for blog post
-app.post("/api/admin/blog/generate-image", blogAdminAuth, async (c) => {
+app.post("/api/admin/blog/generate-image", adminAuth, async (c) => {
   return handleGenerateImage(c);
 });
 
 // Admin: Upload image for blog post
-app.post("/api/admin/blog/upload-image", blogAdminAuth, async (c) => {
+app.post("/api/admin/blog/upload-image", adminAuth, async (c) => {
   try {
     const formData = await c.req.formData();
     const file = formData.get('image') as any as File;
