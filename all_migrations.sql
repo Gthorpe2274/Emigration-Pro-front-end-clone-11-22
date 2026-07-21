@@ -1,4 +1,4 @@
-﻿
+
 CREATE TABLE assessments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_age INTEGER,
@@ -134,3 +134,9 @@ CREATE TABLE email_leads (
 
 CREATE INDEX idx_email_leads_email ON email_leads(email);
 CREATE INDEX idx_email_leads_assessment_id ON email_leads(assessment_id);
+
+CREATE TABLE IF NOT EXISTS site_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT
+);
+

@@ -25,6 +25,7 @@ export default function Navigation() {
               Assessment
             </Link>
             <Link to="/best-countries" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Popular Countries</Link>
+            <Link to="/earn-abroad" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Earn Abroad</Link>
             <Link to="/sample-report" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Sample Report</Link>
             <Link to="/blog" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Blog</Link>
             <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">About Us</Link>

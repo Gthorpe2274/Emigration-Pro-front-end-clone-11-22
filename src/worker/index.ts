@@ -364,7 +364,7 @@ app.post('/api/admin/login', async (c) => {
     return c.json({ error: 'Too many login attempts. Try later.' }, 429);
   }
   const { username, password } = await c.req.json();
-  if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+  if (username !== c.env.ADMIN_USERNAME || password !== c.env.ADMIN_PASSWORD) {
     await c.env.REPORTS_KV.put(attemptsKey, String(attempts + 1), { expirationTtl: 900 });
     return c.json({ error: 'Invalid credentials' }, 401);
   }
@@ -880,6 +880,20 @@ app.put('/api/admin/crm/purchasers/:id', async (c) => {
 // Public: Get all published posts
 app.get('/api/blog/posts', async (c) => {
   try {
+    // Ensure site_settings table exists
+    await c.env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS site_settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+      )
+    `).run();
+
+    // Check if we have already seeded
+    const seededResult = await c.env.DB.prepare(
+      'SELECT value FROM site_settings WHERE key = ?'
+    ).bind('blog_seeded').first();
+    const blogSeeded = seededResult ? seededResult.value === 'true' : false;
+
     let { results } = await c.env.DB.prepare(`
       SELECT id, title, slug, featured_image, excerpt, published_date, author
       FROM blog_posts 
@@ -887,60 +901,67 @@ app.get('/api/blog/posts', async (c) => {
       ORDER BY published_date DESC, created_at DESC
     `).all();
 
-    // Check if ANY posts exist (published or draft) to decide on seeding
-    // This prevents seeding conflicts if only drafts exist
-    const totalCountResult = await c.env.DB.prepare('SELECT COUNT(*) as count FROM blog_posts').first();
-    const totalCount = totalCountResult ? (totalCountResult.count as number) : 0;
+    // Auto-seed only if we haven't seeded before
+    if (!blogSeeded) {
+      // Check if ANY posts exist (published or draft) to decide on seeding
+      // This prevents seeding conflicts if only drafts exist
+      const totalCountResult = await c.env.DB.prepare('SELECT COUNT(*) as count FROM blog_posts').first();
+      const totalCount = totalCountResult ? (totalCountResult.count as number) : 0;
 
-    // Auto-seed only if database is completely empty
-    if (totalCount === 0) {
-      console.log('Seeding initial blog posts...');
-      const initialPosts = [
-        {
-          title: "Top 10 Countries for US Expats in 2024",
-          slug: "top-10-countries-us-expats-2024",
-          featured_image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80",
-          body: "Discover the best destinations for Americans looking to move abroad, considering safety, healthcare, and cost of living. <br/><br/> 1. Portugal... <br/> 2. Costa Rica...",
-          excerpt: "Discover the best destinations for Americans looking to move abroad, considering safety, healthcare, and cost of living.",
-          published_date: new Date().toISOString(),
-          is_published: 1,
-          allow_comments: 1,
-          author: "Emigration Pro Team"
-        },
-        {
-          title: "The Ultimate Guide to Digital Nomad Visas",
-          slug: "ultimate-guide-digital-nomad-visas",
-          featured_image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80",
-          body: "Learn which countries offer the best digital nomad visas and how to apply for them to work remotely from paradise. <br/><br/> Digital nomad visas are becoming increasingly popular...",
-          excerpt: "Learn which countries offer the best digital nomad visas and how to apply for them to work remotely from paradise.",
-          published_date: new Date().toISOString(),
-          is_published: 1,
-          allow_comments: 1,
-          author: "Emigration Pro Team"
-        },
-        {
-          title: "Moving Abroad Checklist: What to Do Before You Go",
-          slug: "moving-abroad-checklist",
-          featured_image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
-          body: "A comprehensive checklist to ensure a smooth transition to your new life abroad, from banking to packing. <br/><br/> 1. Visa... <br/> 2. Banking...",
-          excerpt: "A comprehensive checklist to ensure a smooth transition to your new life abroad, from banking to packing.",
-          published_date: new Date().toISOString(),
-          is_published: 1,
-          allow_comments: 1,
-          author: "Emigration Pro Team"
+      if (totalCount === 0) {
+        console.log('Seeding initial blog posts...');
+        const initialPosts = [
+          {
+            title: "Top 10 Countries for US Expats in 2024",
+            slug: "top-10-countries-us-expats-2024",
+            featured_image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=800&q=80",
+            body: "Discover the best destinations for Americans looking to move abroad, considering safety, healthcare, and cost of living. <br/><br/> 1. Portugal... <br/> 2. Costa Rica...",
+            excerpt: "Discover the best destinations for Americans looking to move abroad, considering safety, healthcare, and cost of living.",
+            published_date: new Date().toISOString(),
+            is_published: 1,
+            allow_comments: 1,
+            author: "Emigration Pro Team"
+          },
+          {
+            title: "The Ultimate Guide to Digital Nomad Visas",
+            slug: "ultimate-guide-digital-nomad-visas",
+            featured_image: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&q=80",
+            body: "Learn which countries offer the best digital nomad visas and how to apply for them to work remotely from paradise. <br/><br/> Digital nomad visas are becoming increasingly popular...",
+            excerpt: "Learn which countries offer the best digital nomad visas and how to apply for them to work remotely from paradise.",
+            published_date: new Date().toISOString(),
+            is_published: 1,
+            allow_comments: 1,
+            author: "Emigration Pro Team"
+          },
+          {
+            title: "Moving Abroad Checklist: What to Do Before You Go",
+            slug: "moving-abroad-checklist",
+            featured_image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
+            body: "A comprehensive checklist to ensure a smooth transition to your new life abroad, from banking to packing. <br/><br/> 1. Visa... <br/> 2. Banking...",
+            excerpt: "A comprehensive checklist to ensure a smooth transition to your new life abroad, from banking to packing.",
+            published_date: new Date().toISOString(),
+            is_published: 1,
+            allow_comments: 1,
+            author: "Emigration Pro Team"
+          }
+        ];
+
+        for (const post of initialPosts) {
+          // Use INSERT OR IGNORE to be extra safe against race conditions or partial failures
+          await c.env.DB.prepare(`
+            INSERT OR IGNORE INTO blog_posts (title, slug, featured_image, body, excerpt, published_date, is_published, allow_comments, author)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            post.title, post.slug, post.featured_image, post.body, post.excerpt,
+            post.published_date, post.is_published, post.allow_comments, post.author
+          ).run();
         }
-      ];
-
-      for (const post of initialPosts) {
-        // Use INSERT OR IGNORE to be extra safe against race conditions or partial failures
-        await c.env.DB.prepare(`
-          INSERT OR IGNORE INTO blog_posts (title, slug, featured_image, body, excerpt, published_date, is_published, allow_comments, author)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(
-          post.title, post.slug, post.featured_image, post.body, post.excerpt,
-          post.published_date, post.is_published, post.allow_comments, post.author
-        ).run();
       }
+
+      // Mark as seeded in the database
+      await c.env.DB.prepare(`
+        INSERT OR REPLACE INTO site_settings (key, value) VALUES (?, ?)
+      `).bind('blog_seeded', 'true').run();
 
       // Re-fetch
       const newResults = await c.env.DB.prepare(`
