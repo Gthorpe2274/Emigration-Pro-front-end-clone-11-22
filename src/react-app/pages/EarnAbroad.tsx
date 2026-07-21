@@ -16,12 +16,15 @@ export default function EarnAbroad() {
           <p className="text-xl text-gray-700 mb-8 font-medium">
             Discover how to build a sustainable, self-employed life while living in your dream destination.
           </p>
-          <div className="flex justify-center space-x-4">
+          <div className="flex flex-col items-center gap-4">
+            <p className="text-xl font-bold text-blue-800">
+              Start Earning Now and Take Your Earning Power With You!
+            </p>
             <Link
-              to="/assessment"
-              className="bg-blue-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-blue-700 transition-colors"
+              to="/living-wage-business"
+              className="bg-blue-600 text-white px-10 py-4 rounded-full font-bold text-xl hover:bg-blue-700 transition-all transform hover:scale-105 shadow-lg"
             >
-              Find Your Best Country
+              Earn Now
             </Link>
           </div>
         </div>

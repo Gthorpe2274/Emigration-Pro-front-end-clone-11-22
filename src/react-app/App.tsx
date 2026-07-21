@@ -25,6 +25,7 @@ import BlogPost from './pages/BlogPost';
 import BlogAdmin from './pages/BlogAdmin';
 import Blog from './pages/Blog';
 import EarnAbroad from './pages/EarnAbroad';
+import LivingWageBusiness from './pages/LivingWageBusiness';
 import FileConverter from './pages/FileConverter';
 import AdminReportGen from './pages/AdminReportGen';
 
@@ -59,6 +60,7 @@ function App() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/earn-abroad" element={<EarnAbroad />} />
+        <Route path="/living-wage-business" element={<LivingWageBusiness />} />
         <Route path="/file-converter" element={<FileConverter />} />
       </Routes>
     </Router>
