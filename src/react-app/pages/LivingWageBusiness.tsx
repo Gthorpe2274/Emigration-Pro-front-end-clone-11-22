@@ -51,7 +51,7 @@ export default function LivingWageBusiness() {
               <div className="aspect-video mb-4 overflow-hidden rounded-2xl">
                 <iframe
                   className="w-full h-full"
-                  src="https://www.youtube.com/embed/gFWDM0xDROw"
+                  src="https://www.youtube.com/embed/VzhY_-IYwoU"
                   title="Living Wage Business Training 2"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
