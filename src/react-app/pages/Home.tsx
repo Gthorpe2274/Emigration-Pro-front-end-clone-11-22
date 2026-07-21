@@ -42,10 +42,13 @@ export default function Home() {
             <h2 className="text-5xl md:text-6xl font-bold text-gray-800 mb-3 leading-tight">
               How To Leave The U.S.
             </h2>
-            <p className="text-2xl md:text-3xl font-medium text-gray-700 mb-6 italic leading-relaxed">
+            <p className="text-2xl md:text-3xl font-medium text-gray-700 mb-2 italic leading-relaxed">
               <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
                 Find Your Perfect International Destination
               </span>
+            </p>
+            <p className="text-lg text-blue-700 mb-6 font-semibold italic max-w-2xl mx-auto leading-relaxed">
+              “You don’t leave to stay in a country — you leave to stay in a particular city in that country. Get the real details you need, where others fail.”
             </p>
 
             <div className="inline-block bg-white px-8 py-6 border-2 border-gray-300 shadow-xl mb-10 mx-auto max-w-3xl">
