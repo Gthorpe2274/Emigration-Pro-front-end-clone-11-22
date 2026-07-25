@@ -15,7 +15,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-black py-12 px-6 relative">
+    <footer className="bg-brand-ink py-12 px-6 relative font-brand-sans">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Logo and Description Section */}
@@ -97,17 +97,17 @@ export default function Footer() {
 
           {/* Services Column */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">Services</h3>
+            <h3 className="text-white text-lg font-semibold mb-4 font-brand-serif">Services</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/assessment" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link to="/assessment" className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm">
                   Country Assessment
                 </Link>
               </li>
               <li>
                 <button
                   onClick={() => setShowConsultationPopup(true)}
-                  className="text-gray-300 hover:text-white transition-colors text-sm text-left focus:outline-none"
+                  className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm text-left focus:outline-none"
                 >
                   Emigration Consultation
                 </button>
@@ -115,7 +115,7 @@ export default function Footer() {
               <li>
                 <button
                   onClick={() => setShowRelocationPopup(true)}
-                  className="text-gray-300 hover:text-white transition-colors text-sm text-left focus:outline-none"
+                  className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm text-left focus:outline-none"
                 >
                   Relocation Planning
                 </button>
@@ -125,13 +125,13 @@ export default function Footer() {
 
           {/* Resources Column */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">Resources</h3>
+            <h3 className="text-white text-lg font-semibold mb-4 font-brand-serif">Resources</h3>
             <ul className="space-y-3">
 
               <li className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="text-gray-300 hover:text-white transition-colors text-sm flex items-center focus:outline-none"
+                  className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm flex items-center focus:outline-none"
                   aria-expanded={isDropdownOpen}
                   aria-haspopup="true"
                 >
@@ -154,7 +154,7 @@ export default function Footer() {
                         href="https://www.numbeo.com/cost-of-living/comparison.jsp"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-brand-accent"
                         role="menuitem"
                       >
                         Numbeo Cost of Living
@@ -163,7 +163,7 @@ export default function Footer() {
                         href="https://www.expatistan.com/cost-of-living"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-brand-accent"
                         role="menuitem"
                       >
                         Expatistan Comparison
@@ -178,15 +178,15 @@ export default function Footer() {
 
           {/* Legal Column */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">Legal</h3>
+            <h3 className="text-white text-lg font-semibold mb-4 font-brand-serif">Legal</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/terms" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link to="/terms" className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-gray-300 hover:text-white transition-colors text-sm">
+                <Link to="/privacy" className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm">
                   Privacy Policy
                 </Link>
               </li>
@@ -220,13 +220,13 @@ export default function Footer() {
             </button>
 
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-brand-surface rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-brand-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
 
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Contact Consultation Team</h3>
+              <h3 className="text-2xl font-bold text-brand-ink mb-4 font-brand-serif">Contact Consultation Team</h3>
 
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Please send us an email with your specifics about what subject(s) you wish to have a consultation about and we will get back to you shortly.
@@ -234,7 +234,7 @@ export default function Footer() {
 
               <a
                 href="mailto:info@emigrationpro.com"
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 w-full"
+                className="inline-block bg-brand-btn hover:bg-brand-ink-2 text-brand-btn-ink font-semibold py-3 px-8 rounded-lg transition duration-200 w-full"
               >
                 info@emigrationpro.com
               </a>
@@ -258,13 +258,13 @@ export default function Footer() {
             </button>
 
             <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 bg-brand-surface rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-brand-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
               </div>
 
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Relocation Planning</h3>
+              <h3 className="text-2xl font-bold text-brand-ink mb-4 font-brand-serif">Relocation Planning</h3>
 
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Get Your Full Relocation Planning Report for a step by step guide to relocation planning. Just click the link on this page.
@@ -274,7 +274,7 @@ export default function Footer() {
                   setShowRelocationPopup(false);
                   setShowEmailModal(true);
                 }}
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-200 w-full"
+                className="inline-block bg-brand-btn hover:bg-brand-ink-2 text-brand-btn-ink font-semibold py-3 px-8 rounded-lg transition duration-200 w-full"
               >
                 Get Full Report
               </button>

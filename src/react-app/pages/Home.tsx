@@ -1,9 +1,54 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Users, Star, CheckCircle } from 'lucide-react';
+import { Star } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
+
+const destinations = [
+  { name: 'Portugal', flag: '🇵🇹', tier: 'Tier 1', visa: 'D7 · Golden Visa', desc: 'Robust healthcare, English-friendly cities, and an established expat community in Porto and Lisbon.', cost: '62' },
+  { name: 'Spain', flag: '🇪🇸', tier: 'Tier 1', visa: 'Non-lucrative visa', desc: 'Warm climate, universal healthcare, and a lower cost of living outside Madrid and Barcelona.', cost: '68' },
+  { name: 'Mexico', flag: '🇲🇽', tier: 'Tier 2', visa: 'Temporary resident', desc: 'Close to the US, a favorable tax treaty, and thriving expat hubs in CDMX, Mérida, and Oaxaca.', cost: '48' },
+  { name: 'Costa Rica', flag: '🇨🇷', tier: 'Tier 2', visa: 'Rentista · Pensionado', desc: 'Stable democracy, universal healthcare (Caja), and a mature retirement infrastructure.', cost: '58' },
+];
+
+const reportSections = [
+  { n: '01', title: 'Visa & Residency', desc: 'Legal requirements for visa applications and residency permits.' },
+  { n: '02', title: 'Relocation Timeline', desc: 'Step-by-step master guide with key dates and milestones.' },
+  { n: '03', title: 'Cost of Living', desc: 'Detailed budget planning with hyper-local cost analysis.' },
+  { n: '04', title: 'Healthcare Mapping', desc: 'Hospital rankings and healthcare system comparisons.' },
+  { n: '05', title: 'Retirement Benefits', desc: 'Pensions and senior citizen programs available to expats.' },
+  { n: '06', title: 'Digital Connectivity', desc: 'Internet speed, telecom infrastructure, mobile options.' },
+  { n: '07', title: 'Power & Utilities', desc: 'Reliability of electric, water, and gas infrastructure.' },
+  { n: '08', title: 'Retail & Food', desc: 'Grocery stores, markets, and retail ecosystem availability.' },
+  { n: '09', title: 'Safety & Governance', desc: 'Safety ratings, crime statistics, and political stability.' },
+  { n: '10', title: 'Environment & Water', desc: 'Air quality, water safety, and environmental conditions.' },
+  { n: '11', title: 'Professional Outlook', desc: 'Job market and professional opportunities assessment.' },
+  { n: '12', title: 'Mobility & Transit', desc: 'Public transportation, urban mobility, commute options.' },
+  { n: '13', title: 'Culture & Entertainment', desc: 'Arts, festivals, dining, and cultural experiences.' },
+  { n: '14', title: 'Sports & Recreation', desc: 'Active lifestyle options and outdoor activities.' },
+];
+
+const testimonials = [
+  {
+    initials: 'SR',
+    name: 'Sarah Rodriguez',
+    role: 'Retired teacher · moved to Portugal',
+    quote: 'The Portugal assessment was incredibly detailed and accurate. The report helped us understand exactly what we needed for the Golden Visa program. We’re now happily living in Lisbon!',
+  },
+  {
+    initials: 'MC',
+    name: 'Michael Chen',
+    role: 'Software developer · relocated to Costa Rica',
+    quote: 'As a remote software developer, the assessment perfectly matched my priorities. The cost analysis for Costa Rica was spot-on and saved me months of research. Highly recommend!',
+  },
+  {
+    initials: 'DT',
+    name: 'David Thompson',
+    role: 'Entrepreneur · moved to Mexico',
+    quote: 'The Mexico assessment revealed important healthcare considerations we hadn’t thought of. The timeline and checklist made our move organized and stress-free. Worth every penny!',
+  },
+];
 
 export default function Home() {
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -15,7 +60,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
       <Navigation />
       <EmailCaptureModal
         isOpen={showEmailModal}
@@ -23,462 +68,279 @@ export default function Home() {
         onSubmit={handleEmailSubmit}
       />
 
-      {/* Hero Section */}
-      <section className="relative w-full px-4 py-20 text-center bg-white">
-        {/* Background Image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: 'url(/images/hero-1.png)'
-          }}
-        ></div>
-
-        {/* Overlay for text readability */}
-        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
-
-        {/* Content */}
-        <div className="relative z-10">
-          <div className="container mx-auto max-w-4xl">
-            <h2 className="text-5xl md:text-6xl font-bold text-gray-800 mb-3 leading-tight">
-              How To Leave The U.S.
-            </h2>
-            <p className="text-2xl md:text-3xl font-medium text-gray-700 mb-2 italic leading-relaxed">
-              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Find Your Perfect International Destination
-              </span>
-            </p>
-            <p className="text-lg text-blue-700 mb-6 font-semibold italic max-w-2xl mx-auto leading-relaxed">
-              “You don’t leave to stay in a country — you leave to stay in a particular city in that country. Get the real details you need, where others fail.”
-            </p>
-
-            <div className="inline-block bg-white px-8 py-6 border-2 border-gray-300 shadow-xl mb-10 mx-auto max-w-3xl">
-              <p className="text-2xl text-gray-900 font-medium">
-                Your one stop shop for step-by-step emigration guidance with your PERSONALIZED comprehensive Report covering immigration requirements,
-                cost analysis, healthcare systems, and relocation timelines and more.
-              </p>
+      {/* HERO */}
+      <section className="border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24 grid md:grid-cols-2 gap-12 md:gap-16 items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-surface border border-brand-border rounded-full text-xs font-semibold text-brand-ink-2 uppercase tracking-wide mb-7">
+              <span className="w-1.5 h-1.5 bg-brand-accent rounded-full" />
+              For U.S. citizens planning to relocate
             </div>
-
-            <div className="flex flex-col items-center gap-6 mb-12 max-w-4xl mx-auto">
-              {/* Information Box */}
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-6 rounded-2xl shadow-xl border-2 border-white/30">
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-6 h-6 mt-1 flex-shrink-0" />
-                  <p className="text-xl font-medium leading-relaxed">
-                    Get your free Assessment and a Relocation Hub with Expat videos, vetted service providers and more.
-                  </p>
-                </div>
-              </div>
-
-              {/* Call-to-Action Button */}
+            <h1 className="font-brand-serif font-medium text-5xl md:text-6xl leading-[1.05] tracking-tight text-brand-ink mb-6">
+              A serious plan for<br />
+              <span className="italic text-brand-ink-2">leaving the U.S.</span>
+            </h1>
+            <p className="text-lg leading-relaxed text-brand-muted max-w-xl mb-10">
+              You don&apos;t move to a country — you move to a city. The only place to get city-level
+              data, where others only provide country-level data.
+            </p>
+            <div className="flex flex-wrap items-center gap-4 mb-8">
               <Link
                 to="/assessment"
-                className="inline-flex items-center bg-white text-blue-600 border-2 border-blue-600 px-10 py-5 rounded-full font-bold text-xl hover:bg-blue-600 hover:text-white hover:shadow-2xl transform hover:scale-105 transition-all duration-200"
+                className="inline-flex items-center gap-2 px-7 py-4 bg-brand-btn text-brand-btn-ink rounded-lg font-semibold text-base hover:bg-brand-ink-2 transition-colors"
               >
-                Click Here for Your Free Assessment
+                Start free assessment
+                <span className="text-lg leading-none">&rarr;</span>
               </Link>
-
-              {/* Trust Indicators */}
-              <div className="text-lg text-black font-bold">
-                No credit card required • 3 minutes
-              </div>
+              <a
+                href="#report"
+                className="px-6 py-4 text-brand-ink border border-brand-border-strong rounded-lg font-semibold text-base bg-brand-bg hover:bg-brand-surface transition-colors"
+              >
+                See sample report
+              </a>
             </div>
+            <div className="flex flex-wrap items-center gap-6 text-sm text-brand-muted">
+              <span className="inline-flex items-center gap-1.5"><span className="text-brand-accent font-bold">&#10003;</span> No credit card</span>
+              <span className="inline-flex items-center gap-1.5"><span className="text-brand-accent font-bold">&#10003;</span> 3 minutes</span>
+              <span className="inline-flex items-center gap-1.5"><span className="text-brand-accent font-bold">&#10003;</span> Data-driven</span>
+            </div>
+          </div>
 
-            {/* Trust Indicators */}
-            <div className="flex items-center justify-center space-x-8 text-lg text-gray-600">
-              <div className="flex items-center space-x-2">
-                <Star className="w-4 h-4 text-yellow-500" />
-                <span className="text-black font-bold">Data-Driven Analysis</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4 text-green-500" />
-                <span className="text-black font-bold">Current Requirements</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Users className="w-4 h-4 text-blue-500" />
-                <span className="text-black font-bold">Join the many we have helped</span>
-              </div>
+          <div className="relative">
+            <div className="aspect-[4/5] rounded-xl overflow-hidden bg-brand-surface border border-brand-border">
+              <img src="/images/hero-1.png" alt="" className="w-full h-full object-cover" style={{ filter: 'saturate(0.9)' }} />
+            </div>
+            <div className="hidden sm:block absolute -left-8 bottom-12 w-64 p-5 bg-brand-bg border border-brand-border rounded-lg shadow-xl">
+              <div className="font-brand-serif text-3xl font-medium text-brand-ink leading-none">14</div>
+              <div className="text-sm text-brand-muted mt-1.5 leading-snug">Comprehensive sections in every personalized report</div>
+            </div>
+            <div className="hidden sm:flex absolute -right-5 top-10 items-center gap-2.5 px-4 py-3.5 bg-brand-btn text-brand-btn-ink rounded-lg shadow-xl">
+              <span className="w-2 h-2 bg-brand-accent-2 rounded-full" />
+              <span className="text-sm font-medium">Current visa data</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <h3 className="text-4xl font-bold text-gray-900 mb-4">How It Works</h3>
-            <p className="text-xl text-gray-600">Get professional emigration guidance in three simple steps</p>
+      {/* HOW IT WORKS */}
+      <section id="how" className="bg-brand-surface border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
+          <div className="grid md:grid-cols-2 gap-10 items-end mb-14">
+            <div>
+              <div className="inline-block text-xs font-semibold text-brand-accent-ink bg-brand-accent-2 px-2.5 py-1 rounded uppercase tracking-wide mb-5">Process</div>
+              <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink">Three steps from<br />question to plan.</h2>
+            </div>
+            <p className="text-lg leading-relaxed text-brand-muted max-w-md">
+              A short assessment gives you a compatibility read. A Relocation Hub gives you people
+              and services on the ground. The full Report gives you the paperwork, costs, and dates.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="text-center">
-              <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-5xl font-bold text-blue-600">1</span>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="p-8 bg-brand-bg border border-brand-border rounded-xl">
+              <div className="flex items-baseline justify-between mb-8">
+                <span className="font-brand-serif text-4xl font-medium text-brand-ink leading-none">01</span>
+                <span className="text-xs uppercase tracking-wide text-brand-muted font-semibold">Free</span>
               </div>
-              <h4 className="text-3xl font-semibold text-gray-900 mb-3">Free Assessment</h4>
-              <p className="text-xl text-gray-600 mb-4">Answer questions about your preferences, age, profession, and priorities</p>
-              <p className="text-xl text-gray-600">Receive an instant compatibility analysis for your chosen destination</p>
+              <h3 className="font-brand-serif text-2xl font-medium text-brand-ink mb-3">Assessment</h3>
+              <p className="text-base leading-relaxed text-brand-muted">Answer questions about age, profession, family, and priorities. Get an instant compatibility analysis for your chosen destination.</p>
             </div>
-
-            <div className="text-center">
-              <div className="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-5xl font-bold text-purple-600">2</span>
+            <div className="p-8 bg-brand-bg border border-brand-border rounded-xl">
+              <div className="flex items-baseline justify-between mb-8">
+                <span className="font-brand-serif text-4xl font-medium text-brand-ink leading-none">02</span>
+                <span className="text-xs uppercase tracking-wide text-brand-muted font-semibold">Included</span>
               </div>
-              <h4 className="text-3xl font-semibold text-gray-900 mb-3">Relocation Hub</h4>
-              <p className="text-xl text-gray-600">Your selected city personalized source for information including, lists of Professional service providers, expat videos, online support communities and more...</p>
+              <h3 className="font-brand-serif text-2xl font-medium text-brand-ink mb-3">Relocation Hub</h3>
+              <p className="text-base leading-relaxed text-brand-muted">A personalized hub for your city: vetted service providers, expat interviews on video, and active online communities.</p>
             </div>
-
-            <div className="text-center">
-              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-5xl font-bold text-green-600">3</span>
+            <div className="p-8 bg-brand-ink border border-brand-ink rounded-xl text-white">
+              <div className="flex items-baseline justify-between mb-8">
+                <span className="font-brand-serif text-4xl font-medium text-brand-accent-2 leading-none">03</span>
               </div>
-              <h4 className="text-3xl font-semibold text-gray-900 mb-3">Professional Report</h4>
-              <p className="text-xl text-gray-600">Upgrade to get detailed immigration requirements, costs, and timeline</p>
+              <h3 className="font-brand-serif text-2xl font-medium text-white mb-3">Professional Report</h3>
+              <p className="text-base leading-relaxed text-[#b8c8e2]">Fourteen detailed sections: immigration paperwork, hyper-local costs, healthcare mapping, and a step-by-step timeline.</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Countries */}
-      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Popular Destinations</h3>
-            <p className="text-lg text-gray-600">Explore top emigration destinations for US citizens</p>
+      {/* DESTINATIONS */}
+      <section id="destinations" className="border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+            <div>
+              <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">Popular destinations</div>
+              <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink max-w-xl">Where Americans are landing, and why.</h2>
+            </div>
+            <Link
+              to="/assessment"
+              className="shrink-0 inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#15803d] px-[18px] py-2.5 rounded-lg hover:bg-[#166534] transition-colors self-start"
+            >
+              Get Your Free Assessment &rarr;
+            </Link>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { name: 'Portugal', flag: '🇵🇹', description: 'Golden Visa program, excellent healthcare' },
-              { name: 'Spain', flag: '🇪🇸', description: 'Rich culture, affordable living, great climate' },
-              { name: 'Mexico', flag: '🇲🇽', description: 'Close to US, low cost of living, friendly locals' },
-              { name: 'Costa Rica', flag: '🇨🇷', description: 'Stable democracy, natural beauty, expat community' }
-            ].map((country) => (
-              <div key={country.name} className="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/20 hover:shadow-lg transition-shadow">
-                <div className="text-4xl mb-4">{country.flag}</div>
-                <h4 className="text-xl font-semibold text-gray-900 mb-2">{country.name}</h4>
-                <p className="text-lg text-gray-600">{country.description}</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {destinations.map((d) => (
+              <div key={d.name} className="p-6 bg-brand-bg border border-brand-border rounded-xl flex flex-col gap-4 hover:border-brand-accent hover:-translate-y-0.5 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-3xl leading-none">{d.flag}</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-brand-accent bg-brand-surface px-2 py-1 rounded">{d.tier}</span>
+                </div>
+                <div>
+                  <h4 className="font-brand-serif text-xl font-medium text-brand-ink mb-1">{d.name}</h4>
+                  <div className="text-xs text-brand-muted uppercase tracking-wide font-semibold">{d.visa}</div>
+                </div>
+                <p className="text-sm leading-relaxed text-brand-muted">{d.desc}</p>
+                <div className="flex items-center justify-between pt-4 mt-auto border-t border-dashed border-brand-border">
+                  <span className="text-xs text-brand-muted">Cost index</span>
+                  <span className="font-brand-serif text-lg font-medium text-brand-ink">{d.cost}</span>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Get a Professional Report */}
-      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <div className="container mx-auto px-4 py-16">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 md:p-12">
-            <div className="grid md:grid-cols-3 gap-8 items-center">
-              {/* Left Image */}
-              <div className="hidden md:block">
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square flex items-center justify-center border-4 border-white">
-                  <img
-                    src="/images/blk-couple-sq.png"
-                    alt="Couple reviewing emigration documents"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
+      {/* REPORT CTA */}
+      <section id="report" className="bg-brand-ink text-white">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24 grid md:grid-cols-2 gap-14 items-center">
+          <div>
+            <div className="text-xs font-semibold text-brand-accent-2 uppercase tracking-wide mb-5">The professional report</div>
+            <h2 className="font-brand-serif font-medium text-4xl md:text-5xl leading-tight tracking-tight text-white mb-6">
+              Everything you need in one <span className="italic text-brand-accent-2">document</span>.
+            </h2>
+            <p className="text-lg leading-relaxed text-[#b8c8e2] max-w-md mb-10">
+              Written for the exact city you&apos;re targeting. Immigration paperwork, cost analysis,
+              healthcare, taxes, education, and a month-by-month timeline.
+            </p>
+            <div className="flex flex-wrap items-center gap-5 mb-6">
+              <div className="flex items-baseline gap-3">
+                <span className="font-brand-serif text-5xl font-medium text-white leading-none">
+                  $69<span className="text-2xl">.99</span>
+                </span>
+                <span className="text-2xl font-medium text-[#94a6c4] relative inline-block line-through decoration-red-500">
+                  $99.99
+                </span>
               </div>
-
-              {/* Center Content */}
-              <div className="text-center">
-                <h3 className="text-3xl font-bold text-gray-900 mb-6">Want More Now? Get a Professional Report</h3>
-
-                <div className="mb-6">
-                  <div className="inline-block bg-gradient-to-r from-red-500 via-orange-500 to-red-500 text-white px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-sm font-semibold uppercase tracking-wide">Limited Time Sale</span>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-lg font-bold line-through opacity-75">$69.99</span>
-                        <span className="text-2xl font-extrabold animate-pulse">now $49.99</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setShowEmailModal(true)}
-                  className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                >
-                  <span className="mr-2">📋</span>
-                  Get Your Report
-                </button>
-                <div className="mt-4">
-                  <Link
-                    to="/sample-report"
-                    className="inline-flex items-center text-blue-600 hover:text-blue-700 underline px-4 py-2 rounded-full font-semibold text-lg"
-                  >
-                    View a Sample Report Section
-                  </Link>
-                </div>
-              </div>
-
-              {/* Right Image */}
-              <div className="hidden md:block">
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square flex items-center justify-center border-4 border-white">
-                  <img
-                    src="/images/old-couple.png"
-                    alt="Couple reviewing emigration report"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
+              <span className="text-xs font-semibold uppercase tracking-wide px-2.5 py-1.5 bg-brand-accent-2 text-brand-accent-ink rounded">Limited Time Offer</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* What's Included - 14 Categories */}
-      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <div className="container mx-auto px-4 pt-4 pb-16">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 md:p-12">
-            <div className="text-center mb-12">
-              <h3 className="text-3xl font-bold text-gray-900 mb-4">Your Professional Report Includes 14 Comprehensive Sections</h3>
-              <p className="text-lg text-gray-600">Everything you need to plan your move abroad</p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Visa & Immigration - Starting with visa as requested */}
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Visa & Residency Guide</h4>
-                <p className="text-sm text-gray-600">Complete legal requirements for visa applications and residency permits</p>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Relocation Timeline</h4>
-                <p className="text-sm text-gray-600">Step-by-step master guide with key dates and milestones for your move</p>
-              </div>
-
-              {/* Financial Planning */}
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zM12 20v-8m0-8H9.5a2.5 2.5 0 010-5H12m0 0V4m0 16v-4m-3-4H6a2 2 0 010-4h3" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Cost of Living & Finance</h4>
-                <p className="text-sm text-gray-600">Detailed budget planning with hyper-local cost analysis for your destination</p>
-              </div>
-
-              {/* Healthcare & Benefits */}
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Healthcare Mapping</h4>
-                <p className="text-sm text-gray-600">Hospital rankings, medical facilities, and healthcare system comparisons</p>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Senior & Retirement Benefits</h4>
-                <p className="text-sm text-gray-600">Retirement benefits, pensions, and senior citizen programs available</p>
-              </div>
-
-              {/* Infrastructure & Connectivity */}
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-violet-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Digital Connectivity</h4>
-                <p className="text-sm text-gray-600">Internet speed, telecom infrastructure, and connectivity options</p>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-violet-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Infrastructure & Power</h4>
-                <p className="text-sm text-gray-600">Power reliability, utilities, and infrastructure resilience</p>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-violet-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Retail & Food Supply</h4>
-                <p className="text-sm text-gray-600">Grocery stores, markets, and retail ecosystem availability</p>
-              </div>
-
-              {/* Security & Environment */}
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-amber-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Political Stability & Security</h4>
-                <p className="text-sm text-gray-600">Safety ratings, crime statistics, and governance analysis</p>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-amber-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Environmental & Water Quality</h4>
-                <p className="text-sm text-gray-600">Air quality, water safety, and environmental health conditions</p>
-              </div>
-
-              {/* Professional & Mobility */}
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Professional Risk Analysis</h4>
-                <p className="text-sm text-gray-600">Job market outlook and professional opportunities assessment</p>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Mobility & Connectivity</h4>
-                <p className="text-sm text-gray-600">Public transportation, urban mobility, and commute options</p>
-              </div>
-
-              {/* Recreation & Culture */}
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Culture & Entertainment</h4>
-                <p className="text-sm text-gray-600">Arts, festivals, dining, and cultural experiences available</p>
-              </div>
-
-              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                <div className="w-10 h-10 bg-gradient-to-r from-rose-500 to-pink-600 rounded-xl flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-2">Sports & Recreation</h4>
-                <p className="text-sm text-gray-600">Active lifestyle options, sports facilities, and outdoor activities</p>
-              </div>
-            </div>
-
-            <div className="text-center mt-8">
-              <Link
-                to="/assessment"
-                className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setShowEmailModal(true)}
+                className="px-6 py-4 bg-brand-accent-2 text-brand-accent-ink rounded-lg font-semibold text-base hover:brightness-95 transition-all"
               >
-                Start Your Assessment Now
+                Get your report
+              </button>
+              <Link
+                to="/sample-report"
+                className="px-5 py-4 text-white border border-[#2b4879] rounded-lg font-semibold text-base hover:bg-white/5 transition-colors"
+              >
+                View sample
               </Link>
+            </div>
+          </div>
 
+          <div className="relative hidden md:block">
+            <div className="bg-brand-surface rounded-xl p-7 text-brand-ink border border-brand-border">
+              <div className="flex items-center justify-between mb-5 pb-4 border-b border-brand-border-strong">
+                <div>
+                  <div className="font-brand-serif text-xl font-medium">Porto, Portugal</div>
+                  <div className="text-xs text-brand-muted mt-0.5">Personalized report · 68 pages</div>
+                </div>
+                <div className="text-xs font-bold uppercase tracking-wide text-brand-accent-ink bg-brand-accent-2 px-2 py-1 rounded">Sample</div>
+              </div>
+              {[
+                { n: '01', title: 'Visa & residency requirements', pages: 8 },
+                { n: '02', title: 'Cost of living, hyper-local', pages: 6 },
+                { n: '03', title: 'Healthcare & hospitals', pages: 5 },
+                { n: '04', title: 'Taxes for US expats', pages: 7 },
+                { n: '05', title: 'Housing & neighborhoods', pages: 6 },
+                { n: '06', title: 'Timeline & checklist', pages: 4 },
+              ].map((row) => (
+                <div key={row.n} className="flex items-center justify-between py-2.5 border-b border-brand-border last:border-b-0">
+                  <div className="flex items-center gap-3">
+                    <span className="font-brand-serif text-xs font-medium text-brand-muted w-6">{row.n}</span>
+                    <span className="text-sm text-brand-ink font-medium">{row.title}</span>
+                  </div>
+                  <span className="text-xs text-brand-muted">{row.pages} pp</span>
+                </div>
+              ))}
+            </div>
+            <div className="absolute -right-6 -top-6 px-4 py-3.5 bg-brand-bg text-brand-ink border border-brand-border rounded-lg shadow-xl text-sm font-medium flex items-center gap-2">
+              <span className="w-1.5 h-1.5 bg-brand-accent rounded-full" />
+              Ships to your inbox in 48h
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">What Our Clients Say</h3>
-            <p className="text-lg text-gray-600">Real experiences from people who found their perfect destination</p>
+      {/* SECTIONS GRID */}
+      <section className="bg-brand-surface border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">What&apos;s included</div>
+            <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink mb-4">Fourteen sections. No filler.</h2>
+            <p className="text-lg leading-relaxed text-brand-muted">Every report covers the same fourteen dimensions, each researched for your specific destination city.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Testimonial 1 */}
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-brand-border border border-brand-border rounded-xl overflow-hidden">
+            {reportSections.map((s) => (
+              <div key={s.n} className="p-6 bg-brand-bg flex flex-col gap-3 min-h-[160px]">
+                <div className="flex items-center justify-between">
+                  <span className="font-brand-serif text-xs font-medium text-brand-accent tracking-wide">{s.n}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-accent-2" />
                 </div>
+                <h4 className="font-brand-serif text-lg font-medium text-brand-ink leading-tight">{s.title}</h4>
+                <p className="text-sm leading-relaxed text-brand-muted">{s.desc}</p>
               </div>
-              <p className="text-gray-700 mb-6 italic leading-relaxed">
-                "The Portugal assessment was incredibly detailed and accurate. The report helped us understand exactly what we needed for the Golden Visa program. We're now happily living in Lisbon!"
-              </p>
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-semibold mr-4">
-                  SR
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">Sarah Rodriguez</p>
-                  <p className="text-sm text-gray-600">Retired Teacher, moved to Portugal</p>
-                </div>
-              </div>
-            </div>
+            ))}
+          </div>
 
-            {/* Testimonial 2 */}
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-700 mb-6 italic leading-relaxed">
-                "As a remote software developer, the assessment perfectly matched my priorities. The cost analysis for Costa Rica was spot-on and saved me months of research. Highly recommend!"
-              </p>
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-400 rounded-full flex items-center justify-center text-white font-semibold mr-4">
-                  MC
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">Michael Chen</p>
-                  <p className="text-sm text-gray-600">Software Developer, relocated to Costa Rica</p>
-                </div>
-              </div>
-            </div>
+          <div className="text-center mt-12">
+            <Link
+              to="/assessment"
+              className="inline-flex items-center gap-2 px-7 py-4 bg-brand-btn text-brand-btn-ink rounded-lg font-semibold text-base hover:bg-brand-ink-2 transition-colors"
+            >
+              Start with a free assessment
+              <span className="text-lg leading-none">&rarr;</span>
+            </Link>
+          </div>
+        </div>
+      </section>
 
-            {/* Testimonial 3 */}
-            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-white/30 shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
+      {/* TESTIMONIALS */}
+      <section className="border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
+          <div className="max-w-xl mb-14">
+            <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">Client stories</div>
+            <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink">
+              From questions to <span className="italic">boarding pass</span>.
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {testimonials.map((t) => (
+              <figure key={t.name} className="p-8 bg-brand-bg border border-brand-border rounded-xl flex flex-col gap-6">
+                <div className="flex gap-0.5">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-current" />
+                    <Star key={i} className="w-3.5 h-3.5 text-brand-accent fill-current" />
                   ))}
                 </div>
-              </div>
-              <p className="text-gray-700 mb-6 italic leading-relaxed">
-                "The Mexico assessment revealed important healthcare considerations we hadn't thought of. The timeline and checklist made our move organized and stress-free. Worth every penny!"
-              </p>
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-semibold mr-4">
-                  DT
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">David Thompson</p>
-                  <p className="text-sm text-gray-600">Entrepreneur, moved to Mexico</p>
-                </div>
-              </div>
-            </div>
+                <blockquote className="font-brand-serif text-lg leading-snug text-brand-ink font-normal tracking-tight m-0">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
+                <figcaption className="flex items-center gap-3 pt-5 border-t border-brand-border">
+                  <div className="w-10 h-10 rounded-full bg-brand-ink text-brand-accent-2 flex items-center justify-center font-brand-serif font-medium text-sm">
+                    {t.initials}
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-brand-ink">{t.name}</div>
+                    <div className="text-xs text-brand-muted mt-0.5">{t.role}</div>
+                  </div>
+                </figcaption>
+              </figure>
+            ))}
           </div>
         </div>
       </section>
@@ -486,17 +348,17 @@ export default function Home() {
       <Footer />
 
       {/* Footer Links - Below Footer */}
-      <div className="text-center py-4 bg-gray-50 border-t border-gray-200">
+      <div className="text-center py-4 bg-brand-surface border-t border-brand-border">
         <a
           href="/admin/blog"
-          className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors font-medium"
+          className="text-[10px] text-brand-muted hover:text-brand-ink transition-colors font-medium"
         >
           Site Health
         </a>
-        <span className="mx-2 text-[10px] text-gray-300">•</span>
+        <span className="mx-2 text-[10px] text-brand-border-strong">•</span>
         <a
           href="/admin/crm"
-          className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors font-medium"
+          className="text-[10px] text-brand-muted hover:text-brand-ink transition-colors font-medium"
         >
           Server
         </a>

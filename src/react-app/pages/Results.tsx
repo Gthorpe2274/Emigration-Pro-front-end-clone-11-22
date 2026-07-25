@@ -92,10 +92,10 @@ export default function Results() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-brand-surface font-brand-sans text-brand-ink flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your results...</p>
+          <p className="text-brand-muted">Loading your results...</p>
         </div>
       </div>
     );
@@ -103,10 +103,10 @@ export default function Results() {
 
   if (!assessment) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-brand-surface font-brand-sans text-brand-ink flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Assessment Not Found</h2>
-          <Link to="/" className="text-blue-600 hover:text-blue-700">Return to Home</Link>
+          <h2 className="text-2xl font-bold text-brand-ink mb-4">Assessment Not Found</h2>
+          <Link to="/" className="text-brand-ink-2 hover:text-brand-accent">Return to Home</Link>
         </div>
       </div>
     );
@@ -160,7 +160,7 @@ export default function Results() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-brand-surface font-brand-sans text-brand-ink">
       <Navigation />
       <EmailCaptureModal
         isOpen={showEmailModal}
@@ -173,29 +173,29 @@ export default function Results() {
         <div className="max-w-4xl mx-auto">
           {/* Results Header */}
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-brand-ink mb-4">
               Your Migration Assessment Results
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-brand-muted">
               Based on your preferences for {assessment.preferred_country}
               {assessment.preferred_city && ` - ${assessment.preferred_city}`}
             </p>
           </div>
 
           {/* Score Card */}
-          <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20 mb-8">
+          <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border mb-8">
             <div className="text-center">
               <div className={`inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br ${getScoreColor(assessment.overall_score)} text-white text-4xl font-bold mb-6`}>
                 {assessment.overall_score}
               </div>
-              <h3 className="text-3xl font-bold text-gray-900 mb-2">
+              <h3 className="text-3xl font-bold text-brand-ink mb-2">
                 Your Match Rating
               </h3>
               {renderStars(getStarRating(assessment.overall_score))}
-              <p className="text-lg text-gray-600 mb-4">
+              <p className="text-lg text-brand-muted mb-4">
                 {getScoreDescription(assessment.overall_score)}
               </p>
-              <div className="flex items-center justify-center space-x-2 text-blue-600">
+              <div className="flex items-center justify-center space-x-2 text-brand-ink-2">
                 <span className="font-medium">{getStarRating(assessment.overall_score)} stars • {assessment.overall_score}/100 Compatibility Score</span>
               </div>
             </div>
@@ -203,29 +203,29 @@ export default function Results() {
 
           {/* Emigration Report Section */}
           <div className="text-center mb-8">
-            <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-8 shadow-lg">
+            <div className="bg-brand-surface border-2 border-brand-border rounded-2xl p-8 shadow-lg">
               <div className="flex items-center justify-center space-x-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-brand-ink rounded-full flex items-center justify-center">
                   <span className="text-white text-xl">📋</span>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">Complete Emigration Report</h3>
+                <h3 className="text-2xl font-bold text-brand-ink">Complete Emigration Report</h3>
               </div>
 
-              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 max-w-2xl mx-auto mb-6">
-                <p className="text-xl text-gray-800 leading-relaxed mb-4">
+              <div className="bg-brand-bg rounded-xl p-6 max-w-2xl mx-auto mb-6">
+                <p className="text-xl text-brand-ink leading-relaxed mb-4">
                   Get a comprehensive, detailed step-by-step Emigration Report based on current immigration data and requirements that guides you through your migration to a new country and city.
                 </p>
 
                 {/* Report Preview Section */}
-                <div className="mt-8 border-t border-blue-100 pt-6">
-                  <h4 className="text-lg font-bold text-blue-900 mb-4 uppercase tracking-wide">
+                <div className="mt-8 border-t border-brand-border pt-6">
+                  <h4 className="text-lg font-bold text-brand-ink-2 mb-4 uppercase tracking-wide">
                     Your Report Will Cover The Below Subjects
                   </h4>
 
                   {loadingPreview ? (
                     <div className="flex items-center justify-center py-4">
-                      <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mr-3"></div>
-                      <span className="text-gray-600">Generating your personalized summary...</span>
+                      <div className="animate-spin w-6 h-6 border-2 border-brand-accent border-t-transparent rounded-full mr-3"></div>
+                      <span className="text-brand-muted">Generating your personalized summary...</span>
                     </div>
                   ) : previewError ? (
                     <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-center">
@@ -238,8 +238,8 @@ export default function Results() {
                       </button>
                     </div>
                   ) : previewSummary ? (
-                    <div className="bg-blue-50/50 rounded-xl p-6 text-left border border-blue-100">
-                      <p className="text-gray-800 leading-relaxed italic">
+                    <div className="bg-brand-surface rounded-xl p-6 text-left border border-brand-border">
+                      <p className="text-brand-ink leading-relaxed italic">
                         "{previewSummary}"
                       </p>
                     </div>
@@ -249,12 +249,12 @@ export default function Results() {
 
               {/* Limited Time Sale Price Display */}
               <div className="mb-6">
-                <div className="inline-block bg-gradient-to-r from-red-500 via-orange-500 to-red-500 text-white px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
+                <div className="inline-block bg-brand-accent-2 text-brand-accent-ink px-6 py-3 rounded-full shadow-lg">
                   <div className="flex items-center space-x-3">
                     <span className="text-sm font-semibold uppercase tracking-wide">Limited Time Sale</span>
                     <div className="flex items-center space-x-2">
-                      <span className="text-lg font-bold line-through opacity-75">$69.99</span>
-                      <span className="text-2xl font-extrabold animate-pulse">now $49.99</span>
+                      <span className="text-lg font-bold line-through opacity-75">$99.99</span>
+                      <span className="text-2xl font-extrabold">now $69.99</span>
                     </div>
                   </div>
                 </div>
@@ -262,7 +262,7 @@ export default function Results() {
 
               <button
                 onClick={() => setShowEmailModal(true)}
-                className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                className="inline-flex items-center bg-brand-btn hover:bg-brand-ink-2 text-brand-btn-ink px-8 py-3 rounded-full font-semibold text-lg hover:shadow-xl transition-all duration-200"
               >
                 <span className="mr-2">📋</span>
                 Get Your Report
@@ -277,11 +277,11 @@ export default function Results() {
                 <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-xl">🏠</span>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">Your Relocation Hub</h3>
+                <h3 className="text-2xl font-bold text-brand-ink">Your Relocation Hub</h3>
               </div>
 
-              <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 max-w-2xl mx-auto mb-6">
-                <p className="text-xl text-gray-800 leading-relaxed mb-4">
+              <div className="bg-brand-bg rounded-xl p-6 max-w-2xl mx-auto mb-6">
+                <p className="text-xl text-brand-ink leading-relaxed mb-4">
                   Access your FREE <strong className="text-green-700">personalized relocation hub</strong> with resources,
                   connections, and tools specifically curated for your emigration.
                 </p>
@@ -291,7 +291,7 @@ export default function Results() {
                     <span>🌟</span>
                     <span className="font-medium">Video Insights</span>
                   </div>
-                  <div className="flex items-center space-x-2 text-blue-700 bg-blue-50 px-3 py-2 rounded-full text-sm">
+                  <div className="flex items-center space-x-2 text-brand-ink-2 bg-brand-surface px-3 py-2 rounded-full text-sm">
                     <span>🤝</span>
                     <span className="font-medium">Community Support</span>
                   </div>
@@ -304,7 +304,7 @@ export default function Results() {
 
               <Link
                 to={`/relocation-hub/${id}`}
-                className="inline-flex items-center bg-gradient-to-r from-green-600 to-blue-600 text-white px-8 py-3 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 no-underline"
+                className="inline-flex items-center bg-[#15803d] hover:bg-[#166534] text-white px-8 py-3 rounded-full font-semibold text-lg hover:shadow-xl transition-all duration-200 no-underline"
               >
                 <span className="mr-2">🏠</span>
                 View Your Relocation Hub Page
@@ -314,12 +314,12 @@ export default function Results() {
 
           {/* Budget Compatibility */}
           {assessment.budget_compatibility && (
-            <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20 mb-8">
+            <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border mb-8">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-xl">💰</span>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">Budget Compatibility Analysis</h3>
+                <h3 className="text-2xl font-bold text-brand-ink">Budget Compatibility Analysis</h3>
               </div>
 
               <div className={`rounded-lg p-6 border-2 ${assessment.budget_compatibility.startsWith('excellent')
@@ -357,7 +357,7 @@ export default function Results() {
                     <p className={`text-lg leading-relaxed ${assessment.budget_compatibility.startsWith('excellent')
                         ? 'text-green-700'
                         : assessment.budget_compatibility.startsWith('good')
-                          ? 'text-blue-700'
+                          ? 'text-brand-ink-2'
                           : assessment.budget_compatibility.startsWith('tight')
                             ? 'text-yellow-700'
                             : 'text-red-700'
@@ -371,42 +371,42 @@ export default function Results() {
           )}
 
           {/* Your Preferences */}
-          <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20 mb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Your Assessment Ratings</h3>
+          <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border mb-8">
+            <h3 className="text-xl font-bold text-brand-ink mb-6">Your Assessment Ratings</h3>
 
             <div className="grid md:grid-cols-2 gap-6 mb-8">
               <div className="space-y-4">
                 <div>
-                  <span className="text-lg font-medium text-gray-500">Age</span>
-                  <div className="text-lg font-semibold text-gray-900">{assessment.user_age} years old</div>
+                  <span className="text-lg font-medium text-brand-muted">Age</span>
+                  <div className="text-lg font-semibold text-brand-ink">{assessment.user_age} years old</div>
                 </div>
                 <div>
-                  <span className="text-lg font-medium text-gray-500">Occupation</span>
-                  <div className="text-lg font-semibold text-gray-900">{assessment.user_job}</div>
+                  <span className="text-lg font-medium text-brand-muted">Occupation</span>
+                  <div className="text-lg font-semibold text-brand-ink">{assessment.user_job}</div>
                 </div>
                 <div>
-                  <span className="text-lg font-medium text-gray-500">Monthly Housing Budget</span>
-                  <div className="text-lg font-semibold text-gray-900">${assessment.monthly_budget?.toLocaleString() || 'Not specified'}</div>
+                  <span className="text-lg font-medium text-brand-muted">Monthly Housing Budget</span>
+                  <div className="text-lg font-semibold text-brand-ink">${assessment.monthly_budget?.toLocaleString() || 'Not specified'}</div>
                 </div>
               </div>
               <div className="space-y-4">
                 <div>
-                  <span className="text-lg font-medium text-gray-500">Destination</span>
-                  <div className="text-lg font-semibold text-gray-900">
+                  <span className="text-lg font-medium text-brand-muted">Destination</span>
+                  <div className="text-lg font-semibold text-brand-ink">
                     {assessment.preferred_country}
                     {assessment.preferred_city && ` - ${assessment.preferred_city}`}
                   </div>
                 </div>
                 <div>
-                  <span className="text-lg font-medium text-gray-500">Location Preference</span>
-                  <div className="text-lg font-semibold text-gray-900 capitalize">
+                  <span className="text-lg font-medium text-brand-muted">Location Preference</span>
+                  <div className="text-lg font-semibold text-brand-ink capitalize">
                     {assessment.location_preference.replace('_', ' ')}
                   </div>
                 </div>
               </div>
             </div>
 
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">Your Priority Factors</h4>
+            <h4 className="text-lg font-semibold text-brand-ink mb-4">Your Priority Factors</h4>
             <div className="grid md:grid-cols-2 gap-4">
               {factors.map(factor => {
                 const criteriaKey = factor.key.replace('_importance', '');
@@ -417,10 +417,10 @@ export default function Results() {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-3">
                         <span className="text-xl">{factor.icon}</span>
-                        <span className="font-medium text-gray-900">{factor.label}</span>
+                        <span className="font-medium text-brand-ink">{factor.label}</span>
                       </div>
                       <div className="flex flex-col items-end">
-                        <div className="text-sm text-gray-500 mb-1">Importance</div>
+                        <div className="text-sm text-brand-muted mb-1">Importance</div>
                         <div className="flex space-x-1">
                           {[1, 2, 3, 4, 5].map(star => (
                             <Star
@@ -438,7 +438,7 @@ export default function Results() {
                     {criteriaScore !== undefined && (
                       <div className="mt-3 bg-white rounded-md p-3 border border-gray-100">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-gray-600">Compatibility Score</span>
+                          <span className="text-sm font-medium text-brand-muted">Compatibility Score</span>
                           <span className={`text-sm font-bold ${criteriaScore > 80 ? 'text-green-600' :
                               criteriaScore >= 50 ? 'text-yellow-600' : 'text-red-600'
                             }`}>
@@ -463,8 +463,8 @@ export default function Results() {
 
           {/* Navigation */}
           <div className="text-center space-y-4">
-            <div className="text-lg text-gray-500">
-              <Link to="/assessment" className="text-blue-600 hover:text-blue-700 underline">Take a new assessment</Link>
+            <div className="text-lg text-brand-muted">
+              <Link to="/assessment" className="text-brand-ink-2 hover:text-brand-accent underline">Take a new assessment</Link>
             </div>
           </div>
         </div>

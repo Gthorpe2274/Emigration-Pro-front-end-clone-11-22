@@ -2,35 +2,50 @@ import { Link } from 'react-router-dom';
 
 export default function Navigation() {
   return (
-    <header className="bg-white/80 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-start space-x-24">
+    <header className="sticky top-0 z-50 bg-brand-bg border-b border-brand-border font-brand-sans">
+      <div className="container mx-auto px-4 md:px-8">
+        <div className="flex items-center justify-between gap-6 py-3">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3">
-            <div className="inline-block">
-              <img
-                src="/images/logo-full.png"
-                alt="Emigration Pro"
-                className="h-14 w-auto"
-              />
-            </div>
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <img
+              src="/images/logo-full.png"
+              alt="Emigration Pro"
+              className="h-11 w-auto"
+            />
           </Link>
 
           {/* Navigation Menu */}
-          <div className="hidden md:flex md:items-center md:space-x-8" style={{ marginLeft: '28px' }}>
-            <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+          <nav className="hidden md:flex md:items-center md:gap-7 text-sm font-medium">
+            <Link to="/" className="text-brand-muted hover:text-brand-accent transition-colors">
               Home
             </Link>
-            <Link to="/assessment" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
+            <Link to="/assessment" className="text-brand-muted hover:text-brand-accent transition-colors">
               Assessment
             </Link>
-            <Link to="/best-countries" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Popular Countries</Link>
-            <Link to="/earn-abroad" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Earn Abroad</Link>
-            <Link to="/sample-report" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Sample Report</Link>
-            <Link to="/blog" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">Blog</Link>
-            <Link to="/about" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">About Us</Link>
+            <Link to="/best-countries" className="text-brand-muted hover:text-brand-accent transition-colors">
+              Popular Countries
+            </Link>
+            <Link to="/earn-abroad" className="text-brand-muted hover:text-brand-accent transition-colors">
+              Earn Abroad
+            </Link>
+            <Link to="/sample-report" className="text-brand-muted hover:text-brand-accent transition-colors">
+              Sample Report
+            </Link>
+            <Link to="/blog" className="text-brand-muted hover:text-brand-accent transition-colors">
+              Blog
+            </Link>
+            <Link to="/about" className="text-brand-muted hover:text-brand-accent transition-colors">
+              About Us
+            </Link>
+          </nav>
 
-          </div>
+          {/* CTA */}
+          <Link
+            to="/assessment"
+            className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-brand-btn text-brand-btn-ink rounded-full text-sm font-semibold hover:bg-brand-ink-2 transition-colors"
+          >
+            Free assessment
+          </Link>
         </div>
       </div>
     </header>

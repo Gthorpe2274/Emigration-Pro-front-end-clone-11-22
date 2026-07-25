@@ -1,0 +1,56 @@
+/*
+  Self-hosted brand fonts for the redesigned pages (Home, Assessment, RelocationHub, Results,
+  Navigation, Footer). Files are served from /fonts (public/fonts) — same origin, no external
+  network request at runtime. This intentionally avoids re-introducing the Google Fonts CDN
+  dependency that index.html explicitly avoids ("no external font dependencies to prevent
+  502 errors"). If these files ever fail to load for any reason, text falls back to the same
+  system font stack already used site-wide.
+*/
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/inter-latin-400-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/inter-latin-500-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/inter-latin-600-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fraunces Variable';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/fraunces-latin-standard-normal.woff2') format('woff2-variations');
+}
+
+@font-face {
+  font-family: 'Fraunces Variable';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/fraunces-latin-standard-italic.woff2') format('woff2-variations');
+}

@@ -203,10 +203,10 @@ export default function RelocationHub() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-brand-surface font-brand-sans text-brand-ink flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your relocation hub...</p>
+          <p className="text-brand-muted">Loading your relocation hub...</p>
         </div>
       </div>
     );
@@ -214,17 +214,17 @@ export default function RelocationHub() {
 
   if (!assessment) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-brand-surface font-brand-sans text-brand-ink flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Assessment Not Found</h2>
-          <Link to="/" className="text-blue-600 hover:text-blue-700">Return to Home</Link>
+          <h2 className="text-2xl font-bold text-brand-ink mb-4">Assessment Not Found</h2>
+          <Link to="/" className="text-brand-ink-2 hover:text-brand-accent">Return to Home</Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-brand-surface font-brand-sans text-brand-ink">
       <Navigation />
       <EmailCaptureModal
         isOpen={showEmailModal}
@@ -237,14 +237,14 @@ export default function RelocationHub() {
         <div className="max-w-6xl mx-auto">
           {/* Hub Header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-lg font-medium mb-4">
+            <div className="inline-flex items-center bg-brand-surface text-brand-ink-2 px-4 py-2 rounded-full text-lg font-medium mb-4">
               <Users className="w-4 h-4 mr-2" />
               {isPermanentAccess ? 'Your 2-Year Relocation Hub' : 'Your Relocation Hub'}
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-brand-ink mb-4">
               {assessment.preferred_country} Relocation Hub
             </h2>
-            <p className="text-xl text-gray-600 mb-4">
+            <p className="text-xl text-brand-muted mb-4">
               Resources and insights for US citizens planning to relocate to {assessment.preferred_country}
               {assessment.preferred_city && ` - ${assessment.preferred_city}`}
             </p>
@@ -264,7 +264,7 @@ export default function RelocationHub() {
                       This relocation hub will <strong>remain active only until you close this browser tab</strong>.
                       All content and resources shown here are temporary.
                     </p>
-                    <h4 className="text-2xl font-bold text-gray-900 mb-3 mt-4">Want 2 yrs. access, with quarterly updates?</h4>
+                    <h4 className="text-2xl font-bold text-brand-ink mb-3 mt-4">Want 2 yrs. access, with quarterly updates?</h4>
                     <div className="bg-green-100 border border-green-300 rounded-lg p-4 mb-4">
                       <p className="text-xl text-green-900 font-medium mb-2">
                         🎁 <strong>FREE BONUS with Full Report Purchase!</strong>
@@ -277,7 +277,7 @@ export default function RelocationHub() {
 
                     <button
                       onClick={handleGetPermanentAccess}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold text-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                      className="w-full bg-brand-btn text-brand-btn-ink py-3 px-6 rounded-lg font-semibold text-lg hover:bg-brand-ink-2 hover:shadow-lg transition-all duration-200"
                     >
                       Get Your Full Report & 2 Years Access
                     </button>
@@ -307,10 +307,10 @@ export default function RelocationHub() {
           </div>
 
           {/* Complete Emigration Report Section */}
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl border border-blue-100 mb-8 shadow-lg">
+          <div className="bg-brand-surface p-8 rounded-2xl border border-brand-border mb-8 shadow-lg">
             <div className="text-center">
               <div className="flex items-center justify-center mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-16 h-16 bg-brand-ink rounded-full flex items-center justify-center shadow-lg">
                   <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
                     <path d="M14 2v6h6" />
@@ -319,39 +319,39 @@ export default function RelocationHub() {
                     <path d="M10 9H8" />
                   </svg>
                 </div>
-                <h2 className="text-4xl font-bold text-gray-900 ml-4">Complete Emigration Report</h2>
+                <h2 className="text-4xl font-bold text-brand-ink ml-4">Complete Emigration Report</h2>
               </div>
 
-              <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl text-brand-muted mb-8 max-w-3xl mx-auto leading-relaxed">
                 Get a comprehensive, detailed step-by-step Emigration Report based on current immigration data and requirements that guides you through your migration to a new country and city.
               </p>
 
               {/* Report Preview Section */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 max-w-3xl mx-auto mb-10 border border-blue-100 shadow-sm text-left">
-                <h4 className="text-lg font-bold text-blue-900 mb-4 uppercase tracking-wide flex items-center">
+              <div className="bg-brand-bg rounded-2xl p-8 max-w-3xl mx-auto mb-10 border border-brand-border shadow-sm text-left">
+                <h4 className="text-lg font-bold text-brand-ink-2 mb-4 uppercase tracking-wide flex items-center">
                   <span className="mr-2">📝</span>
                   Your Report Will Cover The Below Subjects
                 </h4>
 
                 {loadingPreview ? (
                   <div className="flex items-center justify-center py-6">
-                    <div className="animate-spin w-8 h-8 border-3 border-blue-500 border-t-transparent rounded-full mr-3"></div>
-                    <span className="text-gray-600 text-lg">Generating your personalized summary...</span>
+                    <div className="animate-spin w-8 h-8 border-3 border-brand-accent border-t-transparent rounded-full mr-3"></div>
+                    <span className="text-brand-muted text-lg">Generating your personalized summary...</span>
                   </div>
                 ) : previewError ? (
                   <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
                     <p className="text-red-700 font-bold text-lg">Error: {previewError}</p>
                     <button
                       onClick={() => window.location.reload()}
-                      className="text-blue-600 underline mt-3 font-semibold hover:text-blue-800"
+                      className="text-brand-ink-2 underline mt-3 font-semibold hover:text-brand-accent"
                     >
                       Try again
                     </button>
                   </div>
                 ) : previewSummary ? (
                   <div className="space-y-4">
-                    <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                      <p className="text-gray-800 text-lg leading-relaxed italic">
+                    <div className="p-4 bg-brand-surface rounded-xl border border-brand-border">
+                      <p className="text-brand-ink text-lg leading-relaxed italic">
                         "{previewSummary}"
                       </p>
                     </div>
@@ -360,17 +360,17 @@ export default function RelocationHub() {
               </div>
 
               <div className="inline-block mb-6">
-                <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-3 rounded-full shadow-lg transform -rotate-1 mb-4">
-                  <span className="text-lg font-bold">LIMITED TIME SALE</span>
-                  <span className="ml-4 text-lg line-through opacity-80">$69.99</span>
-                  <span className="ml-2 text-2xl font-bold">now $49.99</span>
+                <div className="bg-brand-accent-2 text-brand-accent-ink px-8 py-3 rounded-full shadow-lg mb-4">
+                  <span className="text-lg font-bold uppercase tracking-wide">Limited Time Sale</span>
+                  <span className="ml-4 text-lg line-through opacity-80">$99.99</span>
+                  <span className="ml-2 text-2xl font-bold">now $69.99</span>
                 </div>
               </div>
 
               <div>
                 <button
                   onClick={() => setShowEmailModal(true)}
-                  className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-10 py-4 rounded-full text-xl font-bold shadow-xl transform hover:scale-105 transition-all duration-200"
+                  className="inline-flex items-center bg-brand-btn hover:bg-brand-ink-2 text-brand-btn-ink px-10 py-4 rounded-full text-xl font-bold shadow-xl hover:shadow-2xl transition-all duration-200"
                 >
                   <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
@@ -386,12 +386,12 @@ export default function RelocationHub() {
           </div>
 
           {/* Professional Services */}
-          <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20 mb-8">
+          <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border mb-8">
             <div className="flex items-center space-x-3 mb-6">
-              <ExternalLink className="w-8 h-8 text-blue-600" />
-              <h3 className="text-2xl font-bold text-gray-900">Professional Relocation Services</h3>
+              <ExternalLink className="w-8 h-8 text-brand-ink-2" />
+              <h3 className="text-2xl font-bold text-brand-ink">Professional Relocation Services</h3>
             </div>
-            <p className="text-gray-600 mb-8">
+            <p className="text-brand-muted mb-8">
               Connect with verified professional service providers to handle the complex aspects of your relocation to {assessment.preferred_country}.
             </p>
 
@@ -406,10 +406,10 @@ export default function RelocationHub() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <ExternalLink className="w-4 h-4 text-blue-600" />
+                      <ExternalLink className="w-4 h-4 text-brand-ink-2" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Fragomen</h4>
+                      <h4 className="font-semibold text-brand-ink">Fragomen</h4>
                       <div className="flex items-center space-x-1">
                         <div className="flex text-yellow-400">
                           {'★'.repeat(5)}
@@ -419,14 +419,14 @@ export default function RelocationHub() {
                     </div>
                   </div>
                 </div>
-                <p className="text-sm text-blue-600 mb-2">Emigration Law & Legal Services</p>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-brand-ink-2 mb-2">Emigration Law & Legal Services</p>
+                <p className="text-sm text-brand-muted mb-3">
                   Global immigration law firm specializing in US citizen relocations and visa applications.
                 </p>
                 <div className="text-xs text-gray-500 mb-4">
                   <p><strong>Services:</strong> Visa Applications, Legal Documentation, Residency Planning</p>
                 </div>
-                <div className="text-sm text-blue-600 font-medium">Visit Website →</div>
+                <div className="text-sm text-brand-ink-2 font-medium">Visit Website →</div>
               </a>
 
               {/* Henley & Partners */}
@@ -439,10 +439,10 @@ export default function RelocationHub() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
                     <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <ExternalLink className="w-4 h-4 text-blue-600" />
+                      <ExternalLink className="w-4 h-4 text-brand-ink-2" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Henley & Partners</h4>
+                      <h4 className="font-semibold text-brand-ink">Henley & Partners</h4>
                       <div className="flex items-center space-x-1">
                         <div className="flex text-yellow-400">
                           {'★'.repeat(5)}
@@ -452,14 +452,14 @@ export default function RelocationHub() {
                     </div>
                   </div>
                 </div>
-                <p className="text-sm text-blue-600 mb-2">Citizenship Planning</p>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-brand-ink-2 mb-2">Citizenship Planning</p>
+                <p className="text-sm text-brand-muted mb-3">
                   The global leader in residence and citizenship by investment, helping you acquire alternative residence or citizenship.
                 </p>
                 <div className="text-xs text-gray-500 mb-4">
                   <p><strong>Services:</strong> Citizenship by Investment, Residence Planning, Global Mobility</p>
                 </div>
-                <div className="text-sm text-blue-600 font-medium">Visit Website →</div>
+                <div className="text-sm text-brand-ink-2 font-medium">Visit Website →</div>
               </a>
 
               {/* Banking & Finance */}
@@ -475,7 +475,7 @@ export default function RelocationHub() {
                       <ExternalLink className="w-4 h-4 text-purple-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Wise</h4>
+                      <h4 className="font-semibold text-brand-ink">Wise</h4>
                       <div className="flex items-center space-x-1">
                         <div className="flex text-yellow-400">
                           {'★'.repeat(5)}
@@ -486,7 +486,7 @@ export default function RelocationHub() {
                   </div>
                 </div>
                 <p className="text-sm text-purple-600 mb-2">Banking & Financial Services</p>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-brand-muted mb-3">
                   International banking solutions for expatriates with multi-currency accounts and low-fee transfers.
                 </p>
                 <div className="text-xs text-gray-500 mb-4">
@@ -508,7 +508,7 @@ export default function RelocationHub() {
                       <ExternalLink className="w-4 h-4 text-red-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Cigna Global</h4>
+                      <h4 className="font-semibold text-brand-ink">Cigna Global</h4>
                       <div className="flex items-center space-x-1">
                         <div className="flex text-yellow-400">
                           {'★'.repeat(5)}
@@ -519,7 +519,7 @@ export default function RelocationHub() {
                   </div>
                 </div>
                 <p className="text-sm text-red-600 mb-2">Healthcare & Insurance</p>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-brand-muted mb-3">
                   Leading international health insurance provider offering comprehensive coverage for expatriates.
                 </p>
                 <div className="text-xs text-gray-500 mb-4">
@@ -541,7 +541,7 @@ export default function RelocationHub() {
                       <ExternalLink className="w-4 h-4 text-orange-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">SIRVA</h4>
+                      <h4 className="font-semibold text-brand-ink">SIRVA</h4>
                       <div className="flex items-center space-x-1">
                         <div className="flex text-yellow-400">
                           {'★'.repeat(5)}
@@ -552,7 +552,7 @@ export default function RelocationHub() {
                   </div>
                 </div>
                 <p className="text-sm text-orange-600 mb-2">Moving & Relocation Services</p>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-brand-muted mb-3">
                   Global relocation company providing comprehensive moving and settling-in services worldwide.
                 </p>
                 <div className="text-xs text-gray-500 mb-4">
@@ -569,7 +569,7 @@ export default function RelocationHub() {
                       <ExternalLink className="w-4 h-4 text-green-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">US Visa Application Locations</h4>
+                      <h4 className="font-semibold text-brand-ink">US Visa Application Locations</h4>
                       <div className="flex items-center space-x-1">
                         <div className="flex text-yellow-400">
                           {'★'.repeat(5)}
@@ -580,7 +580,7 @@ export default function RelocationHub() {
                   </div>
                 </div>
                 <p className="text-sm text-green-600 mb-2">Foreign Consulates in the USA</p>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-brand-muted mb-3">
                   Consulates and embassies in the US where American citizens can apply for visas to emigrate.
                 </p>
                 <div className="text-xs text-gray-500 mb-4">
@@ -606,15 +606,15 @@ export default function RelocationHub() {
                   <div className="mt-4 space-y-4">
                     {/* Portugal */}
                     <div>
-                      <h5 className="font-semibold text-gray-900 mb-2 text-sm">Portugal Consulates in USA</h5>
+                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Portugal Consulates in USA</h5>
                       <div className="space-y-2">
-                        <a href="https://www.consulateportugalus.org/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.consulateportugalus.org/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Portuguese Consulate New York
                         </a>
-                        <a href="https://www.sanfrancisco.embaixadaportugal.mne.gov.pt/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.sanfrancisco.embaixadaportugal.mne.gov.pt/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Portuguese Consulate San Francisco
                         </a>
-                        <a href="https://boston.embaixadaportugal.mne.gov.pt/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://boston.embaixadaportugal.mne.gov.pt/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Portuguese Consulate Boston
                         </a>
                       </div>
@@ -622,18 +622,18 @@ export default function RelocationHub() {
 
                     {/* Spain */}
                     <div>
-                      <h5 className="font-semibold text-gray-900 mb-2 text-sm">Spain Consulates in USA</h5>
+                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Spain Consulates in USA</h5>
                       <div className="space-y-2">
-                        <a href="https://www.exteriores.gob.es/Consulados/NUEVAYORK/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.exteriores.gob.es/Consulados/NUEVAYORK/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Spanish Consulate New York
                         </a>
-                        <a href="https://www.exteriores.gob.es/Consulados/MIAMI/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.exteriores.gob.es/Consulados/MIAMI/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Spanish Consulate Miami
                         </a>
-                        <a href="https://www.exteriores.gob.es/Consulados/LOSANGELES/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.exteriores.gob.es/Consulados/LOSANGELES/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Spanish Consulate Los Angeles
                         </a>
-                        <a href="https://www.exteriores.gob.es/Consulados/SANFRANCISCO/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.exteriores.gob.es/Consulados/SANFRANCISCO/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Spanish Consulate San Francisco
                         </a>
                       </div>
@@ -641,18 +641,18 @@ export default function RelocationHub() {
 
                     {/* Mexico */}
                     <div>
-                      <h5 className="font-semibold text-gray-900 mb-2 text-sm">Mexico Consulates in USA</h5>
+                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Mexico Consulates in USA</h5>
                       <div className="space-y-2">
-                        <a href="https://consulmex.sre.gob.mx/nuevayork/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://consulmex.sre.gob.mx/nuevayork/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Mexican Consulate New York
                         </a>
-                        <a href="https://consulmex.sre.gob.mx/losangeles/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://consulmex.sre.gob.mx/losangeles/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Mexican Consulate Los Angeles
                         </a>
-                        <a href="https://consulmex.sre.gob.mx/miami/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://consulmex.sre.gob.mx/miami/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Mexican Consulate Miami
                         </a>
-                        <a href="https://consulmex.sre.gob.mx/chicago/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://consulmex.sre.gob.mx/chicago/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Mexican Consulate Chicago
                         </a>
                       </div>
@@ -660,15 +660,15 @@ export default function RelocationHub() {
 
                     {/* Costa Rica */}
                     <div>
-                      <h5 className="font-semibold text-gray-900 mb-2 text-sm">Costa Rica Consulates in USA</h5>
+                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Costa Rica Consulates in USA</h5>
                       <div className="space-y-2">
-                        <a href="https://www.costarica-embassy.org/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.costarica-embassy.org/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Costa Rican Consulate Washington DC
                         </a>
-                        <a href="https://www.costarica-embassy.org/index.php?q=node/21" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.costarica-embassy.org/index.php?q=node/21" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Costa Rican Consulate New York
                         </a>
-                        <a href="https://www.costarica-embassy.org/index.php?q=node/21" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.costarica-embassy.org/index.php?q=node/21" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Costa Rican Consulate Los Angeles
                         </a>
                       </div>
@@ -676,15 +676,15 @@ export default function RelocationHub() {
 
                     {/* Canada */}
                     <div>
-                      <h5 className="font-semibold text-gray-900 mb-2 text-sm">Canada Consulates in USA</h5>
+                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Canada Consulates in USA</h5>
                       <div className="space-y-2">
-                        <a href="https://www.canada.ca/en/immigration-refugees-citizenship.html" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.canada.ca/en/immigration-refugees-citizenship.html" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Canadian Consulate New York
                         </a>
-                        <a href="https://www.canada.ca/en/immigration-refugees-citizenship.html" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.canada.ca/en/immigration-refugees-citizenship.html" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Canadian Consulate Los Angeles
                         </a>
-                        <a href="https://www.canada.ca/en/immigration-refugees-citizenship.html" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.canada.ca/en/immigration-refugees-citizenship.html" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Canadian Consulate Miami
                         </a>
                       </div>
@@ -692,18 +692,18 @@ export default function RelocationHub() {
 
                     {/* Germany */}
                     <div>
-                      <h5 className="font-semibold text-gray-900 mb-2 text-sm">Germany Consulates in USA</h5>
+                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Germany Consulates in USA</h5>
                       <div className="space-y-2">
-                        <a href="https://www.germany.info/us-en" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.germany.info/us-en" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           German Consulate New York
                         </a>
-                        <a href="https://www.germany.info/us-en/embassy-consulates/sanfrancisco" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.germany.info/us-en/embassy-consulates/sanfrancisco" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           German Consulate San Francisco
                         </a>
-                        <a href="https://www.germany.info/us-en/embassy-consulates/losangeles" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.germany.info/us-en/embassy-consulates/losangeles" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           German Consulate Los Angeles
                         </a>
-                        <a href="https://www.germany.info/us-en/embassy-consulates/miami" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.germany.info/us-en/embassy-consulates/miami" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           German Consulate Miami
                         </a>
                       </div>
@@ -720,7 +720,7 @@ export default function RelocationHub() {
                       <ExternalLink className="w-4 h-4 text-indigo-600" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Customs Brokers</h4>
+                      <h4 className="font-semibold text-brand-ink">Customs Brokers</h4>
                       <div className="flex items-center space-x-1">
                         <div className="flex text-yellow-400">
                           {'★'.repeat(5)}
@@ -731,7 +731,7 @@ export default function RelocationHub() {
                   </div>
                 </div>
                 <p className="text-sm text-indigo-600 mb-2">Customs & Import Services</p>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-brand-muted mb-3">
                   Professional customs brokerage services for smooth international shipment clearance.
                 </p>
                 <div className="text-xs text-gray-500 mb-4">
@@ -757,21 +757,21 @@ export default function RelocationHub() {
                   <div className="mt-4 space-y-4">
                     {/* West Coast */}
                     <div>
-                      <h5 className="font-semibold text-gray-900 mb-2 text-sm">West Coast</h5>
+                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">West Coast</h5>
                       <div className="space-y-2">
-                        <a href="https://www.aacb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.aacb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           A & A Customs Brokers Ltd. (Blaine, WA)
                         </a>
-                        <a href="https://priorityimport.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://priorityimport.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Priority Import‑Export Services (Los Angeles, CA)
                         </a>
-                        <a href="https://www.coppersmith.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.coppersmith.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Coppersmith Global Logistics (Los Angeles/SF)
                         </a>
-                        <a href="https://omegachb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://omegachb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Omega CHB Int'l Inc. (Los Angeles, CA)
                         </a>
-                        <a href="https://www.packair.com/customs-broker-los-angeles/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.packair.com/customs-broker-los-angeles/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           Packair (Customs Broker Los Angeles)
                         </a>
                       </div>
@@ -779,21 +779,21 @@ export default function RelocationHub() {
 
                     {/* East Coast */}
                     <div>
-                      <h5 className="font-semibold text-gray-900 mb-2 text-sm">East Coast</h5>
+                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">East Coast</h5>
                       <div className="space-y-2">
-                        <a href="https://www.accb.nyc/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.accb.nyc/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           All Cleared Customs Brokerage (New York, NY)
                         </a>
-                        <a href="https://www.nycb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.nycb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           New York Customs Brokers Inc.
                         </a>
-                        <a href="https://acb-us.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://acb-us.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           A Customs Brokerage, Inc. (Miami, FL)
                         </a>
-                        <a href="https://lmbcustomsbrokers.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://lmbcustomsbrokers.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           LMB Customs Brokers, LLC (Miami, FL)
                         </a>
-                        <a href="https://www.us-ccb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                        <a href="https://www.us-ccb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
                           U.S. Consolidated Customs Brokers (Miami, FL)
                         </a>
                       </div>
@@ -804,8 +804,8 @@ export default function RelocationHub() {
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h4 className="font-semibold text-blue-800 mb-3">✅ Professional Guidance Recommended</h4>
-              <p className="text-blue-700 text-sm mb-4">
+              <h4 className="font-semibold text-brand-ink-2 mb-3">✅ Professional Guidance Recommended</h4>
+              <p className="text-brand-ink-2 text-sm mb-4">
                 While this hub provides general information, professional services can provide personalized guidance
                 for your specific situation and help navigate complex legal and financial requirements.
               </p>
@@ -813,12 +813,12 @@ export default function RelocationHub() {
           </div>
 
           {/* Community Insights */}
-          <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20 mb-8">
+          <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border mb-8">
             <div className="flex items-center space-x-3 mb-6">
-              <Video className="w-8 h-8 text-blue-600" />
-              <h3 className="text-2xl font-bold text-gray-900">Relocation Video Resources</h3>
+              <Video className="w-8 h-8 text-brand-ink-2" />
+              <h3 className="text-2xl font-bold text-brand-ink">Relocation Video Resources</h3>
             </div>
-            <p className="text-gray-600 mb-4">
+            <p className="text-brand-muted mb-4">
               Watch real stories and personal experiences from Americans who have made the move to {assessment.preferred_country}.
               These community-shared videos provide personal perspectives and general tips.
             </p>
@@ -845,18 +845,18 @@ export default function RelocationHub() {
                     </div>
                   </div>
                   <div className="p-6">
-                    <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                    <h4 className="font-semibold text-brand-ink mb-2 line-clamp-2">
                       {video.title}
                     </h4>
-                    <p className="text-lg text-blue-600 mb-3">{video.channel}</p>
-                    <p className="text-lg text-gray-600 mb-4 line-clamp-3">
+                    <p className="text-lg text-brand-ink-2 mb-3">{video.channel}</p>
+                    <p className="text-lg text-brand-muted mb-4 line-clamp-3">
                       {video.description}
                     </p>
                     <a
                       href={video.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-lg"
+                      className="inline-flex items-center text-brand-ink-2 hover:text-brand-accent font-medium text-lg"
                     >
                       Watch on YouTube
                       <ExternalLink className="w-4 h-4 ml-1" />
@@ -870,16 +870,16 @@ export default function RelocationHub() {
           {/* Additional Resources */}
           <div className="grid md:grid-cols-2 gap-8">
             {/* Expat Communities */}
-            <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Online Community Networks</h3>
+            <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border">
+              <h3 className="text-xl font-bold text-brand-ink mb-4">Online Community Networks</h3>
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Users className="w-4 h-4 text-blue-600" />
+                    <Users className="w-4 h-4 text-brand-ink-2" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Facebook Groups</h4>
-                    <p className="text-lg text-gray-600">Join active expat community groups for daily tips and support</p>
+                    <h4 className="font-medium text-brand-ink">Facebook Groups</h4>
+                    <p className="text-lg text-brand-muted">Join active expat community groups for daily tips and support</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
@@ -887,8 +887,8 @@ export default function RelocationHub() {
                     <Users className="w-4 h-4 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Reddit Communities</h4>
-                    <p className="text-lg text-gray-600">r/{assessment.preferred_country.toLowerCase().replace(' ', '')} and expat-focused subreddits</p>
+                    <h4 className="font-medium text-brand-ink">Reddit Communities</h4>
+                    <p className="text-lg text-brand-muted">r/{assessment.preferred_country.toLowerCase().replace(' ', '')} and expat-focused subreddits</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
@@ -896,36 +896,36 @@ export default function RelocationHub() {
                     <Users className="w-4 h-4 text-purple-600" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-gray-900">Discord Servers</h4>
-                    <p className="text-lg text-gray-600">Real-time chat with current residents and newcomers</p>
+                    <h4 className="font-medium text-brand-ink">Discord Servers</h4>
+                    <p className="text-lg text-brand-muted">Real-time chat with current residents and newcomers</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Quick Tips */}
-            <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">General Tips for Getting Started</h3>
+            <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border">
+              <h3 className="text-xl font-bold text-brand-ink mb-4">General Tips for Getting Started</h3>
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <span className="text-lg text-gray-700">Research visa requirements thoroughly</span>
+                  <div className="w-2 h-2 bg-brand-ink-2 rounded-full"></div>
+                  <span className="text-lg text-brand-muted">Research visa requirements thoroughly</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <span className="text-lg text-gray-700">Connect with local expat communities</span>
+                  <div className="w-2 h-2 bg-brand-ink-2 rounded-full"></div>
+                  <span className="text-lg text-brand-muted">Connect with local expat communities</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <span className="text-lg text-gray-700">Consult with qualified professionals</span>
+                  <div className="w-2 h-2 bg-brand-ink-2 rounded-full"></div>
+                  <span className="text-lg text-brand-muted">Consult with qualified professionals</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <span className="text-lg text-gray-700">Plan your finances carefully</span>
+                  <div className="w-2 h-2 bg-brand-ink-2 rounded-full"></div>
+                  <span className="text-lg text-brand-muted">Plan your finances carefully</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <span className="text-lg text-gray-700">Consider a reconnaissance trip first</span>
+                  <div className="w-2 h-2 bg-brand-ink-2 rounded-full"></div>
+                  <span className="text-lg text-brand-muted">Consider a reconnaissance trip first</span>
                 </div>
               </div>
             </div>
@@ -935,7 +935,7 @@ export default function RelocationHub() {
           <div className="mt-12 text-center">
             <Link
               to={`/results/${id}`}
-              className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium text-lg"
+              className="inline-flex items-center text-brand-ink-2 hover:text-brand-accent font-medium text-lg"
             >
               ← Back to Assessment Results
             </Link>
