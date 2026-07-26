@@ -1,8 +1,14 @@
 import { Link } from 'react-router-dom';
 import { Shield, Heart, DollarSign, Users, Globe, CheckCircle } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
+import { useSEO } from '../hooks/useSEO';
 
 export default function AboutUs() {
+  useSEO({
+    title: 'About Us',
+    description: 'Learn about Emigration Pro and our mission to help US citizens find their perfect international destination.'
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <Navigation />
@@ -297,49 +303,23 @@ export default function AboutUs() {
               </div>
             </div>
 
-            {/* Services Column */}
-            <div>
-              <h3 className="text-white text-lg font-semibold mb-4">Services</h3>
-              <ul className="space-y-3">
-                <li>
-                  <a href="/assessment" className="text-gray-300 hover:text-white transition-colors text-sm">
-                    Country Assessment
-                  </a>
-                </li>
-                <li>
-                  <span className="text-gray-300 text-sm">
-                    Emigration Consultation
-                  </span>
-                </li>
-                <li>
-                  <span className="text-gray-300 text-sm">
-                    Relocation Planning
-                  </span>
-                </li>
-              </ul>
-            </div>
-
             {/* Resources Column */}
             <div>
               <h3 className="text-white text-lg font-semibold mb-4">Resources</h3>
               <ul className="space-y-3">
                 <li>
-                  <span className="text-gray-300 text-sm">
-                    Country Guides
-                  </span>
+                  <a href="https://www.numbeo.com/cost-of-living/comparison.jsp" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors text-sm">
+                    Numbeo Cost of Living
+                  </a>
                 </li>
                 <li>
-                  <span className="text-gray-300 text-sm">
-                    Emigration News
-                  </span>
-                </li>
-                <li>
-                  <span className="text-gray-300 text-sm">
-                    Cost Calculators
-                  </span>
+                  <a href="https://www.expatistan.com/cost-of-living" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors text-sm">
+                    Expatistan Comparison
+                  </a>
                 </li>
               </ul>
             </div>
+
 
             {/* Legal Column */}
             <div>

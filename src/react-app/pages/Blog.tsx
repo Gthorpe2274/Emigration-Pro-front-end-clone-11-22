@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
+import { useSEO } from '../hooks/useSEO';
 
 interface BlogPost {
   id: number;
@@ -20,6 +21,11 @@ export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEmailModal, setShowEmailModal] = useState(false);
+
+  useSEO({
+    title: 'Blog',
+    description: 'Expert emigration guidance and news for US citizens seeking their perfect international destination.'
+  });
 
   const handleEmailSubmit = () => {
     // Email is already stored by the modal component

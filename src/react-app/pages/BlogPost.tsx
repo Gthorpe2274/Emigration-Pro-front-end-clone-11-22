@@ -4,6 +4,7 @@ import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import BlogIndex from '../components/BlogIndex';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
+import { useSEO } from '../hooks/useSEO';
 
 interface BlogPostType {
   id: number;
@@ -32,6 +33,11 @@ export default function BlogPost() {
   useEffect(() => {
     fetchPost();
   }, [slug]);
+
+  useSEO({
+    title: post ? post.title : 'Loading Post...',
+    description: post ? (post.body.substring(0, 160).replace(/<[^>]*>?/gm, '')) : undefined
+  });
 
   const fetchPost = async () => {
     try {

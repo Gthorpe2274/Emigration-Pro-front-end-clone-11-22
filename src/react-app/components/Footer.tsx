@@ -47,7 +47,9 @@ export default function Footer() {
               <p className="text-gray-400 text-sm mb-3">Follow & Share</p>
               <div className="flex space-x-4">
                 <a
-                  href="/social-login"
+                  href="https://www.linkedin.com/login"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="group flex items-center justify-center w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-200 transform hover:scale-105"
                   title="LinkedIn"
                 >
@@ -95,39 +97,10 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Services Column */}
-          <div>
-            <h3 className="text-white text-lg font-semibold mb-4 font-brand-serif">Services</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/assessment" className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm">
-                  Country Assessment
-                </Link>
-              </li>
-              <li>
-                <button
-                  onClick={() => setShowConsultationPopup(true)}
-                  className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm text-left focus:outline-none"
-                >
-                  Emigration Consultation
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setShowRelocationPopup(true)}
-                  className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm text-left focus:outline-none"
-                >
-                  Relocation Planning
-                </button>
-              </li>
-            </ul>
-          </div>
-
           {/* Resources Column */}
           <div>
             <h3 className="text-white text-lg font-semibold mb-4 font-brand-serif">Resources</h3>
             <ul className="space-y-3">
-
               <li className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -168,13 +141,13 @@ export default function Footer() {
                       >
                         Expatistan Comparison
                       </a>
-
                     </div>
                   </div>
                 )}
               </li>
             </ul>
           </div>
+
 
           {/* Legal Column */}
           <div>
@@ -233,10 +206,10 @@ export default function Footer() {
               </p>
 
               <a
-                href="mailto:info@emigrationpro.com"
+                href="mailto:info.emipro@gmail.com"
                 className="inline-block bg-brand-btn hover:bg-brand-ink-2 text-brand-btn-ink font-semibold py-3 px-8 rounded-lg transition duration-200 w-full"
               >
-                info@emigrationpro.com
+                info.emipro@gmail.com
               </a>
             </div>
           </div>

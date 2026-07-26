@@ -1229,7 +1229,7 @@ async function sendRelocationHubAccessEmail(
             <p style="margin: 0; color: #991b1b;">
               <strong>⚠️ DO NOT REPLY TO THIS EMAIL</strong><br>
               This is an automated message from an unmonitored email address. 
-              If you need assistance, please contact us at <a href="mailto:info@emigrationpro.com" style="color: #991b1b; text-decoration: underline;">info@emigrationpro.com</a>
+              If you need assistance, please contact us at <a href="mailto:info.emipro@gmail.com" style="color: #991b1b; text-decoration: underline;">info.emipro@gmail.com</a>
             </p>
           </div>
           
@@ -1259,7 +1259,7 @@ Access Your Relocation Hub: ${hubAccessUrl}
 
 ⚠️ DO NOT REPLY TO THIS EMAIL
 This is an automated message from an unmonitored email address. 
-If you need assistance, please contact us at info@emigrationpro.com
+If you need assistance, please contact us at info.emipro@gmail.com
 
 This access code provides 2 years of access to your relocation hub. Keep this information safe for future reference.
 
@@ -2485,7 +2485,6 @@ app.get('/ping', async (c) => {
   });
 });
 
-// Serve robots.txt to block all search engines (TESTING MODE)
 // Serve robots.txt to allow search engine crawling
 app.get('/robots.txt', (c) => {
   const url = new URL(c.req.url);
@@ -2497,6 +2496,65 @@ Allow: /
 Sitemap: ${baseUrl}/sitemap.xml`, 200, {
     'Content-Type': 'text/plain'
   });
+});
+
+// Dynamic sitemap.xml generation
+app.get('/sitemap.xml', async (c) => {
+  const url = new URL(c.req.url);
+  const baseUrl = url.origin;
+  
+  try {
+    const { results } = await c.env.DB.prepare(`
+      SELECT slug, updated_at, published_date 
+      FROM blog_posts 
+      WHERE is_published = 1 
+      ORDER BY published_date DESC
+    `).all();
+
+    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/assessment</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/blog</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+
+    for (const post of results) {
+      const date = post.updated_at || post.published_date || new Date().toISOString();
+      sitemap += `
+  <url>
+    <loc>${baseUrl}/blog/${post.slug}</loc>
+    <lastmod>${new Date(date as string).toISOString().split('T')[0]}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+    }
+
+    sitemap += `\n</urlset>`;
+
+    return c.text(sitemap, 200, {
+      'Content-Type': 'application/xml',
+      'Cache-Control': 'public, max-age=3600'
+    });
+  } catch (error) {
+    console.error('Sitemap generation error:', error);
+    return c.text('Error generating sitemap', 500);
+  }
 });
 
 // Serve static files for React app using ASSETS binding
@@ -2519,7 +2577,80 @@ app.get('*', async (c) => {
 
     // If asset not found and it's not an API call, serve index.html (for SPA routing)
     if (response.status === 404 && !url.pathname.startsWith('/api/')) {
-      return await c.env.ASSETS.fetch(new URL('/', url.origin).toString());
+      const indexResponse = await c.env.ASSETS.fetch(new URL('/', url.origin).toString());
+      
+      // HTMLRewriter for blog posts SEO
+      const blogMatch = url.pathname.match(/^\/blog\/([^/]+)$/);
+      if (blogMatch) {
+        const slug = blogMatch[1];
+        try {
+          const post = await c.env.DB.prepare(`
+            SELECT title, excerpt, featured_image, author, published_date, updated_at
+            FROM blog_posts
+            WHERE slug = ? AND is_published = 1
+          `).bind(slug).first();
+          
+          if (post) {
+            const jsonLd = {
+              "@context": "https://schema.org",
+              "@type": "Article",
+              "headline": post.title,
+              "image": [post.featured_image || "https://mocha-cdn.com/og.png"],
+              "datePublished": post.published_date,
+              "dateModified": post.updated_at || post.published_date,
+              "author": [{
+                  "@type": "Person",
+                  "name": post.author || "Emigration Pro"
+              }]
+            };
+
+            const rewriter = new HTMLRewriter()
+              .on('title', {
+                element(e) { e.setInnerContent(`${post.title} | Emigration Pro`); }
+              })
+              .on('meta[property="og:title"]', {
+                element(e) { e.setAttribute('content', post.title as string); }
+              })
+              .on('meta[property="twitter:title"]', {
+                element(e) { e.setAttribute('content', post.title as string); }
+              })
+              .on('head', {
+                element(e) {
+                  e.append(`<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`, { html: true });
+                  if (post.excerpt) {
+                    const safeExcerpt = (post.excerpt as string).replace(/"/g, '&quot;');
+                    e.append(`<meta name="description" content="${safeExcerpt}" />`, { html: true });
+                  }
+                }
+              });
+
+            if (post.excerpt) {
+              const safeExcerpt = (post.excerpt as string).replace(/"/g, '&quot;');
+              rewriter.on('meta[property="og:description"]', {
+                element(e) { e.setAttribute('content', safeExcerpt); }
+              })
+              .on('meta[property="twitter:description"]', {
+                element(e) { e.setAttribute('content', safeExcerpt); }
+              });
+            }
+
+            if (post.featured_image) {
+              rewriter.on('meta[property="og:image"]', {
+                element(e) { e.setAttribute('content', post.featured_image as string); }
+              })
+              .on('meta[property="twitter:image"]', {
+                element(e) { e.setAttribute('content', post.featured_image as string); }
+              });
+            }
+
+            return rewriter.transform(indexResponse);
+          }
+        } catch (dbError) {
+          console.error("Error fetching post for SEO:", dbError);
+        }
+      }
+
+      return indexResponse;
     }
 
     return response;

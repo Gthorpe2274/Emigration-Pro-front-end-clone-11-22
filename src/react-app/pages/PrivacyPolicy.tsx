@@ -67,7 +67,7 @@ export default function PrivacyPolicy() {
             <p className="mb-6">
               We retain your assessment data and generated reports for the purpose of providing ongoing access 
               to your purchased reports. If you wish to have your data deleted, you may contact us at 
-              info@emigrationpro.com with your request.
+              info.emipro@gmail.com with your request.
             </p>
 
             <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Cookies and Tracking</h2>
@@ -118,7 +118,7 @@ export default function PrivacyPolicy() {
             <p className="mb-6">
               If you have any questions about this privacy policy or our privacy practices, please contact us at:
               <br />
-              <strong>Email:</strong> info@emigrationpro.com
+              <strong>Email:</strong> info.emipro@gmail.com
               <br />
               <strong>Company:</strong> Clear Products, LLC
             </p>
