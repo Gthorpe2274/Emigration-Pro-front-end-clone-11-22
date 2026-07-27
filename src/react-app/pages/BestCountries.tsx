@@ -127,31 +127,15 @@ const bestCountries: Country[] = [
 ];
 
 export default function BestCountries() {
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return 'from-green-500 to-emerald-500';
-    if (score >= 80) return 'from-blue-500 to-indigo-500';
-    if (score >= 70) return 'from-yellow-500 to-orange-500';
-    return 'from-red-500 to-pink-500';
-  };
-
-  const getCostColor = (cost: string) => {
-    switch (cost) {
-      case 'Low': return 'text-green-600 bg-green-100';
-      case 'Moderate': return 'text-yellow-600 bg-yellow-100';
-      case 'High': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
-    }
-  };
-
   const renderStars = (rating: number) => {
     return (
       <div className="flex items-center space-x-1">
         {[1, 2, 3, 4, 5].map(star => (
           <Star
             key={star}
-            className={`w-4 h-4 ${star <= rating
-              ? 'text-yellow-400 fill-current'
-              : 'text-gray-300'
+            className={`w-3.5 h-3.5 ${star <= rating
+              ? 'text-brand-accent fill-current'
+              : 'text-brand-border-strong'
               }`}
           />
         ))}
@@ -160,188 +144,175 @@ export default function BestCountries() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
       <Navigation />
 
       {/* Hero Section */}
-      <section className="bg-white py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-4xl mx-auto">
-            <div className="inline-flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-lg font-medium mb-6">
-              <Globe className="w-4 h-4 mr-2" />
-              Top Emigration Destinations 2025
+      <section className="border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-surface border border-brand-border rounded-full text-xs font-semibold text-brand-ink-2 uppercase tracking-wide mb-7">
+            <Globe className="w-3.5 h-3.5 text-brand-accent" />
+            Top Destinations 2025
+          </div>
+
+          <h1 className="font-brand-serif font-medium text-5xl md:text-6xl leading-[1.05] tracking-tight text-brand-ink mb-6">
+            Popular Countries for<br />
+            <span className="italic text-brand-ink-2">American Expats</span>
+          </h1>
+
+          <p className="text-lg leading-relaxed text-brand-muted max-w-3xl mx-auto mb-10">
+            Discover the top-ranked destinations based on immigration policies, quality of life,
+            cost of living, and overall compatibility for US citizens seeking a new home abroad.
+          </p>
+
+          <div className="flex flex-wrap gap-6 justify-center items-center text-sm font-medium text-brand-muted">
+            <div className="flex items-center space-x-2">
+              <TrendingUp className="w-4 h-4 text-brand-accent" />
+              <span>Expert Analysis</span>
             </div>
-
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              <span className="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">
-                Popular Countries for American Expats
-              </span>
-            </h1>
-
-            <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto font-medium">
-              Discover the top-ranked destinations based on immigration policies, quality of life,
-              cost of living, and overall compatibility for US citizens seeking a new home abroad.
-            </p>
-
-            <div className="flex flex-wrap gap-6 justify-center items-center text-lg text-gray-600">
-              <div className="flex items-center space-x-2">
-                <TrendingUp className="w-5 h-5 text-green-500" />
-                <span className="font-medium">Expert Analysis</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Shield className="w-5 h-5 text-blue-500" />
-                <span className="font-medium">Current Requirements</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Users className="w-5 h-5 text-purple-500" />
-                <span className="font-medium">Proven Pathways</span>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Shield className="w-4 h-4 text-brand-accent" />
+              <span>Current Requirements</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Users className="w-4 h-4 text-brand-accent" />
+              <span>Proven Pathways</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* Countries Ranking */}
-      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Top 6 Countries for US Emigrants</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+      <section className="bg-brand-surface border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
+          <div className="text-center mb-14">
+            <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">Rankings</div>
+            <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink mb-4">Top 6 Countries for US Emigrants</h2>
+            <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto">
               Ranked by number of American expats living in such countries
             </p>
           </div>
 
-          <div className="grid gap-8 max-w-6xl mx-auto">
+          <div className="grid gap-12 max-w-5xl mx-auto">
             {bestCountries.map((country) => (
-              <div key={country.name} className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+              <div key={country.name} className="bg-brand-bg border border-brand-border rounded-xl overflow-hidden hover:border-brand-accent transition-colors">
                 {/* Country Image Header */}
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative h-64 overflow-hidden border-b border-brand-border">
                   <img
                     src={country.image}
                     alt={`${country.name} landscape`}
                     className="w-full h-full object-cover"
+                    style={{ filter: 'saturate(0.9)' }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                   <div className="absolute top-4 right-4 flex items-center space-x-2">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-lg font-bold text-blue-700">
+                    <div className="w-12 h-12 bg-brand-surface/90 backdrop-blur border border-brand-border rounded-full flex items-center justify-center text-lg font-brand-serif font-medium text-brand-ink">
                       #{country.rank}
                     </div>
                   </div>
-                  <div className="absolute bottom-4 left-4">
+                  <div className="absolute bottom-6 left-6">
                     <div className="flex items-center space-x-3">
-                      <div className="text-4xl">{country.flag}</div>
-                      <h3 className="text-2xl font-bold text-white">{country.name}</h3>
+                      <div className="text-4xl leading-none">{country.flag}</div>
+                      <h3 className="font-brand-serif text-3xl font-medium text-white">{country.name}</h3>
                     </div>
                   </div>
                 </div>
+                
                 <div className="p-8">
-                  <div className="flex items-start justify-between mb-6">
+                  <div className="flex flex-col md:flex-row items-start justify-between mb-8 gap-8">
                     <div className="flex-1">
-                      <p className="text-lg text-gray-600 max-w-2xl">{country.description}</p>
+                      <p className="text-sm leading-relaxed text-brand-muted whitespace-pre-wrap">{country.description}</p>
                     </div>
-                    <div className="text-center ml-6">
-                      <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br ${getScoreColor(country.overallScore)} text-white text-xl font-bold mb-2`}>
+                    <div className="text-center md:ml-6 shrink-0">
+                      <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-brand-accent-2 text-brand-accent-ink text-2xl font-brand-serif font-medium mb-2 border border-brand-accent/20">
                         {country.overallScore}
                       </div>
-                      <div className="text-lg font-medium text-gray-600">Overall Score</div>
+                      <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide">Overall Score</div>
                     </div>
                   </div>
 
-                  <div className="grid lg:grid-cols-3 gap-8">
+                  <div className="grid md:grid-cols-3 gap-8">
                     {/* Key Information */}
                     <div className="space-y-4">
-                      <h4 className="text-xl font-semibold text-gray-900 mb-3">Key Information</h4>
-
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-700">Cost of Living</span>
-                        <span className={`px-3 py-1 rounded-full text-lg font-medium ${getCostColor(country.costOfLiving)}`}>
-                          {country.costOfLiving}
-                        </span>
+                      <h4 className="font-brand-serif text-xl font-medium text-brand-ink mb-4 border-b border-brand-border pb-2">Key Info</h4>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-brand-muted">Cost of Living</span>
+                        <span className="font-medium text-brand-ink">{country.costOfLiving}</span>
                       </div>
-
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-700">Healthcare</span>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-brand-muted">Healthcare</span>
                         {renderStars(country.healthcareRating)}
                       </div>
-
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-700">Safety</span>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-brand-muted">Safety</span>
                         {renderStars(country.safetyRating)}
                       </div>
-
-                      <div>
-                        <span className="text-gray-700 block mb-1">Language</span>
-                        <span className="text-lg text-gray-600">{country.language}</span>
+                      <div className="text-sm">
+                        <span className="text-brand-muted block mb-1">Language</span>
+                        <span className="font-medium text-brand-ink">{country.language}</span>
                       </div>
-
-                      <div>
-                        <span className="text-gray-700 block mb-1">Climate</span>
-                        <span className="text-lg text-gray-600">{country.climate}</span>
+                      <div className="text-sm">
+                        <span className="text-brand-muted block mb-1">Climate</span>
+                        <span className="font-medium text-brand-ink">{country.climate}</span>
                       </div>
                     </div>
 
                     {/* Immigration Pathways */}
                     <div>
-                      <h4 className="text-xl font-semibold text-gray-900 mb-3">Immigration Pathways</h4>
-                      <ul className="space-y-2">
+                      <h4 className="font-brand-serif text-xl font-medium text-brand-ink mb-4 border-b border-brand-border pb-2">Pathways</h4>
+                      <ul className="space-y-2 mb-6">
                         {country.immigrationPaths.map((path, index) => (
-                          <li key={index} className="flex items-center space-x-2">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                            <span className="text-gray-700">{path}</span>
+                          <li key={index} className="flex items-start space-x-2 text-sm text-brand-muted">
+                            <CheckCircle className="w-4 h-4 text-brand-accent mt-0.5 shrink-0" />
+                            <span>{path}</span>
                           </li>
                         ))}
                       </ul>
-
-                      <div className="mt-6">
-                        <h5 className="text-lg font-medium text-gray-900 mb-2">Popular Cities</h5>
-                        <div className="flex flex-wrap gap-2">
-                          {country.popularCities.map((city, index) => (
-                            <span
-                              key={index}
-                              className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-lg"
-                            >
-                              {city}
-                            </span>
-                          ))}
-                        </div>
+                      <h5 className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-3">Popular Cities</h5>
+                      <div className="flex flex-wrap gap-2">
+                        {country.popularCities.map((city, index) => (
+                          <span
+                            key={index}
+                            className="bg-brand-surface border border-brand-border text-brand-ink px-2.5 py-1 rounded text-xs font-medium"
+                          >
+                            {city}
+                          </span>
+                        ))}
                       </div>
                     </div>
 
                     {/* Key Benefits */}
                     <div>
-                      <h4 className="text-xl font-semibold text-gray-900 mb-3">Key Benefits</h4>
-                      <ul className="space-y-3">
+                      <h4 className="font-brand-serif text-xl font-medium text-brand-ink mb-4 border-b border-brand-border pb-2">Benefits</h4>
+                      <ul className="space-y-3 mb-6">
                         {country.keyBenefits.map((benefit, index) => (
-                          <li key={index} className="flex items-start space-x-2">
-                            <Heart className="w-4 h-4 text-red-500 mt-1 flex-shrink-0" />
-                            <span className="text-gray-700 text-lg">{benefit}</span>
+                          <li key={index} className="flex items-start space-x-2 text-sm text-brand-muted">
+                            <Heart className="w-4 h-4 text-brand-accent mt-0.5 shrink-0" />
+                            <span>{benefit}</span>
                           </li>
                         ))}
                       </ul>
-
-                      <div className="mt-6">
-                        <h5 className="text-lg font-medium text-gray-900 mb-2">Top Highlights</h5>
-                        <div className="space-y-2">
-                          {country.highlights.map((highlight, index) => (
-                            <div key={index} className="bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-                              <span className="text-green-800 font-medium">{highlight}</span>
-                            </div>
-                          ))}
-                        </div>
+                      <h5 className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-3">Highlights</h5>
+                      <div className="space-y-2">
+                        {country.highlights.map((highlight, index) => (
+                          <div key={index} className="bg-brand-surface border border-brand-border rounded px-3 py-2 text-xs font-medium text-brand-ink">
+                            {highlight}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-8 pt-6 border-t border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <div className="text-lg text-gray-600">
+                  <div className="mt-8 pt-6 border-t border-brand-border">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div className="text-sm font-medium text-brand-ink">
                         Ready to explore {country.name} as your new home?
                       </div>
                       <Link
                         to="/assessment"
-                        className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full font-medium hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-btn text-brand-btn-ink rounded-lg text-sm font-semibold hover:bg-brand-ink-2 transition-colors"
                       >
-                        <MapPin className="w-4 h-4 mr-2" />
+                        <MapPin className="w-4 h-4" />
                         Get Assessment
                       </Link>
                     </div>
@@ -354,65 +325,64 @@ export default function BestCountries() {
       </section>
 
       {/* Why These Countries */}
-      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">Why These Countries Top Our Rankings</h2>
+      <section className="border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
+          <div className="text-center mb-14">
+            <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink">Why These Countries Top Our Rankings</h2>
+          </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-6 h-6 text-blue-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Immigration Friendly</h3>
-                <p className="text-gray-600">Clear pathways and welcoming policies for American emigrants</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-brand-surface p-6 rounded-xl border border-brand-border">
+              <div className="w-10 h-10 bg-brand-bg border border-brand-border rounded-lg flex items-center justify-center mb-4">
+                <Shield className="w-5 h-5 text-brand-accent" />
               </div>
+              <h3 className="font-brand-serif text-lg font-medium text-brand-ink mb-2">Immigration Friendly</h3>
+              <p className="text-sm text-brand-muted leading-relaxed">Clear pathways and welcoming policies for American emigrants</p>
+            </div>
 
-              <div className="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Heart className="w-6 h-6 text-green-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Quality Healthcare</h3>
-                <p className="text-gray-600">Universal or affordable healthcare systems with quality care</p>
+            <div className="bg-brand-surface p-6 rounded-xl border border-brand-border">
+              <div className="w-10 h-10 bg-brand-bg border border-brand-border rounded-lg flex items-center justify-center mb-4">
+                <Heart className="w-5 h-5 text-brand-accent" />
               </div>
+              <h3 className="font-brand-serif text-lg font-medium text-brand-ink mb-2">Quality Healthcare</h3>
+              <p className="text-sm text-brand-muted leading-relaxed">Universal or affordable healthcare systems with quality care</p>
+            </div>
 
-              <div className="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp className="w-6 h-6 text-purple-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Economic Opportunity</h3>
-                <p className="text-gray-600">Strong economies with opportunities for business and employment</p>
+            <div className="bg-brand-surface p-6 rounded-xl border border-brand-border">
+              <div className="w-10 h-10 bg-brand-bg border border-brand-border rounded-lg flex items-center justify-center mb-4">
+                <TrendingUp className="w-5 h-5 text-brand-accent" />
               </div>
+              <h3 className="font-brand-serif text-lg font-medium text-brand-ink mb-2">Economic Opportunity</h3>
+              <p className="text-sm text-brand-muted leading-relaxed">Strong economies with opportunities for business and employment</p>
+            </div>
 
-              <div className="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
-                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Users className="w-6 h-6 text-orange-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Expat Communities</h3>
-                <p className="text-gray-600">Established American expat communities for support and integration</p>
+            <div className="bg-brand-surface p-6 rounded-xl border border-brand-border">
+              <div className="w-10 h-10 bg-brand-bg border border-brand-border rounded-lg flex items-center justify-center mb-4">
+                <Users className="w-5 h-5 text-brand-accent" />
               </div>
+              <h3 className="font-brand-serif text-lg font-medium text-brand-ink mb-2">Expat Communities</h3>
+              <p className="text-sm text-brand-muted leading-relaxed">Established American expat communities for support and integration</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Call to Action */}
-      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Find Your Perfect Match</h2>
-            <p className="text-xl text-gray-700 mb-8">
-              Take our comprehensive assessment to discover which of these top countries
-              best aligns with your priorities, lifestyle, and emigration goals.
-            </p>
-            <Link
-              to="/assessment"
-              className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-            >
-              <MapPin className="w-5 h-5 mr-2" />
-              Start Your Assessment
-            </Link>
-          </div>
+      <section className="bg-brand-ink text-white">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24 text-center">
+          <div className="text-xs font-semibold text-brand-accent-2 uppercase tracking-wide mb-5">Take Action</div>
+          <h2 className="font-brand-serif font-medium text-4xl md:text-5xl leading-tight tracking-tight text-white mb-6">Find Your Perfect Match</h2>
+          <p className="text-lg leading-relaxed text-[#b8c8e2] max-w-2xl mx-auto mb-10">
+            Take our comprehensive assessment to discover which of these top countries
+            best aligns with your priorities, lifestyle, and emigration goals.
+          </p>
+          <Link
+            to="/assessment"
+            className="inline-flex items-center gap-2 px-7 py-4 bg-brand-accent-2 text-brand-accent-ink rounded-lg font-semibold text-base hover:brightness-95 transition-all"
+          >
+            <MapPin className="w-5 h-5" />
+            Start Your Assessment
+          </Link>
         </div>
       </section>
 

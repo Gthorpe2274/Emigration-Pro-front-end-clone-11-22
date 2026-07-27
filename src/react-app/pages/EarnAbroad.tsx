@@ -1,49 +1,58 @@
 import { Link } from 'react-router-dom';
 import { Briefcase, Laptop, Rocket, DollarSign, TrendingUp, Shield } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
+import Footer from '@/react-app/components/Footer';
 
 export default function EarnAbroad() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
       <Navigation />
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            Earn <span className="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">Abroad</span>
+      <section className="border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-surface border border-brand-border rounded-full text-xs font-semibold text-brand-ink-2 uppercase tracking-wide mb-7">
+            <span className="w-1.5 h-1.5 bg-brand-accent rounded-full" />
+            Global Self-Employment
+          </div>
+          <h1 className="font-brand-serif font-medium text-5xl md:text-6xl leading-[1.05] tracking-tight text-brand-ink mb-6">
+            Earn <span className="italic text-brand-ink-2">Abroad</span>
           </h1>
-          <p className="text-xl text-gray-700 mb-8 font-medium">
+          <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto mb-10">
             Discover how to build a sustainable, self-employed life while living in your dream destination.
           </p>
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-xl font-bold text-blue-800">
+          <div className="flex flex-col items-center gap-6">
+            <p className="text-lg font-medium text-brand-ink">
               Start Earning Now and Take Your Earning Power With You!
             </p>
             <Link
               to="/living-wage-business"
-              className="bg-blue-600 text-white px-10 py-4 rounded-full font-bold text-xl hover:bg-blue-700 transition-all transform hover:scale-105 shadow-lg"
+              className="inline-flex items-center gap-2 px-7 py-4 bg-brand-btn text-brand-btn-ink rounded-lg font-semibold text-base hover:bg-brand-ink-2 transition-colors"
             >
               Earn Now
+              <span className="text-lg leading-none">&rarr;</span>
             </Link>
           </div>
         </div>
       </section>
 
       {/* The Opportunity */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto">
+      <section className="bg-brand-surface border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="order-2 lg:order-1">
-              <img
-                src="https://mocha-cdn.com/0198c152-69c8-7918-a1cb-a063f87c02df/image.png_8243.png"
-                alt="Digital nomad working from a beautiful location"
-                className="rounded-2xl shadow-2xl"
-              />
+            <div className="order-2 lg:order-1 relative">
+              <div className="aspect-[4/3] rounded-xl overflow-hidden bg-brand-bg border border-brand-border">
+                <img
+                  src="https://mocha-cdn.com/0198c152-69c8-7918-a1cb-a063f87c02df/image.png_8243.png"
+                  alt="Digital nomad working from a beautiful location"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
             <div className="order-1 lg:order-2">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">The Freedom of Global Self-Employment</h2>
-              <div className="space-y-4 text-lg text-gray-700">
+              <div className="inline-block text-xs font-semibold text-brand-accent-ink bg-brand-accent-2 px-2.5 py-1 rounded uppercase tracking-wide mb-5">Opportunity</div>
+              <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink mb-6">The Freedom of Global Self-Employment</h2>
+              <div className="space-y-4 text-base leading-relaxed text-brand-muted">
                 <p>
                   Moving abroad isn't just about changing your scenery; it's about reclaiming your time and financial independence. The rise of the digital economy has made it more possible than ever to earn a "Western" income while enjoying a significantly lower cost of living.
                 </p>
@@ -60,34 +69,37 @@ export default function EarnAbroad() {
       </section>
 
       {/* Ways to Earn */}
-      <section className="container mx-auto px-4 py-16 bg-white/40 backdrop-blur-sm rounded-3xl my-12">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Paths to Self-Employment Abroad</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-8 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <Laptop className="w-6 h-6 text-blue-600" />
+      <section className="border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">Methods</div>
+            <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink">Paths to Self-Employment Abroad</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="p-8 bg-brand-surface border border-brand-border rounded-xl">
+              <div className="w-12 h-12 bg-brand-bg border border-brand-border rounded-xl flex items-center justify-center mb-6">
+                <Laptop className="w-5 h-5 text-brand-accent" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Remote Freelancing</h3>
-              <p className="text-gray-600">
+              <h3 className="font-brand-serif text-2xl font-medium text-brand-ink mb-3">Remote Freelancing</h3>
+              <p className="text-sm leading-relaxed text-brand-muted">
                 Leverage your existing skills in design, writing, coding, or marketing to serve clients worldwide from your new home base.
               </p>
             </div>
-            <div className="p-8 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-                <Briefcase className="w-6 h-6 text-purple-600" />
+            <div className="p-8 bg-brand-surface border border-brand-border rounded-xl">
+              <div className="w-12 h-12 bg-brand-bg border border-brand-border rounded-xl flex items-center justify-center mb-6">
+                <Briefcase className="w-5 h-5 text-brand-accent" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Specialized Consulting</h3>
-              <p className="text-gray-600">
+              <h3 className="font-brand-serif text-2xl font-medium text-brand-ink mb-3">Specialized Consulting</h3>
+              <p className="text-sm leading-relaxed text-brand-muted">
                 Offer your professional expertise to international businesses or local organizations looking for specialized Western market insights.
               </p>
             </div>
-            <div className="p-8 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
-                <Rocket className="w-6 h-6 text-green-600" />
+            <div className="p-8 bg-brand-surface border border-brand-border rounded-xl">
+              <div className="w-12 h-12 bg-brand-bg border border-brand-border rounded-xl flex items-center justify-center mb-6">
+                <Rocket className="w-5 h-5 text-brand-accent" />
               </div>
-              <h3 className="text-xl font-bold mb-4">Digital Entrepreneurship</h3>
-              <p className="text-gray-600">
+              <h3 className="font-brand-serif text-2xl font-medium text-brand-ink mb-3">Digital Entrepreneurship</h3>
+              <p className="text-sm leading-relaxed text-brand-muted">
                 Launch an e-commerce brand, a SaaS product, or a content platform that can be managed from anywhere in the world.
               </p>
             </div>
@@ -96,35 +108,38 @@ export default function EarnAbroad() {
       </section>
 
       {/* Key Considerations */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">What You Need to Succeed</h2>
-          <div className="space-y-6">
-            <div className="flex items-start space-x-4 bg-white/60 p-6 rounded-2xl border border-white/20">
-              <div className="bg-blue-100 p-3 rounded-full flex-shrink-0">
-                <Shield className="w-6 h-6 text-blue-600" />
+      <section className="bg-brand-surface border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
+          <div className="max-w-2xl mx-auto text-center mb-14">
+            <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">Requirements</div>
+            <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink">What You Need to Succeed</h2>
+          </div>
+          <div className="max-w-3xl mx-auto space-y-6">
+            <div className="flex items-start space-x-5 bg-brand-bg p-6 rounded-xl border border-brand-border">
+              <div className="bg-brand-surface border border-brand-border p-3 rounded-full flex-shrink-0">
+                <Shield className="w-5 h-5 text-brand-accent" />
               </div>
               <div>
-                <h4 className="text-xl font-bold text-gray-900 mb-2">Legal Residency & Work Permits</h4>
-                <p className="text-gray-700">Understanding which countries offer "Digital Nomad Visas" or self-employment permits is the first step to a legal and stress-free move.</p>
+                <h4 className="font-brand-serif text-xl font-medium text-brand-ink mb-2">Legal Residency & Work Permits</h4>
+                <p className="text-sm leading-relaxed text-brand-muted">Understanding which countries offer "Digital Nomad Visas" or self-employment permits is the first step to a legal and stress-free move.</p>
               </div>
             </div>
-            <div className="flex items-start space-x-4 bg-white/60 p-6 rounded-2xl border border-white/20">
-              <div className="bg-green-100 p-3 rounded-full flex-shrink-0">
-                <DollarSign className="w-6 h-6 text-green-600" />
+            <div className="flex items-start space-x-5 bg-brand-bg p-6 rounded-xl border border-brand-border">
+              <div className="bg-brand-surface border border-brand-border p-3 rounded-full flex-shrink-0">
+                <DollarSign className="w-5 h-5 text-brand-accent" />
               </div>
               <div>
-                <h4 className="text-xl font-bold text-gray-900 mb-2">Tax Optimization</h4>
-                <p className="text-gray-700">Properly managing your tax obligations both in the US (for citizens) and your new host country can save you thousands every year.</p>
+                <h4 className="font-brand-serif text-xl font-medium text-brand-ink mb-2">Tax Optimization</h4>
+                <p className="text-sm leading-relaxed text-brand-muted">Properly managing your tax obligations both in the US (for citizens) and your new host country can save you thousands every year.</p>
               </div>
             </div>
-            <div className="flex items-start space-x-4 bg-white/60 p-6 rounded-2xl border border-white/20">
-              <div className="bg-purple-100 p-3 rounded-full flex-shrink-0">
-                <TrendingUp className="w-6 h-6 text-purple-600" />
+            <div className="flex items-start space-x-5 bg-brand-bg p-6 rounded-xl border border-brand-border">
+              <div className="bg-brand-surface border border-brand-border p-3 rounded-full flex-shrink-0">
+                <TrendingUp className="w-5 h-5 text-brand-accent" />
               </div>
               <div>
-                <h4 className="text-xl font-bold text-gray-900 mb-2">Lower Cost of Living</h4>
-                <p className="text-gray-700">Choose destinations where your income goes further, allowing you to invest more in your business and your future.</p>
+                <h4 className="font-brand-serif text-xl font-medium text-brand-ink mb-2">Lower Cost of Living</h4>
+                <p className="text-sm leading-relaxed text-brand-muted">Choose destinations where your income goes further, allowing you to invest more in your business and your future.</p>
               </div>
             </div>
           </div>
@@ -132,36 +147,22 @@ export default function EarnAbroad() {
       </section>
 
       {/* Call to Action */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="max-w-4xl mx-auto text-center bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12 text-white shadow-xl">
-          <h2 className="text-4xl font-bold mb-6">Start Your Journey Today</h2>
-          <p className="text-xl mb-8 opacity-90">
+      <section className="bg-brand-ink text-white">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24 text-center">
+          <h2 className="font-brand-serif font-medium text-4xl md:text-5xl leading-tight tracking-tight text-white mb-6">Start Your Journey Today</h2>
+          <p className="text-lg leading-relaxed text-[#b8c8e2] max-w-2xl mx-auto mb-10">
             Every successful international career starts with a plan. Let us help you find the perfect location that supports both your lifestyle and your business goals.
           </p>
           <Link
             to="/assessment"
-            className="inline-block bg-white text-blue-600 px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors"
+            className="inline-flex items-center gap-2 px-7 py-4 bg-brand-accent-2 text-brand-accent-ink rounded-lg font-semibold text-base hover:brightness-95 transition-all"
           >
             Get Your Custom Report
           </Link>
         </div>
       </section>
 
-      {/* Standard Footer */}
-      <footer className="bg-black py-12 px-6">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="mb-8">
-            <img
-              src="/images/logo-square.png"
-              alt="Emigration Pro Logo"
-              className="h-16 w-auto mx-auto mb-4"
-            />
-          </div>
-          <p className="text-gray-400 text-sm mb-8">
-            Copyright © 2024 emigrationpro.com. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
