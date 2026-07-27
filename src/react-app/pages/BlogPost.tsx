@@ -134,7 +134,7 @@ export default function BlogPost() {
               <span className="text-lg leading-none">&larr;</span>
               Back to Blog
             </Link>
-            <div className="hidden lg:block bg-brand-surface p-6 rounded-xl border border-brand-border">
+            <div className="bg-brand-surface p-6 rounded-xl border border-brand-border">
               {/* Dynamically imported or standard import */}
               <BlogIndex />
             </div>
