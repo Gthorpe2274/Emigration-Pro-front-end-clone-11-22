@@ -15,8 +15,6 @@ interface BlogPost {
   author?: string;
 }
 
-
-
 export default function Blog() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +81,7 @@ export default function Blog() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
       <Navigation />
       <EmailCaptureModal
         isOpen={showEmailModal}
@@ -91,75 +89,79 @@ export default function Blog() {
         onSubmit={handleEmailSubmit}
       />
 
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 md:px-8 py-16 md:py-24">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4 text-center">
-            Emigration Insights & Resources
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 text-center">
-            Expert advice, destination guides, and relocation tips for your journey abroad
-          </p>
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-surface border border-brand-border rounded-full text-xs font-semibold text-brand-ink-2 uppercase tracking-wide mb-7">
+              <span className="w-1.5 h-1.5 bg-brand-accent rounded-full" />
+              Latest Articles
+            </div>
+            <h1 className="font-brand-serif font-medium text-5xl md:text-6xl leading-[1.05] tracking-tight text-brand-ink mb-6">
+              Emigration Insights & Resources
+            </h1>
+            <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto mb-10">
+              Expert advice, destination guides, and relocation tips for your journey abroad.
+            </p>
 
-          <div className="text-center mb-12">
             <button
               onClick={() => setShowEmailModal(true)}
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 text-lg"
+              className="inline-flex items-center gap-2 px-7 py-4 bg-brand-accent-2 text-brand-accent-ink rounded-lg font-semibold text-base hover:brightness-95 transition-all"
             >
               Get Your Full Report
+              <span className="text-lg leading-none">&rarr;</span>
             </button>
           </div>
 
           {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-600 mt-4">Loading posts...</p>
+            <div className="text-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-accent mx-auto"></div>
+              <p className="text-brand-muted mt-4 font-medium">Loading posts...</p>
             </div>
           ) : posts.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-2xl shadow-lg">
-              <p className="text-gray-600 text-lg">No blog posts available yet. Check back soon!</p>
+            <div className="text-center py-16 bg-brand-surface border border-brand-border rounded-xl">
+              <p className="text-brand-muted text-lg">No blog posts available yet. Check back soon!</p>
             </div>
           ) : (
             <div className="space-y-8">
               {posts.map((post) => (
                 <article
                   key={post.id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+                  className="bg-brand-surface border border-brand-border rounded-xl overflow-hidden hover:border-brand-accent transition-colors"
                 >
                   <Link to={`/blog/${post.slug}`} className="block">
                     {post.featured_image && (
-                      <div className="relative h-64 overflow-hidden bg-gray-100">
+                      <div className="relative h-64 md:h-80 overflow-hidden bg-brand-bg border-b border-brand-border">
                         <img
                           src={post.featured_image}
                           alt={post.title}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover"
+                          style={{ filter: 'saturate(0.9)' }}
                         />
                       </div>
                     )}
-                    <div className="p-8">
-                      <div className="flex items-center text-sm text-gray-500 mb-3">
+                    <div className="p-8 md:p-10">
+                      <div className="flex items-center text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">
                         <time dateTime={post.published_date}>
                           {formatDate(post.published_date)}
                         </time>
                         {post.author && (
                           <>
-                            <span className="mx-2">•</span>
+                            <span className="mx-3 text-brand-border-strong">•</span>
                             <span>By {post.author}</span>
                           </>
                         )}
                       </div>
-                      <h2 className="text-3xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition-colors">
+                      <h2 className="font-brand-serif text-3xl font-medium text-brand-ink mb-4 hover:text-brand-accent transition-colors">
                         {post.title}
                       </h2>
                       {post.excerpt && (
-                        <p className="text-gray-600 leading-relaxed mb-4">
+                        <p className="text-base leading-relaxed text-brand-muted mb-6">
                           {post.excerpt}
                         </p>
                       )}
-                      <span className="text-blue-600 font-semibold hover:text-blue-700 inline-flex items-center">
+                      <span className="inline-flex items-center gap-2 text-sm font-semibold text-brand-accent hover:text-brand-ink transition-colors">
                         Read more
-                        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+                        <span className="text-lg leading-none">&rarr;</span>
                       </span>
                     </div>
                   </Link>
@@ -173,17 +175,17 @@ export default function Blog() {
       <Footer />
 
       {/* Footer Links - Below Footer */}
-      <div className="text-center py-4 bg-gray-50 border-t border-gray-200">
+      <div className="text-center py-4 bg-brand-surface border-t border-brand-border">
         <a
           href="/admin/blog"
-          className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors font-medium"
+          className="text-[10px] text-brand-muted hover:text-brand-ink transition-colors font-medium"
         >
           Site Health
         </a>
-        <span className="mx-2 text-[10px] text-gray-300">•</span>
+        <span className="mx-2 text-[10px] text-brand-border-strong">•</span>
         <a
           href="/admin/crm"
-          className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors font-medium"
+          className="text-[10px] text-brand-muted hover:text-brand-ink transition-colors font-medium"
         >
           Server
         </a>

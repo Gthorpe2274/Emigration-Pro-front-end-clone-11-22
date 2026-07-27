@@ -84,13 +84,11 @@ export default function BlogPost() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
         <Navigation />
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-gray-600 mt-4">Loading post...</p>
-          </div>
+        <div className="container mx-auto px-4 py-24 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-accent mx-auto"></div>
+          <p className="text-brand-muted mt-4 font-medium">Loading post...</p>
         </div>
         <Footer />
       </div>
@@ -99,19 +97,17 @@ export default function BlogPost() {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
         <Navigation />
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Post Not Found</h1>
-            <p className="text-gray-600 mb-8">The blog post you're looking for doesn't exist.</p>
-            <Link
-              to="/blog"
-              className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-            >
-              Back to Blog
-            </Link>
-          </div>
+        <div className="container mx-auto px-4 py-24 text-center">
+          <h1 className="font-brand-serif text-4xl font-medium text-brand-ink mb-4">Post Not Found</h1>
+          <p className="text-brand-muted mb-8 text-lg">The blog post you're looking for doesn't exist.</p>
+          <Link
+            to="/blog"
+            className="inline-flex items-center gap-2 px-7 py-3 bg-brand-btn text-brand-btn-ink rounded-lg font-semibold hover:bg-brand-ink-2 transition-colors"
+          >
+            Back to Blog
+          </Link>
         </div>
         <Footer />
       </div>
@@ -119,7 +115,7 @@ export default function BlogPost() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
       <Navigation />
       <EmailCaptureModal
         isOpen={showEmailModal}
@@ -127,20 +123,18 @@ export default function BlogPost() {
         onSubmit={handleEmailSubmit}
       />
 
-      <div className="container mx-auto px-4 py-16">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
+        <div className="flex flex-col lg:flex-row gap-12">
           {/* Sidebar */}
-          <div className="lg:w-1/4">
+          <div className="lg:w-1/4 shrink-0">
             <Link
               to="/blog"
-              className="inline-flex items-center text-blue-600 hover:text-blue-700 mb-8 font-semibold"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-brand-muted hover:text-brand-accent transition-colors mb-8"
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+              <span className="text-lg leading-none">&larr;</span>
               Back to Blog
             </Link>
-            <div className="hidden lg:block">
+            <div className="hidden lg:block bg-brand-surface p-6 rounded-xl border border-brand-border">
               {/* Dynamically imported or standard import */}
               <BlogIndex />
             </div>
@@ -148,17 +142,14 @@ export default function BlogPost() {
 
           {/* Main Content */}
           <div className="lg:w-3/4">
-
-
-            <article className="bg-white rounded-2xl shadow-lg overflow-hidden">
-
-
+            <article className="bg-brand-surface border border-brand-border rounded-xl overflow-hidden">
               {post.featured_image && (
-                <div className="relative h-96 overflow-hidden">
+                <div className="relative h-[400px] overflow-hidden bg-brand-bg border-b border-brand-border">
                   <img
                     src={post.featured_image}
                     alt={post.title}
                     className="w-full h-full object-cover"
+                    style={{ filter: 'saturate(0.9)' }}
                     onError={(e) => {
                       console.error('Image failed to load:', post.featured_image);
                       (e.target as HTMLImageElement).style.display = 'none';
@@ -168,19 +159,19 @@ export default function BlogPost() {
               )}
 
               <div className="p-8 md:p-12">
-                <div className="flex items-center text-sm text-gray-500 mb-4">
+                <div className="flex items-center text-xs font-semibold text-brand-muted uppercase tracking-wide mb-6">
                   <time dateTime={post.published_date}>
                     {formatDate(post.published_date)}
                   </time>
                   {post.author && (
                     <>
-                      <span className="mx-2">•</span>
+                      <span className="mx-3 text-brand-border-strong">•</span>
                       <span>By {post.author}</span>
                     </>
                   )}
                 </div>
 
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
+                <h1 className="font-brand-serif font-medium text-4xl md:text-5xl leading-tight text-brand-ink mb-10">
                   {post.title}
                 </h1>
 
@@ -195,9 +186,9 @@ export default function BlogPost() {
                   return (
                     <>
                       {styles && <style>{styles}</style>}
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto text-base leading-relaxed text-brand-muted">
                         <div
-                          className="max-w-none prose prose-lg prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900 prose-table:mt-4 prose-table:mb-4 prose-table:border-collapse prose-table:w-full prose-thead:bg-gray-50 prose-th:text-left prose-th:border prose-th:border-gray-300 prose-th:px-4 prose-th:py-2 prose-td:border prose-td:border-gray-300 prose-td:px-4 prose-td:py-2 whitespace-pre-line"
+                          className="max-w-none prose prose-lg prose-headings:font-brand-serif prose-headings:font-medium prose-headings:text-brand-ink prose-p:text-brand-muted prose-a:text-brand-accent hover:prose-a:text-brand-ink prose-strong:text-brand-ink prose-table:mt-4 prose-table:mb-4 prose-table:border-collapse prose-table:w-full prose-thead:bg-brand-surface prose-th:text-left prose-th:border prose-th:border-brand-border prose-th:px-4 prose-th:py-2 prose-td:border prose-td:border-brand-border prose-td:px-4 prose-td:py-2 whitespace-pre-line"
                           dangerouslySetInnerHTML={{ __html: processedBody }}
                         />
                       </div>
@@ -206,9 +197,9 @@ export default function BlogPost() {
                 })()}
 
                 {post.allow_comments && (
-                  <div className="mt-12 pt-8 border-t border-gray-200">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Comments</h3>
-                    <p className="text-gray-600">Comments feature coming soon...</p>
+                  <div className="mt-16 pt-10 border-t border-brand-border">
+                    <h3 className="font-brand-serif font-medium text-2xl text-brand-ink mb-4">Comments</h3>
+                    <p className="text-brand-muted text-sm">Comments feature coming soon...</p>
                   </div>
                 )}
               </div>
@@ -218,55 +209,60 @@ export default function BlogPost() {
       </div>
 
       {/* Get a Professional Report Section */}
-      <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 pb-16">
-        <div className="container mx-auto px-4">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-3xl p-8 md:p-12">
-            <div className="grid md:grid-cols-3 gap-8 items-center">
-              {/* Left Image */}
-              <div className="hidden md:block">
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square flex items-center justify-center border-4 border-white">
+      <section className="bg-brand-ink text-white py-16 md:py-24 border-t border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <div className="grid md:grid-cols-3 gap-10 items-center">
+            {/* Left Image */}
+            <div className="hidden md:block">
+              <div className="aspect-square rounded-xl overflow-hidden bg-brand-surface border border-brand-border/30 p-2">
+                <div className="w-full h-full rounded-lg overflow-hidden relative">
                   <img
                     src="/images/blk-couple-sq.png"
                     alt="Couple reviewing emigration documents"
                     className="w-full h-full object-cover"
                     loading="lazy"
+                    style={{ filter: 'saturate(0.9)' }}
                   />
                 </div>
               </div>
+            </div>
 
-              {/* Center Content */}
-              <div className="text-center">
-                <h3 className="text-3xl font-bold text-gray-900 mb-6">Get a Professional Report</h3>
+            {/* Center Content */}
+            <div className="text-center">
+              <div className="text-xs font-semibold text-brand-accent-2 uppercase tracking-wide mb-4">Professional Report</div>
+              <h3 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight text-white mb-6">
+                Ready for the <span className="italic text-brand-accent-2">details?</span>
+              </h3>
 
-                <div className="mb-6">
-                  <div className="inline-block bg-gradient-to-r from-red-500 via-orange-500 to-red-500 text-white px-6 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-sm font-semibold uppercase tracking-wide">Limited Time Sale</span>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-lg font-bold line-through opacity-75">$69.99</span>
-                        <span className="text-2xl font-extrabold animate-pulse">now $49.99</span>
-                      </div>
-                    </div>
+              <div className="mb-8">
+                <div className="inline-flex items-center gap-3 bg-brand-bg/10 border border-brand-border/20 px-5 py-3 rounded-lg">
+                  <span className="text-xs font-bold uppercase tracking-wide text-brand-accent-2 bg-brand-accent-2/20 px-2 py-1 rounded">Limited Offer</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-brand-muted line-through">$99.99</span>
+                    <span className="text-xl font-brand-serif font-medium text-white">$69.99</span>
                   </div>
                 </div>
-
-                <button
-                  onClick={() => setShowEmailModal(true)}
-                  className="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                >
-                  <span className="mr-2">📋</span>
-                  Get Your Report
-                </button>
               </div>
 
-              {/* Right Image */}
-              <div className="hidden md:block">
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden aspect-square flex items-center justify-center border-4 border-white">
+              <button
+                onClick={() => setShowEmailModal(true)}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-brand-accent-2 text-brand-accent-ink rounded-lg font-semibold text-base hover:brightness-95 transition-all"
+              >
+                Get Your Report
+                <span className="text-lg leading-none">&rarr;</span>
+              </button>
+            </div>
+
+            {/* Right Image */}
+            <div className="hidden md:block">
+              <div className="aspect-square rounded-xl overflow-hidden bg-brand-surface border border-brand-border/30 p-2">
+                <div className="w-full h-full rounded-lg overflow-hidden relative">
                   <img
                     src="/images/old-couple.png"
                     alt="Couple reviewing emigration report"
                     className="w-full h-full object-cover"
                     loading="lazy"
+                    style={{ filter: 'saturate(0.9)' }}
                   />
                 </div>
               </div>
