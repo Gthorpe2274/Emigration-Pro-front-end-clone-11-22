@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -33,14 +32,14 @@ export default function BlogIndex() {
     };
 
     if (loading) {
-        return <div className="p-4 bg-gray-50 rounded-lg animate-pulse">Loading index...</div>;
+        return <div className="p-4 bg-brand-bg rounded-lg animate-pulse text-brand-muted text-sm font-medium">Loading index...</div>;
     }
 
     if (posts.length === 0) return null;
 
     return (
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100 sticky top-4">
-            <h3 className="text-xl font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+        <div className="mb-8 sticky top-4 font-brand-sans">
+            <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-4 pb-2 border-b border-brand-border">
                 Article Index
             </h3>
             <nav className="space-y-2">
@@ -49,7 +48,7 @@ export default function BlogIndex() {
                         <li key={post.id}>
                             <Link
                                 to={`/blog/${post.slug}`}
-                                className="block text-gray-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors text-sm font-medium"
+                                className="block text-brand-muted hover:text-brand-ink hover:bg-brand-bg px-3 py-2 rounded-lg transition-colors text-sm font-medium"
                             >
                                 {post.title}
                             </Link>
