@@ -1425,7 +1425,10 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
     }
 
     // 7. Return success with redirect URL to report generation app
-    const reportAppUrl = "https://report.emigrationpro.com";
+    let reportAppUrl = "https://report.emigrationpro.com";
+    if (affiliate_code) {
+      reportAppUrl += `?ref=${encodeURIComponent(affiliate_code)}`;
+    }
 
     return c.json({
       success: true,
