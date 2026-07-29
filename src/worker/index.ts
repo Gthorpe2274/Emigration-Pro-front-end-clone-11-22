@@ -1426,9 +1426,13 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
 
     // 7. Return success with redirect URL to report generation app
     let reportAppUrl = "https://report.emigrationpro.com";
+    const urlParams = new URLSearchParams();
     if (affiliate_code) {
-      reportAppUrl += `?ref=${encodeURIComponent(affiliate_code)}`;
+      urlParams.append('ref', affiliate_code);
     }
+    urlParams.append('assessment_id', finalAssessmentId.toString());
+    urlParams.append('email', normalizedEmail);
+    reportAppUrl += `?${urlParams.toString()}`;
 
     return c.json({
       success: true,

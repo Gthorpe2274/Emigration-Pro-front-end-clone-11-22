@@ -46,6 +46,12 @@ export default function BlogAdmin() {
   const [selectedCategory, setSelectedCategory] = useState<keyof typeof blogImages>('local');
   const [isUploading, setIsUploading] = useState(false);
 
+  // Unsplash Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -253,6 +259,52 @@ export default function BlogAdmin() {
     });
     setEditingPost(null);
     setShowForm(false);
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setSearchError('');
+      return;
+    }
+    
+    setIsSearching(true);
+    setSearchError('');
+    
+    try {
+      const apiKey = import.meta.env.VITE_UNSPLASH_ACCESS_KEY;
+      if (!apiKey || apiKey === 'your_key_here') {
+        setSearchError('Unsplash API key is missing. Please add VITE_UNSPLASH_ACCESS_KEY to your .env file.');
+        setIsSearching(false);
+        return;
+      }
+      
+      const response = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&per_page=20`, {
+        headers: {
+          Authorization: `Client-ID ${apiKey}`
+        }
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Invalid API Key. Please check your VITE_UNSPLASH_ACCESS_KEY.');
+        }
+        throw new Error('Failed to fetch images from Unsplash');
+      }
+      
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+        setSearchResults(data.results.map((img: any) => img.urls.regular));
+      } else {
+        setSearchResults([]);
+        setSearchError('No images found for this search term.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setSearchError(err.message || 'An error occurred while searching.');
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -478,8 +530,13 @@ export default function BlogAdmin() {
                             <button
                               key={cat}
                               type="button"
-                              onClick={() => setSelectedCategory(cat)}
-                              className={`px-4 py-2 rounded-lg capitalize whitespace-nowrap ${selectedCategory === cat
+                              onClick={() => {
+                                setSelectedCategory(cat);
+                                setSearchResults([]);
+                                setSearchQuery('');
+                                setSearchError('');
+                              }}
+                              className={`px-4 py-2 rounded-lg capitalize whitespace-nowrap ${selectedCategory === cat && searchResults.length === 0
                                 ? 'bg-blue-600 text-white'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
@@ -494,9 +551,35 @@ export default function BlogAdmin() {
                           ))}
                         </div>
 
+                        {/* New Search Input */}
+                        <div className="p-4 bg-white border-b border-gray-200 flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Search Unsplash for custom images (e.g. coffee, office, technology)..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleSearch}
+                            disabled={isSearching}
+                            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg disabled:opacity-50 transition"
+                          >
+                            {isSearching ? 'Searching...' : 'Search'}
+                          </button>
+                        </div>
+                        
+                        {searchError && (
+                          <div className="px-6 py-3 bg-red-50 text-red-600 text-sm border-b border-red-100">
+                            {searchError}
+                          </div>
+                        )}
+
                         <div className="flex-1 overflow-y-auto p-6">
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {blogImages[selectedCategory].map((img, index) => (
+                            {(searchResults.length > 0 ? searchResults : blogImages[selectedCategory]).map((img, index) => (
                               <button
                                 key={index}
                                 type="button"
