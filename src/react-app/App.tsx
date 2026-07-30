@@ -28,6 +28,7 @@ import EarnAbroad from './pages/EarnAbroad';
 import LivingWageBusiness from './pages/LivingWageBusiness';
 import FileConverter from './pages/FileConverter';
 import AdminReportGen from './pages/AdminReportGen';
+import CheckoutReport from './pages/CheckoutReport';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
         <Route path="/city/:country/:city" element={<CityDetails />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/sample-report" element={<SampleReport />} />
+        <Route path="/checkout-report" element={<CheckoutReport />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/admin/config" element={<AdminConfig />} />

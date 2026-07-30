@@ -10,6 +10,7 @@ interface Env {
   BLOG_ADMIN_API_KEY: string;
   GEMINI_API_KEY?: string;
   OPENAI_API_KEY?: string;
+  PERPLEXITY_API_KEY?: string;
   RESEND_API_KEY?: string;
   YOUTUBE_API_KEY?: string;
   ADMIN_USERNAME: string;

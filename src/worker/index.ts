@@ -1424,8 +1424,8 @@ app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSche
       console.log(`Email gateway: Created CRM record for ${normalizedEmail}, session: ${sessionCode}, assessment: ${finalAssessmentId}`);
     }
 
-    // 7. Return success with redirect URL to report generation app
-    let reportAppUrl = "https://report.emigrationpro.com";
+    // 7. Return success with redirect URL to internal report generation route
+    let reportAppUrl = "/checkout-report";
     const urlParams = new URLSearchParams();
     if (affiliate_code) {
       urlParams.append('ref', affiliate_code);
@@ -2561,6 +2561,128 @@ app.get('/sitemap.xml', async (c) => {
   } catch (error) {
     console.error('Sitemap generation error:', error);
     return c.text('Error generating sitemap', 500);
+  }
+});
+// Perplexity API endpoint for Report Generation
+app.post("/api/perplexity", async (c) => {
+  const apiKey = c.env.PERPLEXITY_API_KEY;
+  if (!apiKey) {
+    return c.json({ error: 'PERPLEXITY_API_KEY not configured in environment' }, 500);
+  }
+
+  const { action, payload } = await c.req.json();
+  const modelName = 'sonar'; 
+
+  const sanitizeMarkdown = (text: string): string => {
+    if (!text) return "";
+    return text
+      .replace(/###\s*\|\s*\|\s*:---.*\|/g, '')
+      .replace(/\|\s*:---.*\|/g, '')
+      .replace(/^#+\s*[|:-]*\s*$/gm, '')
+      .replace(/^[\s|:-]+$/gm, '')
+      .replace(/\|(\s*\|)+/g, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  };
+
+  try {
+    if (action === 'generateSummary') {
+      const prompt = `
+        GEOGRAPHIC CONTEXT: ${payload.destinationCity}, ${payload.destinationCountry}.
+        TASK: Create a compelling 200-word RELATIONAL PREVIEW for an exhaustive Emigration Strategy.
+        Focus on high-value intelligence like healthcare accessibility and financial transitions.
+        IMPORTANT FORMATTING DIRECTIVE:
+        - DO NOT USE MARKDOWN TABLES.
+        - Use professional paragraphs and bullet points.
+        Tone: Institutional, Premium.
+      `;
+
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages: [
+            { role: 'system', content: 'You are a senior relocation expert.' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.2,
+          max_tokens: 1000
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return c.json({ error: `Perplexity API Error: ${response.status}`, details: errorText }, response.status);
+      }
+
+      const data = await response.json();
+      const content = data.choices[0].message.content;
+
+      return c.json({ content: sanitizeMarkdown(content), title: 'Executive Relocation Preview' }, 200);
+    }
+
+    if (action === 'generateSection') {
+      const { input, concern } = payload;
+      const isFinance = concern.id === 'finance';
+
+      let prompt = `
+        ${concern.promptText}
+        
+        FORMATTING DIRECTIVE:
+        - Use clear, professional headers (#, ##, ###).
+        - Use bullet points for lists.
+        - DO NOT output empty table headers.
+      `;
+
+      if (isFinance && concern.responseSchema) {
+        prompt += `\n\nCRITICAL: You MUST respond with ONLY a valid JSON object matching this schema: ${JSON.stringify(concern.responseSchema)}. Do not include any other text.`;
+      }
+
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: modelName,
+          messages: [
+            { role: 'system', content: 'You are an elite research analyst specializing in international relocation and global mobility.' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.1,
+          max_tokens: 2000
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        return c.json({ error: `Perplexity API Error: ${response.status}`, details: errorText }, response.status);
+      }
+
+      const data = await response.json();
+      const rawText = data.choices[0].message.content;
+      
+      const sources = (data.citations || []).map((url: string) => {
+        try {
+            const domain = new URL(url).hostname.replace('www.', '');
+            return { title: domain, uri: url };
+        } catch {
+            return { title: 'Source', uri: url };
+        }
+      }).filter((s: any, i: number, a: any[]) => a.findIndex(t => t.uri === s.uri) === i);
+
+      return c.json({ content: rawText, sources }, 200);
+    }
+
+    return c.json({ error: 'Invalid action' }, 400);
+  } catch (error: any) {
+    console.error('Perplexity Function Error:', error);
+    return c.json({ error: error.message || 'Internal Server Error' }, 500);
   }
 });
 
