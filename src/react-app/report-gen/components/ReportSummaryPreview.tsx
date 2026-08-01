@@ -103,7 +103,7 @@ const ReportSummaryPreview: React.FC<ReportSummaryPreviewProps> = ({ summaryData
       <div className="bg-indigo-50 border border-indigo-200 p-6 rounded-lg mb-8 w-full max-w-sm">
           <p className="text-lg font-semibold text-slate-950 text-center">Emigration Pro Report</p>
           <div className="flex items-baseline justify-center gap-2 mt-2">
-            <p className="text-slate-600 text-sm line-through">$99.00</p>
+            <p className="text-slate-600 text-sm line-through">$99.99</p>
             <p className="text-4xl font-extrabold text-indigo-600">$69.99</p>
           </div>
           <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mt-1 text-center font-black">Limited Time Launch Offer</p>
