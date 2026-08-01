@@ -1466,63 +1466,6 @@ app.post("/api/admin/cleanup", async (c) => {
   }
 });
 
-// Records a sale conversion in the Supabase affiliate system
-async function recordAffiliateConversion(env: Env, email: string, assessmentId: number): Promise<void> {
-  try {
-    const access = await env.DB.prepare(
-      "SELECT affiliate_code FROM relocation_hub_access WHERE email = ? AND assessment_id = ?"
-    ).bind(email, assessmentId).first();
-
-    const affiliateCode = (access as any)?.affiliate_code;
-    if (!affiliateCode) return;
-
-    const supabaseUrl = env.SUPABASE_URL;
-    const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!supabaseUrl || !supabaseKey) {
-      console.warn('Supabase credentials not set — skipping affiliate conversion recording');
-      return;
-    }
-
-    // Look up affiliate by unique_affiliate_id
-    const affRes = await fetch(
-      `${supabaseUrl}/rest/v1/affiliates?unique_affiliate_id=eq.${encodeURIComponent(affiliateCode)}&select=id,commission_rate&limit=1`,
-      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
-    );
-    const affiliates = await affRes.json() as any[];
-    if (!affiliates?.length) {
-      console.warn(`No affiliate found for code: ${affiliateCode}`);
-      return;
-    }
-
-    const affiliate = affiliates[0];
-    const reportPrice = parseFloat(env.REPORT_PRICE_USD || '49');
-    const commissionRate = affiliate.commission_rate ?? 35;
-    const commissionAmount = parseFloat(((reportPrice * commissionRate) / 100).toFixed(2));
-
-    await fetch(`${supabaseUrl}/rest/v1/conversions`, {
-      method: 'POST',
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal'
-      },
-      body: JSON.stringify({
-        affiliate_id: affiliate.id,
-        stripe_payment_intent_id: `emipro_${Date.now()}_${affiliateCode}`,
-        gross_sale_amount: reportPrice,
-        commission_amount: commissionAmount,
-        status: 'pending'
-      })
-    });
-
-    console.log(`Affiliate conversion recorded: code=${affiliateCode}, commission=$${commissionAmount}`);
-  } catch (err) {
-    // Never block access activation due to tracking failure
-    console.error('Failed to record affiliate conversion:', err);
-  }
-}
-
 // Create permanent relocation hub access after purchase
 const PermanentAccessSchema = z.object({
   assessment_id: z.number(),
@@ -1660,10 +1603,12 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
       }
     }
 
-    // Record affiliate conversion if this purchase came via a referral link
-    if (purchase_confirmed) {
-      await recordAffiliateConversion(c.env, normalizedEmail, assessment_id);
-    }
+    // Affiliate conversions are recorded by the Stripe webhook in the affiliates
+    // app (pages/api/webhooks/stripe.js), which is the only path with signed
+    // proof of payment, the real payment intent ID, and the real amount charged.
+    // Recording here as well would double-book every referred sale: this path
+    // wrote a synthetic emipro_<timestamp>_<code> payment intent ID, so the
+    // webhook's idempotency check could never match it.
 
     // Send email with relocation hub access information (only if purchase is confirmed)
     if (purchase_confirmed) {

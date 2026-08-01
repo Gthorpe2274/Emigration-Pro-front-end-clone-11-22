@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ReportSectionData } from '../types';
 import SimpleMarkdown from './SimpleMarkdown';
 import { CONFIG } from '../config';
@@ -16,7 +16,15 @@ const ReportSummaryPreview: React.FC<ReportSummaryPreviewProps> = ({ summaryData
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   
   const stripeUrl = (CONFIG.STRIPE_PAYMENT_LINK_URL || '').trim();
-  
+
+  // Persist the affiliate ref code if the user landed here directly with ?ref=.
+  // EmailCaptureModal does the same, but it is not guaranteed to have been shown
+  // before checkout, and the code must survive navigation away from the landing URL.
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if (ref) sessionStorage.setItem('affiliateRef', ref);
+  }, []);
+
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
@@ -57,7 +65,12 @@ const ReportSummaryPreview: React.FC<ReportSummaryPreviewProps> = ({ summaryData
     if (email) {
       url.searchParams.set('prefilled_email', email);
     }
-    const ref = new URLSearchParams(window.location.search).get('ref');
+    // By the time the paywall renders, the user has navigated away from the
+    // affiliate landing URL, so ?ref= is usually gone. Fall back to the copy
+    // persisted in sessionStorage or attribution is silently lost.
+    const ref =
+      new URLSearchParams(window.location.search).get('ref') ||
+      sessionStorage.getItem('affiliateRef');
     if (ref) {
       url.searchParams.set('client_reference_id', ref);
     }
