@@ -1296,7 +1296,8 @@ This access code provides 2 years of access to your relocation hub. Keep this in
 }
 
 // Email gateway endpoint - For report generation app access
-// Creates CRM record and redirects to https://report.emigrationpro.com
+// Creates CRM record and returns a relative /checkout-report URL (staying on
+// the caller's origin keeps sessionStorage, and so affiliate attribution, intact)
 const EmailLeadSchema = z.object({
   email: z.string().email(),
   assessment_id: z.number().optional(),

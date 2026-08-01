@@ -63,11 +63,17 @@ export default function EmailCaptureModal({ isOpen, onClose, onSubmit, assessmen
 
       // Redirect to report generation app
       if (data.report_url) {
-        // Use the report URL provided by backend
+        // Use the report URL provided by backend (already relative)
         window.location.href = data.report_url;
       } else {
-        // Fallback: Use default report generation app link
-        window.location.href = "https://report.emigrationpro.com";
+        // Fallback: rebuild the same relative URL the worker would have
+        // returned. It must stay on this origin — sending the user to another
+        // host drops sessionStorage, and with it the affiliate attribution.
+        const params = new URLSearchParams();
+        if (affiliateCode) params.append('ref', affiliateCode);
+        if (assessmentId) params.append('assessment_id', String(assessmentId));
+        params.append('email', email.toLowerCase());
+        window.location.href = `/checkout-report?${params.toString()}`;
       }
       
       // Keep the modal in submitting state until redirect completes
