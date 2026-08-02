@@ -1104,6 +1104,81 @@ app.get("/api/assessments/:id", async (c) => {
   }
 });
 
+// Persist one generated report section.
+//
+// Called as each section finishes rather than once at the end, so a buyer who
+// closes the tab keeps everything generated so far. The UNIQUE constraint on
+// (assessment_id, concern_id) makes this an upsert: regenerating a section
+// replaces it instead of creating a duplicate.
+app.post("/api/reports/:assessmentId/sections", async (c) => {
+  try {
+    const assessmentId = parseInt(c.req.param("assessmentId"), 10);
+    if (!Number.isFinite(assessmentId)) {
+      return c.json({ error: "Invalid assessment id" }, 400);
+    }
+
+    const body = await c.req.json();
+    const { concern_id, title, content, sources } = body || {};
+
+    if (!concern_id || !title || !content) {
+      return c.json({ error: "concern_id, title and content are required" }, 400);
+    }
+
+    await c.env.DB.prepare(
+      `INSERT INTO report_sections (assessment_id, concern_id, title, content, sources)
+       VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(assessment_id, concern_id) DO UPDATE SET
+         title = excluded.title,
+         content = excluded.content,
+         sources = excluded.sources,
+         updated_at = CURRENT_TIMESTAMP`
+    ).bind(
+      assessmentId,
+      concern_id,
+      title,
+      content,
+      sources ? JSON.stringify(sources) : null
+    ).run();
+
+    return c.json({ success: true });
+  } catch (error) {
+    console.error("Error saving report section:", error);
+    return c.json({ error: "Failed to save report section" }, 500);
+  }
+});
+
+// Return every section stored for an assessment, oldest first.
+//
+// Used on load to resume a part-finished report, and by the hub to re-serve a
+// completed one, so a buyer can come back to it indefinitely.
+app.get("/api/reports/:assessmentId/sections", async (c) => {
+  try {
+    const assessmentId = parseInt(c.req.param("assessmentId"), 10);
+    if (!Number.isFinite(assessmentId)) {
+      return c.json({ error: "Invalid assessment id" }, 400);
+    }
+
+    const result = await c.env.DB.prepare(
+      `SELECT concern_id, title, content, sources, updated_at
+         FROM report_sections
+        WHERE assessment_id = ?
+        ORDER BY id ASC`
+    ).bind(assessmentId).all();
+
+    const sections = (result.results || []).map((row: any) => ({
+      id: row.concern_id,
+      title: row.title,
+      content: row.content,
+      sources: row.sources ? JSON.parse(row.sources) : []
+    }));
+
+    return c.json({ success: true, sections });
+  } catch (error) {
+    console.error("Error fetching report sections:", error);
+    return c.json({ error: "Failed to fetch report sections" }, 500);
+  }
+});
+
 // GET report preview summary
 app.get("/api/assessments/:id/report-preview", async (c) => {
   try {

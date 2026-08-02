@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { UserInput, ReportSectionData } from '../report-gen/types';
-import { generateReportSummary } from '../report-gen/services/aiService';
+import { generateReportSummary, generateReportSection } from '../report-gen/services/aiService';
 import { CONCERNS } from '../report-gen/constants';
 import ReportGenerator from '../report-gen/components/ReportGenerator';
 import ReportSummaryPreview from '../report-gen/components/ReportSummaryPreview';
+import ReportPreview from '../report-gen/components/ReportPreview';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 
@@ -12,7 +13,48 @@ enum AppStep {
   INITIALIZING,
   GENERATING_SUMMARY,
   PREVIEW_SUMMARY,
+  GENERATING_FULL,
+  PREVIEW_FULL,
   ERROR
+}
+
+/**
+ * Sections already generated for this assessment.
+ *
+ * Generation is 13 separate AI calls, so a buyer who closes the tab or reloads
+ * would otherwise start from nothing and be billed for the same sections twice.
+ * Anything already stored is reused and only the remainder is generated.
+ */
+async function loadSavedSections(assessmentId: string): Promise<ReportSectionData[]> {
+  try {
+    const res = await fetch(`/api/reports/${assessmentId}/sections`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.sections || [];
+  } catch {
+    // Never block generation because the resume lookup failed.
+    return [];
+  }
+}
+
+/** Persist one finished section so progress survives losing the page. */
+async function saveSection(assessmentId: string, section: ReportSectionData): Promise<void> {
+  try {
+    await fetch(`/api/reports/${assessmentId}/sections`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        concern_id: section.id,
+        title: section.title,
+        content: section.content,
+        sources: section.sources
+      })
+    });
+  } catch (err) {
+    // The buyer still has the section on screen; losing the copy is not worth
+    // failing the run over.
+    console.error(`Failed to save section ${section.id}:`, err);
+  }
 }
 
 export default function CheckoutReport() {
@@ -23,6 +65,7 @@ export default function CheckoutReport() {
   const [userInput, setUserInput] = useState<UserInput | null>(null);
   const [selectedConcerns, setSelectedConcerns] = useState<string[]>([]);
   const [summaryData, setSummaryData] = useState<ReportSectionData | null>(null);
+  const [reportData, setReportData] = useState<ReportSectionData[]>([]);
   const [loadingMessage, setLoadingMessage] = useState('Initializing your report...');
   const [error, setError] = useState<string | null>(null);
 
@@ -80,8 +123,18 @@ export default function CheckoutReport() {
         const uniqueConcerns = Array.from(new Set(concernsToSelect)).slice(0, 5);
         setSelectedConcerns(uniqueConcerns);
 
-        // 3. Start Summary Generation automatically
-        startSummaryGeneration(prepopulated, uniqueConcerns);
+        // 3. After payment go straight to the full report. Previously the
+        //    Stripe redirect pointed at report.emigrationpro.com, which reads
+        //    its inputs from localStorage — a different origin to this one, so
+        //    it always found nothing and fell back to asking for the details
+        //    the buyer had already entered. Everything needed is on the
+        //    assessment record, so no re-entry is required.
+        if (searchParams.get('payment_success') === 'true') {
+          activateHubAccess(assessmentIdParam, emailParam);
+          startFullReport(prepopulated, uniqueConcerns, assessmentIdParam);
+        } else {
+          startSummaryGeneration(prepopulated, uniqueConcerns);
+        }
       })
       .catch(err => {
         console.error('Failed to load assessment', err);
@@ -89,6 +142,74 @@ export default function CheckoutReport() {
         setStep(AppStep.ERROR);
       });
   }, [searchParams]);
+
+  /** Unlock the permanent relocation hub for a confirmed purchase. */
+  const activateHubAccess = (assessmentId: string, email: string) => {
+    fetch('/api/relocation-hub/create-access', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        assessment_id: parseInt(assessmentId, 10),
+        email,
+        purchase_confirmed: true
+      })
+    }).catch(err => console.error('Failed to activate hub access:', err));
+  };
+
+  /**
+   * Generate the paid report, saving each section as it lands.
+   *
+   * Resumes from whatever is already stored, so a reload or a closed tab costs
+   * the buyer nothing and does not re-bill us for sections we already have.
+   */
+  const startFullReport = async (input: UserInput, concerns: string[], assessmentId: string) => {
+    setStep(AppStep.GENERATING_FULL);
+    setError(null);
+
+    const wanted = CONCERNS.filter(c => concerns.includes(c.id));
+
+    try {
+      const saved = await loadSavedSections(assessmentId);
+      const done = new Map(saved.map(s => [s.id, s]));
+
+      // Show recovered work immediately rather than an empty progress bar.
+      const collected: ReportSectionData[] = wanted
+        .filter(c => done.has(c.id))
+        .map(c => done.get(c.id)!);
+      setReportData([...collected]);
+
+      for (let i = 0; i < wanted.length; i++) {
+        const concern = wanted[i];
+        if (done.has(concern.id)) continue;
+
+        setLoadingMessage(`Researching ${concern.title}… (${i + 1}/${wanted.length})`);
+
+        const result = await generateReportSection(input, concern);
+        const section: ReportSectionData = {
+          id: concern.id,
+          title: concern.title,
+          content: result.content,
+          sources: result.sources
+        };
+
+        collected.push(section);
+        setReportData([...collected]);
+        await saveSection(assessmentId, section);
+      }
+
+      if (collected.length === 0) {
+        throw new Error('No report sections could be generated.');
+      }
+
+      setStep(AppStep.PREVIEW_FULL);
+    } catch (err) {
+      console.error(err);
+      setError(err instanceof Error ? err.message : 'Failed to generate your report.');
+      setStep(AppStep.ERROR);
+    } finally {
+      setLoadingMessage('');
+    }
+  };
 
   const startSummaryGeneration = async (input: UserInput, concerns: string[]) => {
     setStep(AppStep.GENERATING_SUMMARY);
@@ -153,11 +274,30 @@ export default function CheckoutReport() {
         )}
 
         {step === AppStep.GENERATING_SUMMARY && (
-          <ReportGenerator 
-            title="Consulting Global Datasets..." 
-            loadingMessage={loadingMessage} 
-            completedSections={0} 
-            totalSections={1} 
+          <ReportGenerator
+            title="Consulting Global Datasets..."
+            loadingMessage={loadingMessage}
+            completedSections={0}
+            totalSections={1}
+          />
+        )}
+
+        {step === AppStep.GENERATING_FULL && (
+          <ReportGenerator
+            title="Building Your Full Relocation Report"
+            loadingMessage={loadingMessage}
+            completedSections={reportData.length}
+            totalSections={selectedConcerns.length}
+          />
+        )}
+
+        {step === AppStep.PREVIEW_FULL && reportData.length > 0 && userInput && (
+          <ReportPreview
+            reportData={reportData}
+            userInput={userInput}
+            onRestart={handleBackToAssessment}
+            onClone={() => {}}
+            isAdmin={false}
           />
         )}
 
