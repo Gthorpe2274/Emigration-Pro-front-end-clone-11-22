@@ -13,20 +13,20 @@ const destinations = [
 ];
 
 const reportSections = [
-  { n: '01', title: 'Visa & Residency', desc: 'Legal requirements for visa applications and residency permits.' },
-  { n: '02', title: 'Relocation Timeline', desc: 'Step-by-step master guide with key dates and milestones.' },
-  { n: '03', title: 'Cost of Living', desc: 'Detailed budget planning with hyper-local cost analysis.' },
-  { n: '04', title: 'Healthcare Mapping', desc: 'Hospital rankings and healthcare system comparisons.' },
-  { n: '05', title: 'Retirement Benefits', desc: 'Pensions and senior citizen programs available to expats.' },
-  { n: '06', title: 'Digital Connectivity', desc: 'Internet speed, telecom infrastructure, mobile options.' },
-  { n: '07', title: 'Power & Utilities', desc: 'Reliability of electric, water, and gas infrastructure.' },
-  { n: '08', title: 'Retail & Food', desc: 'Grocery stores, markets, and retail ecosystem availability.' },
-  { n: '09', title: 'Safety & Governance', desc: 'Safety ratings, crime statistics, and political stability.' },
-  { n: '10', title: 'Environment & Water', desc: 'Air quality, water safety, and environmental conditions.' },
-  { n: '11', title: 'Professional Outlook', desc: 'Job market and professional opportunities assessment.' },
-  { n: '12', title: 'Mobility & Transit', desc: 'Public transportation, urban mobility, commute options.' },
-  { n: '13', title: 'Culture & Entertainment', desc: 'Arts, festivals, dining, and cultural experiences.' },
-  { n: '14', title: 'Sports & Recreation', desc: 'Active lifestyle options and outdoor activities.' },
+  { n: '01', title: 'Steps to Take to Leave America', desc: 'Residency pathways, customs requirements, and practical departure steps.' },
+  { n: '02', title: 'Job Market Analysis', desc: 'Local demand, salary benchmarks, opportunities, and professional risks.' },
+  { n: '03', title: 'Master Relocation Timeline & Guide', desc: 'A chronological roadmap from preparation through arrival and integration.' },
+  { n: '04', title: 'Comprehensive Healthcare Mapping', desc: 'Hospitals, healthcare systems, insurance, prescriptions, and emergency access.' },
+  { n: '05', title: 'Cost of Living', desc: 'A detailed relocation budget with realistic, destination-specific costs.' },
+  { n: '06', title: 'Political Stability & Security', desc: 'Political conditions, local governance, crime, safety, and emergency support.' },
+  { n: '07', title: 'Environmental & Water Quality', desc: 'Water safety, air quality, natural hazards, waste systems, and green space.' },
+  { n: '08', title: 'Digital Connectivity & Internet', desc: 'Internet speeds, mobile coverage, provider reliability, and remote-work access.' },
+  { n: '09', title: 'Infrastructure & Power Reliability', desc: 'Power, roads, sanitation, utilities, and future infrastructure projects.' },
+  { n: '10', title: 'Mobility & Urban Connectivity', desc: 'Public transportation, vehicle ownership, walkability, and commute options.' },
+  { n: '11', title: 'Culture, Arts & Entertainment', desc: 'Festivals, dining, nightlife, theaters, galleries, and cultural experiences.' },
+  { n: '12', title: 'Sports & Active Recreation', desc: 'Professional sports, fitness facilities, and outdoor recreation options.' },
+  { n: '13', title: 'Senior & Retirement Benefits', desc: 'Tax considerations, discounts, healthcare subsidies, and senior programs.' },
+  { n: '14', title: 'Children’s Education & Schooling', desc: 'Schools, curricula, tuition, admissions, support services, and university pathways.' },
 ];
 
 const testimonials = [
@@ -263,12 +263,12 @@ export default function Home() {
                 <div className="text-xs font-bold uppercase tracking-wide text-brand-accent-ink bg-brand-accent-2 px-2 py-1 rounded">Sample</div>
               </div>
               {[
-                { n: '01', title: 'Visa & residency requirements', pages: 8 },
-                { n: '02', title: 'Cost of living, hyper-local', pages: 6 },
-                { n: '03', title: 'Healthcare & hospitals', pages: 5 },
-                { n: '04', title: 'Taxes for US expats', pages: 7 },
-                { n: '05', title: 'Housing & neighborhoods', pages: 6 },
-                { n: '06', title: 'Timeline & checklist', pages: 4 },
+                { n: '01', title: 'Steps to Take to Leave America', pages: 8 },
+                { n: '02', title: 'Job Market Analysis', pages: 6 },
+                { n: '03', title: 'Master Relocation Timeline & Guide', pages: 4 },
+                { n: '04', title: 'Comprehensive Healthcare Mapping', pages: 5 },
+                { n: '05', title: 'Cost of Living', pages: 6 },
+                { n: '06', title: 'Political Stability & Security', pages: 7 },
               ].map((row) => (
                 <div key={row.n} className="flex items-center justify-between py-2.5 border-b border-brand-border last:border-b-0">
                   <div className="flex items-center gap-3">

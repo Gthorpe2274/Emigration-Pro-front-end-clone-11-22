@@ -78,62 +78,27 @@ export function SampleReport() {
               <h2 className="text-xl font-black text-slate-950 mb-6 flex items-center gap-2 uppercase tracking-wide">Table of Contents</h2>
               <nav>
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">01</span>
-                    <a href="#section-healthcare" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Comprehensive Healthcare Mapping</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">02</span>
-                    <a href="#section-finance" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Cost of Living & Hyper-Local Financial Plan</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">03</span>
-                    <a href="#section-political_stability" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Political Stability & Security</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">04</span>
-                    <a href="#section-environmental_health" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Environmental & Water Quality</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">05</span>
-                    <a href="#section-digital_infrastructure" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Digital Connectivity & Internet</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">06</span>
-                    <a href="#section-utility_resilience" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Infrastructure & Power Reliability</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">07</span>
-                    <a href="#section-retail_food" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Retail Ecosystem & Food Supply</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">08</span>
-                    <a href="#section-transportation" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Mobility & Urban Connectivity</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">09</span>
-                    <a href="#section-culture_entertainment" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Culture, Arts & Entertainment</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">10</span>
-                    <a href="#section-sports_recreation" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Sports & Active Recreation</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">11</span>
-                    <a href="#section-senior_benefits" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Senior & Retirement Benefits</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">12</span>
-                    <a href="#section-situation" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Professional Risk Analysis</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">13</span>
-                    <a href="#section-visa" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Legal Visa & Residency Dossier</a>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="text-indigo-600 font-black text-xs mt-1.5">14</span>
-                    <a href="#section-relocation_timeline" className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">Master Relocation Timeline & Guide</a>
-                  </li>
+                  {[
+                    ['01', 'section-visa', 'Steps to Take to Leave America'],
+                    ['02', 'section-situation', 'Job Market Analysis'],
+                    ['03', 'section-relocation_timeline', 'Master Relocation Timeline & Guide'],
+                    ['04', 'section-healthcare', 'Comprehensive Healthcare Mapping'],
+                    ['05', 'section-finance', 'Cost of Living'],
+                    ['06', 'section-political_stability', 'Political Stability & Security'],
+                    ['07', 'section-environmental_health', 'Environmental & Water Quality'],
+                    ['08', 'section-digital_infrastructure', 'Digital Connectivity & Internet'],
+                    ['09', 'section-utility_resilience', 'Infrastructure & Power Reliability'],
+                    ['10', 'section-transportation', 'Mobility & Urban Connectivity'],
+                    ['11', 'section-culture_entertainment', 'Culture, Arts & Entertainment'],
+                    ['12', 'section-sports_recreation', 'Sports & Active Recreation'],
+                    ['13', 'section-senior_benefits', 'Senior & Retirement Benefits'],
+                    ['14', 'section-childrens_education', 'Children’s Education & Schooling'],
+                  ].map(([number, id, title]) => (
+                    <li key={id} className="flex items-start gap-3">
+                      <span className="text-indigo-600 font-black text-xs mt-1.5">{number}</span>
+                      <a href={`#${id}`} className="text-slate-950 hover:text-indigo-700 transition-colors font-bold border-b border-transparent hover:border-indigo-200">{title}</a>
+                    </li>
+                  ))}
                 </ul>
               </nav>
             </div>
@@ -220,7 +185,7 @@ export function SampleReport() {
             </div>
 
             <div id="section-finance" className="mb-16 break-after-page relative pb-10">
-              <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Cost of Living & Hyper-Local Financial Plan</h2>
+              <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Cost of Living</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
@@ -421,7 +386,7 @@ export function SampleReport() {
                 </div>
               </div>
               <div className="mt-12 pt-4 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-600 font-mono uppercase tracking-[0.2em] select-none font-bold">
-                <span>Emigration Pro — Cost of Living & Hyper-Local Financial Plan</span>
+                <span>Emigration Pro — Cost of Living</span>
                 <span>Section 2 / 14</span>
               </div>
             </div>
@@ -568,32 +533,32 @@ export function SampleReport() {
               </div>
             </div>
 
-            <div id="section-retail_food" className="mb-16 break-after-page relative pb-10">
-              <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Retail Ecosystem & Food Supply</h2>
+            <div id="section-childrens_education" className="mb-16 break-after-page relative pb-10">
+              <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Children’s Education & Schooling</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Retail and Food Supply Chain Dossier</h1>
-                  <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Major Hypermarkets vs. Local Markets</h2>
+                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Education and Schooling Briefing for Rio de Janeiro</h1>
+                  <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. International, Bilingual, and Local Schools</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
-                    <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Tiers:</strong> Premium (Zona Sul, Pão de Açúcar), Budget (Mundial, Guanabara), Wholesale (Assaí, Atacadão).</li>
-                    <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Local Markets:</strong> Weekly street markets (Feiras Livres) offer fresher, cheaper produce.</li>
+                    <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">The British School:</strong> British and international curricula across multiple Rio campuses.</li>
+                    <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Escola Americana do Rio de Janeiro:</strong> American-style education and international university preparation.</li>
                   </ul>
-                  <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">2. Availability of International Brands</h2>
-                  <p className="leading-relaxed mb-6 text-slate-950 font-medium">Available in premium South Zone markets and specialty emporiums like Farinha Pura (Humaitá) and Delly Gil (Leblon), but expensive due to tariffs.</p>
-                  <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">3. Specialized Shopping Districts</h2>
+                  <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">2. Tuition, Admissions, and Enrollment Planning</h2>
+                  <p className="leading-relaxed mb-6 text-slate-950 font-medium">Families should compare tuition, enrollment and capital fees, curriculum recognition, language support, waiting lists, and application dates well before relocating.</p>
+                  <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">3. Education Support and University Pathways</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
-                    <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Apparel:</strong> SAARA (Downtown - budget), Ipanema/Leblon (high-end).</li>
-                    <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Electronics:</strong> Edifício Central (Avenida Rio Branco).</li>
-                    <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Antiques:</strong> Rua do Lavradio (Lapa).</li>
+                    <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Public schooling:</strong> Residency documents, catchment rules, and Portuguese-language instruction affect enrollment.</li>
+                    <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Learning support:</strong> Availability varies, so families should confirm language and additional-needs services directly.</li>
+                    <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Higher education:</strong> Curriculum choice can affect qualification recognition and university entry abroad.</li>
                   </ul>
                 </div>
               </div>
               <div className="mt-12 pt-4 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-600 font-mono uppercase tracking-[0.2em] select-none font-bold">
-                <span>Emigration Pro — Retail Ecosystem & Food Supply</span>
-                <span>Section 7 / 14</span>
+                <span>Emigration Pro — Children’s Education & Schooling</span>
+                <span>Section 14 / 14</span>
               </div>
             </div>
 
@@ -695,7 +660,7 @@ export function SampleReport() {
             </div>
 
             <div id="section-situation" className="mb-16 break-after-page relative pb-10">
-              <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Professional Risk Analysis</h2>
+              <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Job Market Analysis</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
@@ -711,13 +676,13 @@ export function SampleReport() {
                 </div>
               </div>
               <div className="mt-12 pt-4 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-600 font-mono uppercase tracking-[0.2em] select-none font-bold">
-                <span>Emigration Pro — Professional Risk Analysis</span>
-                <span>Section 12 / 14</span>
+                <span>Emigration Pro — Job Market Analysis</span>
+                <span>Section 2 / 14</span>
               </div>
             </div>
 
             <div id="section-visa" className="mb-16 break-after-page relative pb-10">
-              <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Legal Visa & Residency Dossier</h2>
+              <h2 className="text-3xl font-bold text-slate-950 border-b-2 border-indigo-600 pb-2 mb-6">Steps to Take to Leave America</h2>
               <div className="text-slate-900 leading-relaxed font-medium">
                 <div className="prose max-w-none report-text-area">
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
@@ -731,8 +696,8 @@ export function SampleReport() {
                 </div>
               </div>
               <div className="mt-12 pt-4 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-600 font-mono uppercase tracking-[0.2em] select-none font-bold">
-                <span>Emigration Pro — Legal Visa & Residency Dossier</span>
-                <span>Section 13 / 14</span>
+                <span>Emigration Pro — Steps to Take to Leave America</span>
+                <span>Section 1 / 14</span>
               </div>
             </div>
 
@@ -754,7 +719,7 @@ export function SampleReport() {
               </div>
               <div className="mt-12 pt-4 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-600 font-mono uppercase tracking-[0.2em] select-none font-bold">
                 <span>Emigration Pro — Master Relocation Timeline & Guide</span>
-                <span>Section 14 / 14</span>
+                <span>Section 3 / 14</span>
               </div>
             </div>
 
