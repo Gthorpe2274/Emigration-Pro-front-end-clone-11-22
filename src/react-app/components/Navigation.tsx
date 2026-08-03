@@ -6,12 +6,15 @@ export default function Navigation() {
       <div className="container mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between gap-6 py-3">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img
-              src="/images/logo-full.png"
-              alt="Emigration Pro"
-              className="h-11 w-auto"
-            />
+          <Link to="/" className="flex items-center shrink-0">
+            <div className="flex items-start">
+              <img
+                src="/images/logo-full.png"
+                alt="Emigration Pro"
+                className="h-11 w-auto"
+              />
+              <span className="text-[10px] font-bold text-brand-ink mt-1 ml-0.5">&trade;</span>
+            </div>
           </Link>
 
           {/* Navigation Menu */}
