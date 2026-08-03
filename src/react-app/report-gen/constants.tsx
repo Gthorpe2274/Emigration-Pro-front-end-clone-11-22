@@ -107,33 +107,42 @@ const financeSchema = {
 export const CONCERNS: Concern[] = [
   {
     id: 'visa',
-    title: 'Steps To Take To Leave America',
-    description: 'Residency pathways, customs laws, and property relocation (cars, etc.).',
+    title: 'Steps to Take to Leave America',
+    description: 'US departure obligations, residency pathways, customs, and physical relocation.',
     Icon: VisaIcon,
     prompt: (input: UserInput) => `
-      GEOGRAPHIC CONTEXT: ${input.destinationCountry}.
-      TASK: Generate an exhaustive legal dossier on residency and physical relocation.
+      GEOGRAPHIC CONTEXT: Departing the United States for ${input.destinationCity}, ${input.destinationCountry}.
+      CUSTOMER CONTEXT: Age ${input.age}; occupation ${input.profession}.
+      TASK: Generate a practical, chronological departure and destination-entry dossier. Clearly separate US departure obligations from ${input.destinationCountry} immigration requirements.
       INCLUDE:
-      1. Residency Pathways: Step-by-step for the most relevant work or investment visas for a ${input.profession}.
-      2. Customs & Duties: Exhaustive guide to importing personal effects, duty-free exemptions for relocators, and prohibited items.
-      3. Vehicle Importation: Legal requirements, emissions standards (Euro/EPA/etc.), importation taxes, and registration logistics for cars.
-      4. Property Relocation: Documentation for household goods and international shipping legalities.
-      5. Citizenship Track: Requirements for permanent residency and naturalization.
+      1. US Federal and State Departure: IRS filing and foreign-account reporting considerations, state tax-residency termination, Social Security/Medicare implications, voter registration, DMV, insurance, mail, banking, credit, and document retention. Distinguish relocation from formal US citizenship renunciation and do not imply that renunciation is required.
+      2. Residency Pathways: Step-by-step eligibility, documents, fees, processing times, work rights, renewal rules, and official application channels for the most relevant visas for a ${input.profession} age ${input.age}.
+      3. Customs & Duties: Personal effects, duty-free exemptions, inventories, timing windows, prohibited items, pets, medications, and required certificates.
+      4. Vehicle and Household-Goods Relocation: Import eligibility, emissions and safety standards, taxes, registration, shipping, insurance, and when selling before departure is more practical.
+      5. Arrival Compliance: Local registration, tax number, banking, healthcare enrollment, driver licensing, and deadlines after arrival in ${input.destinationCity}.
+      6. Long-Term Status: Permanent residency, naturalization, dual-citizenship considerations, and continuous-residence rules.
+      Use current official government sources and flag matters requiring a licensed immigration or tax professional.
       FORMATTING: Professional headers and checklist formatting.
     `,
   },
   {
     id: 'situation',
     title: 'Job Market Analysis',
-    description: 'Job market demand, legal risks, and migration timelines.',
+    description: 'Hiring demand, work authorization, compensation, credentials, and employment strategy.',
     Icon: SituationIcon,
     prompt: (input: UserInput) => `
       GEOGRAPHIC CONTEXT: ${input.destinationCity}, ${input.destinationCountry}.
-      TASK: SWOT analysis for a ${input.profession} at age ${input.age}.
+      TASK: Produce a current, evidence-based job market and employment-entry analysis for a ${input.profession} at age ${input.age}.
       INCLUDE: 
-      1. Salary benchmarks for the top 10% locally.
-      2. Critical legal or economic risks for 2025.
-      3. 12-month pre- and post-move checklist.
+      1. Current demand, hiring outlook, major employers, growth sectors, and city-specific opportunities relevant to this occupation.
+      2. Realistic entry, median, senior, and top-decile gross salary ranges in local currency, plus estimated take-home pay and mandatory benefits.
+      3. Work authorization restrictions by relevant visa type, employee versus contractor rules, probation norms, working hours, leave, termination protections, and employment taxes.
+      4. Credential recognition, licensing, local-language expectations, skills gaps, and practical retraining or certification routes.
+      5. Best local job boards, recruiters, professional associations, networking channels, and a destination-appropriate application strategy.
+      6. Remote-work and self-employment rules, including whether foreign-employer work is permitted under likely residency routes.
+      7. Current economic, automation, discrimination, and age-related hiring risks, with mitigation strategies.
+      8. A focused 90-day job-search action plan. Do not duplicate the master relocation timeline.
+      If the occupation indicates retirement or non-employment, adapt this section to lawful part-time work, consulting, volunteering, and income-producing options instead of inventing a conventional career path.
     `,
   },
   {
@@ -161,7 +170,7 @@ export const CONCERNS: Concern[] = [
     Icon: HealthcareIcon,
     prompt: (input: UserInput) => `
       GEOGRAPHIC CONTEXT: ${input.destinationCity}, ${input.destinationCountry}.
-      TASK: Generate an exhaustive healthcare strategy report for a ${input.age}yo professional.
+      TASK: Generate an exhaustive healthcare strategy report for a ${input.age}-year-old whose occupation/status is ${input.profession}.
       FORMATTING: Narrative headers and bullet points only.
       INCLUDE: 
       1. Neighborhood-specific hospital rankings within ${input.destinationCity}.
@@ -295,12 +304,17 @@ export const CONCERNS: Concern[] = [
     description: 'Tax exemptions, social discounts, and age-specific subsidies.',
     Icon: SeniorIcon,
     prompt: (input: UserInput) => `
-      GEOGRAPHIC CONTEXT: ${input.destinationCountry}.
-      TASK: Senior-specific (60+) benefits and tax advantages briefing.
+      GEOGRAPHIC CONTEXT: ${input.destinationCity}, ${input.destinationCountry}.
+      CUSTOMER AGE: ${input.age}.
+      TASK: ${Number(input.age) >= 60
+        ? 'Create a current senior and retirement benefits eligibility briefing for this customer.'
+        : 'Create a future-planning briefing that clearly states the customer is not yet 60 and identifies the age and residency thresholds for later eligibility. Do not imply current eligibility.'}
       INCLUDE:
-      1. Legal tax exemptions for foreign retirement income.
-      2. "Golden Age" discount programs for transport and utilities.
-      3. Healthcare subsidies and geriatric community programs.
+      1. Eligibility rules by age, residency status, contribution history, means testing, and nationality for public pensions, tax relief, and foreign retirement income treatment.
+      2. Transport, utility, cultural, property-tax, and other statutory or commercial senior discounts, including how to apply and required identification.
+      3. Public healthcare eligibility, private insurance age rules, long-term care, home care, prescription support, and geriatric community programs.
+      4. US Social Security and Medicare considerations abroad, relevant totalization agreements, and cross-border pension payment logistics.
+      5. A checklist of benefits available now versus benefits available only at later ages. Do not describe a benefit as available without confirming residency and age requirements.
     `,
   },
   {
@@ -310,8 +324,10 @@ export const CONCERNS: Concern[] = [
     Icon: EducationIcon,
     prompt: (input: UserInput) => `
       GEOGRAPHIC CONTEXT: ${input.destinationCity}, ${input.destinationCountry}.
-      TASK: Practical schooling briefing for a relocating family, specific to
-      ${input.destinationCity} rather than the country in general.
+      FAMILY PROFILE: ${input.familyProfile.childrenCount} relocating children; ages: ${input.familyProfile.childrenAges}; stated education preferences or support needs: ${input.familyProfile.educationPreferences}.
+      TASK: ${input.familyProfile.childrenCount > 0
+        ? `Create a practical schooling plan personalized to this family and specific to ${input.destinationCity}. Prioritize age-appropriate options and the stated needs.`
+        : `The customer reported no relocating children. Provide a concise future-reference overview for ${input.destinationCity}, clearly label it as not currently applicable, and do not invent children or schooling needs.`}
       INCLUDE:
       1. Named international, bilingual and private schools serving the city,
          with the curricula they teach (IB, British, American, national).

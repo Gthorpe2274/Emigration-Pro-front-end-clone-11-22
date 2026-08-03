@@ -21,7 +21,7 @@ enum AppStep {
 /**
  * Sections already generated for this assessment.
  *
- * Generation is 13 separate AI calls, so a buyer who closes the tab or reloads
+ * Generation is 14 separate AI calls, so a buyer who closes the tab or reloads
  * would otherwise start from nothing and be billed for the same sections twice.
  * Anything already stored is reused and only the remainder is generated.
  */
@@ -126,6 +126,11 @@ export default function CheckoutReport() {
           monthlyBudget: Number(assessment.monthly_budget) || 0,
           locationPreference: assessment.location_preference || 'Not specified',
           climatePreference: assessment.climate_preference || 'Not specified',
+          familyProfile: {
+            childrenCount: Number(assessment.children_count) || 0,
+            childrenAges: assessment.children_ages || 'Not specified',
+            educationPreferences: assessment.education_preferences || 'Not specified'
+          },
           priorities: {
             immigrationPolicies: Number(assessment.immigration_policies_importance) || 0,
             healthcare: Number(assessment.healthcare_importance) || 0,

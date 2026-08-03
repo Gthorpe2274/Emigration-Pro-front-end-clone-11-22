@@ -4,6 +4,9 @@ export const AssessmentSchema = z.object({
   user_age: z.number().min(18).max(100),
   user_job: z.string().min(1),
   monthly_budget: z.number().min(100).max(50000),
+  children_count: z.number().int().min(0).max(10).default(0),
+  children_ages: z.string().max(100).optional(),
+  education_preferences: z.string().max(500).optional(),
   preferred_country: z.string().min(1),
   preferred_city: z.string().optional(),
   location_preference: z.enum(['beachside', 'rural', 'city']),
@@ -15,6 +18,14 @@ export const AssessmentSchema = z.object({
   emigration_process_importance: z.number().min(0).max(5),
   ease_of_immigration_importance: z.number().min(0).max(5),
   local_acceptance_importance: z.number().min(0).max(5),
+}).superRefine((assessment, ctx) => {
+  if (assessment.children_count > 0 && !assessment.children_ages?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['children_ages'],
+      message: "Children's ages are required when children are relocating",
+    });
+  }
 });
 
 export type AssessmentType = z.infer<typeof AssessmentSchema>;
@@ -26,6 +37,9 @@ export const AssessmentResultSchema = z.object({
   user_age: z.number(),
   user_job: z.string(),
   monthly_budget: z.number(),
+  children_count: z.number().default(0),
+  children_ages: z.string().nullable().optional(),
+  education_preferences: z.string().nullable().optional(),
   preferred_country: z.string(),
   preferred_city: z.string().nullable(),
   location_preference: z.string(),
@@ -196,4 +210,3 @@ export const CountryData = {
     'Cape Verde': ['Praia', 'Mindelo', 'Santa Maria', 'Espargos', 'Assomada']
   }
 };
-

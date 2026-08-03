@@ -9,6 +9,9 @@ interface AssessmentData {
   user_age: number;
   user_job: string;
   monthly_budget: number;
+  children_count: number;
+  children_ages: string;
+  education_preferences: string;
   preferred_country: string;
   preferred_city: string;
   location_preference: 'beachside' | 'rural' | 'city';
@@ -48,6 +51,9 @@ export default function Assessment() {
     user_age: 30,
     user_job: '',
     monthly_budget: 2000,
+    children_count: 0,
+    children_ages: '',
+    education_preferences: '',
     preferred_country: '',
     preferred_city: '',
     location_preference: 'city',
@@ -98,6 +104,10 @@ export default function Assessment() {
       }
       if (assessment.monthly_budget < 100 || assessment.monthly_budget > 50000) {
         setError('Please enter a valid monthly budget between $100 and $50,000');
+        return;
+      }
+      if (assessment.children_count > 0 && !assessment.children_ages.trim()) {
+        setError("Please enter the ages of the children relocating with you");
         return;
       }
     }
@@ -477,6 +487,60 @@ export default function Assessment() {
                 </div>
                 <p className="text-sm text-brand-muted mt-1.5">We&apos;ll compare this to rental costs in your chosen destination</p>
               </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-brand-ink mb-2">
+                  How many children will relocate with you?
+                </label>
+                <select
+                  value={assessment.children_count}
+                  onChange={(e) => {
+                    const count = Number(e.target.value);
+                    setAssessment(prev => ({
+                      ...prev,
+                      children_count: count,
+                      children_ages: count === 0 ? '' : prev.children_ages,
+                      education_preferences: count === 0 ? '' : prev.education_preferences,
+                    }));
+                  }}
+                  className="w-full px-4 py-3.5 rounded-lg border border-brand-border-strong bg-brand-surface text-brand-ink focus:ring-2 focus:ring-brand-accent focus:border-transparent"
+                >
+                  {Array.from({ length: 11 }, (_, count) => (
+                    <option key={count} value={count}>{count === 0 ? 'None' : count}</option>
+                  ))}
+                </select>
+              </div>
+
+              {assessment.children_count > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-brand-ink mb-2">
+                      Children&apos;s ages
+                    </label>
+                    <input
+                      type="text"
+                      value={assessment.children_ages}
+                      onChange={(e) => updateAssessment('children_ages', e.target.value)}
+                      placeholder="e.g., 6 and 12"
+                      maxLength={100}
+                      className="w-full px-4 py-3.5 rounded-lg border border-brand-border-strong bg-brand-surface text-brand-ink focus:ring-2 focus:ring-brand-accent focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-brand-ink mb-2">
+                      Education needs or preferences
+                    </label>
+                    <input
+                      type="text"
+                      value={assessment.education_preferences}
+                      onChange={(e) => updateAssessment('education_preferences', e.target.value)}
+                      placeholder="e.g., IB curriculum, bilingual, learning support"
+                      maxLength={500}
+                      className="w-full px-4 py-3.5 rounded-lg border border-brand-border-strong bg-brand-surface text-brand-ink focus:ring-2 focus:ring-brand-accent focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end mt-8">

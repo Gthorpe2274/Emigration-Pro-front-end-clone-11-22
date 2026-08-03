@@ -7,6 +7,11 @@ export interface UserInput {
   monthlyBudget: number;
   locationPreference: string;
   climatePreference: string;
+  familyProfile: {
+    childrenCount: number;
+    childrenAges: string;
+    educationPreferences: string;
+  };
   priorities: {
     immigrationPolicies: number;
     healthcare: number;

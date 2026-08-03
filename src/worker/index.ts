@@ -389,6 +389,9 @@ app.post('/api/admin/rotate-sessions', adminAuth, async (c) => {
 const AssessmentSchema = z.object({
   user_age: z.number().min(18).max(100),
   user_job: z.string().min(1).max(200),
+  children_count: z.number().int().min(0).max(10).optional().default(0),
+  children_ages: z.string().max(100).optional(),
+  education_preferences: z.string().max(500).optional(),
   preferred_country: z.string().min(1).max(100),
   preferred_city: z.string().optional(),
   location_preference: z.enum(['beachside', 'rural', 'city']),
@@ -401,6 +404,14 @@ const AssessmentSchema = z.object({
   emigration_process_importance: z.number().min(1).max(5),
   ease_of_immigration_importance: z.number().min(1).max(5),
   local_acceptance_importance: z.number().min(1).max(5)
+}).superRefine((assessment, ctx) => {
+  if (assessment.children_count > 0 && !assessment.children_ages?.trim()) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['children_ages'],
+      message: "Children's ages are required when children are relocating"
+    });
+  }
 });
 
 // Budget compatibility data for major cities
@@ -738,15 +749,19 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
 
     const result = await c.env.DB.prepare(`
       INSERT INTO assessments (
-        user_age, user_job, monthly_budget, preferred_country, preferred_city, location_preference,
+        user_age, user_job, monthly_budget, children_count, children_ages, education_preferences,
+        preferred_country, preferred_city, location_preference,
         climate_preference, immigration_policies_importance, healthcare_importance, safety_importance,
         internet_importance, emigration_process_importance, ease_of_immigration_importance,
         local_acceptance_importance, overall_score, match_level, budget_compatibility, retention_expires_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       assessment.user_age ?? 30,
       assessment.user_job ?? 'Test User',
       assessment.monthly_budget || 2000,
+      assessment.children_count || 0,
+      assessment.children_ages || null,
+      assessment.education_preferences || null,
       assessment.preferred_country ?? 'Unknown',
       assessment.preferred_city || null,
       assessment.location_preference ?? 'city',
@@ -2690,6 +2705,11 @@ const ReportUserInputSchema = z.object({
   monthlyBudget: z.number().nonnegative(),
   locationPreference: z.string().trim().min(1),
   climatePreference: z.string().trim().min(1),
+  familyProfile: z.object({
+    childrenCount: z.number().int().min(0).max(10),
+    childrenAges: z.string().trim().min(1),
+    educationPreferences: z.string().trim().min(1)
+  }),
   priorities: z.object({
     immigrationPolicies: z.number().min(0).max(5),
     healthcare: z.number().min(0).max(5),
@@ -2732,6 +2752,7 @@ app.post("/api/perplexity", async (c) => {
       const prompt = `
         GEOGRAPHIC CONTEXT: ${input.destinationCity}, ${input.destinationCountry}.
         CUSTOMER PROFILE: Age ${input.age}; occupation ${input.profession}; monthly budget USD ${input.monthlyBudget}; ${input.lifestyle} lifestyle; preferred setting ${input.locationPreference}; preferred climate ${input.climatePreference}.
+        FAMILY/EDUCATION PROFILE: ${input.familyProfile.childrenCount} relocating children; ages ${input.familyProfile.childrenAges}; preferences or support needs: ${input.familyProfile.educationPreferences}.
         CUSTOMER PRIORITIES (0-5): ${JSON.stringify(input.priorities)}.
         TASK: Create a compelling 200-word RELATIONAL PREVIEW for an exhaustive Emigration Strategy.
         Focus on high-value intelligence like healthcare accessibility and financial transitions.
@@ -2789,6 +2810,9 @@ app.post("/api/perplexity", async (c) => {
         - Lifestyle: ${customer.lifestyle}
         - Location preference: ${customer.locationPreference}
         - Climate preference: ${customer.climatePreference}
+        - Relocating children: ${customer.familyProfile.childrenCount}
+        - Children's ages: ${customer.familyProfile.childrenAges}
+        - Education preferences/support needs: ${customer.familyProfile.educationPreferences}
         - Priority ratings (0-5): ${JSON.stringify(customer.priorities)}
         Every recommendation must be specific to this destination and profile. Do not discuss another country except for a clearly labeled comparison that directly helps this customer.
         

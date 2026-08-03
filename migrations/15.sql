@@ -2,7 +2,7 @@
 --
 -- The existing `reports` table holds a finished report as a single blob, which
 -- is only written once everything has been generated. Sections are produced one
--- at a time by 13 separate AI calls, so a buyer who closes the tab part-way
+-- at a time by 14 separate AI calls, so a buyer who closes the tab part-way
 -- through previously lost the lot and had to be regenerated from scratch —
 -- paying for the same sections twice.
 --
