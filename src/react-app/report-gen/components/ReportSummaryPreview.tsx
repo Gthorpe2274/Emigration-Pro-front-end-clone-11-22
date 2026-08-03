@@ -8,10 +8,11 @@ interface ReportSummaryPreviewProps {
   onBack: () => void;
   isAdmin?: boolean;
   onGenerate?: () => void;
+  customerEmail?: string;
 }
 
-const ReportSummaryPreview: React.FC<ReportSummaryPreviewProps> = ({ summaryData, onBack, isAdmin = false, onGenerate }) => {
-  const [email, setEmail] = useState('');
+const ReportSummaryPreview: React.FC<ReportSummaryPreviewProps> = ({ summaryData, onBack, isAdmin = false, onGenerate, customerEmail }) => {
+  const [email, setEmail] = useState(() => customerEmail || sessionStorage.getItem('userEmail') || '');
   const [emailError, setEmailError] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   
@@ -24,6 +25,17 @@ const ReportSummaryPreview: React.FC<ReportSummaryPreviewProps> = ({ summaryData
     const ref = new URLSearchParams(window.location.search).get('ref');
     if (ref) sessionStorage.setItem('affiliateRef', ref);
   }, []);
+
+  // The email was already captured and linked to the assessment before this
+  // page loaded. Keep the state synchronized with that authoritative value so
+  // customers are not asked to enter it again.
+  useEffect(() => {
+    if (customerEmail && validateEmail(customerEmail)) {
+      const normalizedEmail = customerEmail.toLowerCase();
+      setEmail(normalizedEmail);
+      sessionStorage.setItem('userEmail', normalizedEmail);
+    }
+  }, [customerEmail]);
 
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -97,6 +109,8 @@ const ReportSummaryPreview: React.FC<ReportSummaryPreviewProps> = ({ summaryData
     }
   };
 
+  const hasCapturedEmail = validateEmail(email);
+
   // Logic for Regular Users (Paywall)
   const renderUserPaywall = () => (
     <div className="w-full flex flex-col items-center relative z-[60] pointer-events-auto">
@@ -120,7 +134,7 @@ const ReportSummaryPreview: React.FC<ReportSummaryPreviewProps> = ({ summaryData
         
         {isConfigured ? (
           <div className="flex-grow">
-            {!emailSubmitted ? (
+            {!hasCapturedEmail && !emailSubmitted ? (
               <form onSubmit={handleEmailSubmit} className="flex flex-col gap-2">
                 <input 
                   type="email" 
@@ -139,9 +153,17 @@ const ReportSummaryPreview: React.FC<ReportSummaryPreviewProps> = ({ summaryData
                 </button>
               </form>
             ) : (
-              <div className="text-center bg-green-50 border border-green-200 p-4 rounded-lg">
-                <p className="text-green-700 font-semibold">Check your email!</p>
-                <p className="text-green-600 text-xs mt-1">A confirmation link has been sent. Complete payment in the new tab.</p>
+              <div className="flex flex-col gap-2">
+                <p className="text-center text-xs text-slate-600">
+                  Report delivery: <span className="font-semibold text-slate-800">{email}</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={handlePaymentRedirect}
+                  className="w-full text-center bg-indigo-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-indigo-700 shadow-xl shadow-indigo-100 cursor-pointer active:scale-95 transition-all transform hover:scale-[1.02] z-50"
+                >
+                  Proceed to Payment
+                </button>
               </div>
             )}
           </div>

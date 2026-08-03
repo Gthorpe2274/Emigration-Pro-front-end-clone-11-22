@@ -351,6 +351,7 @@ export default function CheckoutReport() {
             summaryData={summaryData} 
             onBack={handleBackToAssessment} 
             isAdmin={false}
+            customerEmail={searchParams.get('email') || sessionStorage.getItem('userEmail') || undefined}
           />
         )}
       </main>
