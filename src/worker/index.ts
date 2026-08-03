@@ -1104,6 +1104,95 @@ app.get("/api/assessments/:id", async (c) => {
   }
 });
 
+// Landing point for Stripe's post-payment redirect.
+//
+// Stripe only substitutes {CHECKOUT_SESSION_ID} into the success URL, so it
+// cannot hand back our assessment id directly. This resolves the session
+// server-side, maps the buyer's email to their assessment, and forwards them
+// into the report flow. Doing it here rather than in the browser means the
+// buyer can pay on a different device to the one they browsed on.
+app.get("/api/checkout-return", async (c) => {
+  const SITE = "https://emigrationpro.com";
+  const fail = (why: string) =>
+    c.redirect(`${SITE}/?payment_success=true&report_error=${encodeURIComponent(why)}`, 302);
+
+  try {
+    const sessionId = c.req.query("session_id");
+    if (!sessionId) return fail("missing_session");
+
+    const stripeKey = c.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) {
+      console.error("checkout-return: STRIPE_SECRET_KEY is not set");
+      return fail("not_configured");
+    }
+
+    const stripeRes = await fetch(
+      `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`,
+      { headers: { Authorization: `Bearer ${stripeKey}` } }
+    );
+
+    if (!stripeRes.ok) {
+      console.error("checkout-return: Stripe lookup failed", stripeRes.status, await stripeRes.text());
+      return fail("session_lookup_failed");
+    }
+
+    const session = await stripeRes.json() as any;
+
+    // Only unlock the report for a session Stripe considers paid.
+    if (session.payment_status !== "paid") {
+      console.warn(`checkout-return: session ${sessionId} payment_status=${session.payment_status}`);
+      return fail("not_paid");
+    }
+
+    const email: string | undefined =
+      session.customer_details?.email || session.customer_email || undefined;
+
+    if (!email) {
+      console.error(`checkout-return: no email on session ${sessionId}`);
+      return fail("no_email");
+    }
+
+    // The email capture step immediately before checkout writes email_leads,
+    // so the most recent row for this address is the assessment just purchased.
+    let assessmentId: number | null = null;
+
+    const lead = await c.env.DB.prepare(
+      `SELECT assessment_id FROM email_leads
+        WHERE lower(email) = lower(?) AND assessment_id IS NOT NULL
+        ORDER BY id DESC LIMIT 1`
+    ).bind(email).first();
+
+    if (lead?.assessment_id) {
+      assessmentId = Number(lead.assessment_id);
+    } else {
+      // Returning buyers may only exist on a prior hub access record.
+      const access = await c.env.DB.prepare(
+        `SELECT assessment_id FROM relocation_hub_access
+          WHERE lower(email) = lower(?) AND assessment_id IS NOT NULL
+          ORDER BY id DESC LIMIT 1`
+      ).bind(email).first();
+
+      if (access?.assessment_id) assessmentId = Number(access.assessment_id);
+    }
+
+    if (!assessmentId) {
+      console.error(`checkout-return: no assessment found for ${email}`);
+      return c.redirect(
+        `${SITE}/?payment_success=true&report_error=no_assessment&email=${encodeURIComponent(email)}`,
+        302
+      );
+    }
+
+    return c.redirect(
+      `${SITE}/checkout-report?payment_success=true&assessment_id=${assessmentId}&email=${encodeURIComponent(email)}`,
+      302
+    );
+  } catch (error) {
+    console.error("checkout-return failed:", error);
+    return fail("unexpected_error");
+  }
+});
+
 // Persist one generated report section.
 //
 // Called as each section finishes rather than once at the end, so a buyer who

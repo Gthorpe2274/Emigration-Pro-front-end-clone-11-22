@@ -122,6 +122,18 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TAGLINE SECTION */}
+      <section className="bg-brand-surface border-b border-brand-border py-12 md:py-16">
+        <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
+          <h2 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight tracking-tight text-brand-ink mb-4">
+            Find Your New Home Country and Make a Living Wage
+          </h2>
+          <p className="text-lg text-brand-muted">
+            Get all you need here to make the move safely.
+          </p>
+        </div>
+      </section>
+
       {/* HOW IT WORKS */}
       <section id="how" className="bg-brand-surface border-b border-brand-border">
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">

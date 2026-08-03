@@ -19,4 +19,7 @@ interface Env {
   SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
   REPORT_PRICE_USD?: string;
+  // Read-only use: resolving a Stripe Checkout Session on return from payment.
+  // Set via `wrangler secret put STRIPE_SECRET_KEY`.
+  STRIPE_SECRET_KEY?: string;
 }
