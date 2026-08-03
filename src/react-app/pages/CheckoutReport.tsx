@@ -110,17 +110,27 @@ export default function CheckoutReport() {
         // Map based on assessment fields
         if (data.healthcare_importance >= 4) concernsToSelect.push('healthcare');
         if (data.safety_importance >= 4) concernsToSelect.push('political_stability');
-        if (data.internet_importance >= 4) concernsToSelect.push('internet');
+        if (data.internet_importance >= 4) concernsToSelect.push('digital_infrastructure');
         if (data.emigration_process_importance >= 4 || data.ease_of_immigration_importance >= 4) concernsToSelect.push('visa');
-        if (data.local_acceptance_importance >= 4) concernsToSelect.push('culture');
+        if (data.local_acceptance_importance >= 4) concernsToSelect.push('culture_entertainment');
         
         // Always include basic ones
         concernsToSelect.push('finance');
         concernsToSelect.push('situation');
         concernsToSelect.push('relocation_timeline');
 
-        // Deduplicate and select top 5
-        const uniqueConcerns = Array.from(new Set(concernsToSelect)).slice(0, 5);
+        // The paid report covers every subject, matching what the original
+        // report-gen app produced (its ConcernSelector always submitted all of
+        // them) and what the sales page lists. The assessment-derived ordering
+        // above is kept so the buyer's stated priorities appear first.
+        // Guard against ids that no longer exist in CONCERNS: an unmatched id
+        // would inflate the progress total and never produce a section.
+        const validIds = new Set(CONCERNS.map(c => c.id));
+        const prioritised = Array.from(new Set(concernsToSelect)).filter(id => validIds.has(id));
+        const uniqueConcerns = [
+          ...prioritised,
+          ...CONCERNS.map(c => c.id).filter(id => !prioritised.includes(id))
+        ];
         setSelectedConcerns(uniqueConcerns);
 
         // 3. After payment go straight to the full report. Previously the

@@ -3,6 +3,13 @@ import React from 'react';
 import { UserInput, Concern } from './types';
 
 // Icons for sections
+const EducationIcon = (props: any) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+    </svg>
+);
+
 const HealthcareIcon = (props: any) => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9M3 12a9 9 0 019-9m-9 9h18" />
@@ -294,6 +301,30 @@ export const CONCERNS: Concern[] = [
       1. Legal tax exemptions for foreign retirement income.
       2. "Golden Age" discount programs for transport and utilities.
       3. Healthcare subsidies and geriatric community programs.
+    `,
+  },
+  {
+    id: 'childrens_education',
+    title: "Children's Education & Schooling",
+    description: 'Schools, curricula, admissions and costs in your chosen city.',
+    Icon: EducationIcon,
+    prompt: (input: UserInput) => `
+      GEOGRAPHIC CONTEXT: ${input.destinationCity}, ${input.destinationCountry}.
+      TASK: Practical schooling briefing for a relocating family, specific to
+      ${input.destinationCity} rather than the country in general.
+      INCLUDE:
+      1. Named international, bilingual and private schools serving the city,
+         with the curricula they teach (IB, British, American, national).
+      2. Typical annual tuition ranges per school type, plus the enrolment,
+         registration and capital fees families are commonly surprised by.
+      3. How to access state/public schooling as a foreign resident: language
+         of instruction, catchment rules, and documents required to enrol.
+      4. Admissions reality: waiting lists, intake dates relative to the
+         academic calendar, entrance assessments, and how far ahead to apply.
+      5. Provision for children with additional learning needs or limited
+         local-language ability.
+      6. Higher education pathways locally, and whether local qualifications
+         are recognised for university entry back in the United States.
     `,
   },
 ];
