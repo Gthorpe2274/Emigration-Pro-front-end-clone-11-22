@@ -25,9 +25,10 @@ enum AppStep {
  * would otherwise start from nothing and be billed for the same sections twice.
  * Anything already stored is reused and only the remainder is generated.
  */
-async function loadSavedSections(assessmentId: string): Promise<ReportSectionData[]> {
+async function loadSavedSections(assessmentId: string, profileFingerprint: string): Promise<ReportSectionData[]> {
   try {
-    const res = await fetch(`/api/reports/${assessmentId}/sections`);
+    const params = new URLSearchParams({ profile_fingerprint: profileFingerprint });
+    const res = await fetch(`/api/reports/${assessmentId}/sections?${params.toString()}`);
     if (!res.ok) return [];
     const data = await res.json();
     return data.sections || [];
@@ -38,7 +39,7 @@ async function loadSavedSections(assessmentId: string): Promise<ReportSectionDat
 }
 
 /** Persist one finished section so progress survives losing the page. */
-async function saveSection(assessmentId: string, section: ReportSectionData): Promise<void> {
+async function saveSection(assessmentId: string, profileFingerprint: string, section: ReportSectionData): Promise<void> {
   try {
     await fetch(`/api/reports/${assessmentId}/sections`, {
       method: 'POST',
@@ -47,7 +48,8 @@ async function saveSection(assessmentId: string, section: ReportSectionData): Pr
         concern_id: section.id,
         title: section.title,
         content: section.content,
-        sources: section.sources
+        sources: section.sources,
+        profile_fingerprint: profileFingerprint
       })
     });
   } catch (err) {
@@ -55,6 +57,18 @@ async function saveSection(assessmentId: string, section: ReportSectionData): Pr
     // failing the run over.
     console.error(`Failed to save section ${section.id}:`, err);
   }
+}
+
+function createProfileFingerprint(input: UserInput): string {
+  // Stable, non-reversible identifier so profile details are never placed in
+  // the URL used to resume a report.
+  const serialized = JSON.stringify(input);
+  let hash = 2166136261;
+  for (let i = 0; i < serialized.length; i++) {
+    hash ^= serialized.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `v1-${(hash >>> 0).toString(16).padStart(8, '0')}`;
 }
 
 export default function CheckoutReport() {
@@ -88,19 +102,39 @@ export default function CheckoutReport() {
       .then(data => {
         if (data.error) throw new Error(data.error);
 
+        const assessment = data.assessment;
+        if (!assessment || typeof assessment !== 'object') {
+          throw new Error('Assessment response did not contain customer data.');
+        }
+        if (!assessment.preferred_country || !assessment.user_job || !assessment.user_age) {
+          throw new Error('Assessment is missing destination or customer profile fields.');
+        }
+
         // 1. Map to UserInput
         let lifestyleStr = 'Moderate';
-        if (data.monthly_budget) {
-          if (data.monthly_budget < 2500) lifestyleStr = 'Budget-conscious';
-          else if (data.monthly_budget > 6000) lifestyleStr = 'Luxury';
+        if (assessment.monthly_budget) {
+          if (assessment.monthly_budget < 2500) lifestyleStr = 'Budget-conscious';
+          else if (assessment.monthly_budget > 6000) lifestyleStr = 'Luxury';
         }
 
         const prepopulated: UserInput = {
-          destinationCountry: data.preferred_country || '',
-          destinationCity: data.preferred_city || '',
-          profession: data.user_job || '',
-          age: data.user_age ? data.user_age.toString() : '',
-          lifestyle: lifestyleStr
+          destinationCountry: assessment.preferred_country,
+          destinationCity: assessment.preferred_city || 'Any city',
+          profession: assessment.user_job,
+          age: assessment.user_age.toString(),
+          lifestyle: lifestyleStr,
+          monthlyBudget: Number(assessment.monthly_budget) || 0,
+          locationPreference: assessment.location_preference || 'Not specified',
+          climatePreference: assessment.climate_preference || 'Not specified',
+          priorities: {
+            immigrationPolicies: Number(assessment.immigration_policies_importance) || 0,
+            healthcare: Number(assessment.healthcare_importance) || 0,
+            safety: Number(assessment.safety_importance) || 0,
+            internet: Number(assessment.internet_importance) || 0,
+            emigrationProcess: Number(assessment.emigration_process_importance) || 0,
+            easeOfImmigration: Number(assessment.ease_of_immigration_importance) || 0,
+            localAcceptance: Number(assessment.local_acceptance_importance) || 0
+          }
         };
 
         setUserInput(prepopulated);
@@ -108,11 +142,11 @@ export default function CheckoutReport() {
         // 2. Map priorities to selectedConcerns
         const concernsToSelect = [];
         // Map based on assessment fields
-        if (data.healthcare_importance >= 4) concernsToSelect.push('healthcare');
-        if (data.safety_importance >= 4) concernsToSelect.push('political_stability');
-        if (data.internet_importance >= 4) concernsToSelect.push('digital_infrastructure');
-        if (data.emigration_process_importance >= 4 || data.ease_of_immigration_importance >= 4) concernsToSelect.push('visa');
-        if (data.local_acceptance_importance >= 4) concernsToSelect.push('culture_entertainment');
+        if (assessment.healthcare_importance >= 4) concernsToSelect.push('healthcare');
+        if (assessment.safety_importance >= 4) concernsToSelect.push('political_stability');
+        if (assessment.internet_importance >= 4) concernsToSelect.push('digital_infrastructure');
+        if (assessment.emigration_process_importance >= 4 || assessment.ease_of_immigration_importance >= 4) concernsToSelect.push('visa');
+        if (assessment.local_acceptance_importance >= 4) concernsToSelect.push('culture_entertainment');
         
         // Always include basic ones
         concernsToSelect.push('finance');
@@ -179,7 +213,8 @@ export default function CheckoutReport() {
     const wanted = CONCERNS.filter(c => concerns.includes(c.id));
 
     try {
-      const saved = await loadSavedSections(assessmentId);
+      const profileFingerprint = createProfileFingerprint(input);
+      const saved = await loadSavedSections(assessmentId, profileFingerprint);
       const done = new Map(saved.map(s => [s.id, s]));
 
       // Show recovered work immediately rather than an empty progress bar.
@@ -204,7 +239,7 @@ export default function CheckoutReport() {
 
         collected.push(section);
         setReportData([...collected]);
-        await saveSection(assessmentId, section);
+        await saveSection(assessmentId, profileFingerprint, section);
       }
 
       if (collected.length === 0) {

@@ -111,6 +111,9 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
 };
 
 export const generateReportSummary = async (userInput: UserInput): Promise<{ content: string; title: string }> => {
+  if (!userInput.destinationCountry || !userInput.destinationCity || !userInput.profession || !userInput.age) {
+    throw new Error('Customer assessment data is incomplete; report generation was stopped.');
+  }
   try {
     const response = await fetch('/api/perplexity', {
       method: 'POST',
@@ -142,6 +145,9 @@ export const generateReportSummary = async (userInput: UserInput): Promise<{ con
 };
 
 export const generateReportSection = async (userInput: UserInput, concern: Concern): Promise<{ content: string; sources: { title: string; uri: string }[] }> => {
+  if (!userInput.destinationCountry || !userInput.destinationCity || !userInput.profession || !userInput.age) {
+    throw new Error('Customer assessment data is incomplete; report generation was stopped.');
+  }
   try {
     const response = await fetch('/api/perplexity', {
       method: 'POST',

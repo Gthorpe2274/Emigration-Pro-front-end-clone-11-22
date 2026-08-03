@@ -1207,26 +1207,28 @@ app.post("/api/reports/:assessmentId/sections", async (c) => {
     }
 
     const body = await c.req.json();
-    const { concern_id, title, content, sources } = body || {};
+    const { concern_id, title, content, sources, profile_fingerprint } = body || {};
 
-    if (!concern_id || !title || !content) {
-      return c.json({ error: "concern_id, title and content are required" }, 400);
+    if (!concern_id || !title || !content || !profile_fingerprint) {
+      return c.json({ error: "concern_id, title, content and profile_fingerprint are required" }, 400);
     }
 
     await c.env.DB.prepare(
-      `INSERT INTO report_sections (assessment_id, concern_id, title, content, sources)
-       VALUES (?, ?, ?, ?, ?)
+      `INSERT INTO report_sections (assessment_id, concern_id, title, content, sources, profile_fingerprint)
+       VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(assessment_id, concern_id) DO UPDATE SET
-         title = excluded.title,
-         content = excluded.content,
-         sources = excluded.sources,
-         updated_at = CURRENT_TIMESTAMP`
+          title = excluded.title,
+          content = excluded.content,
+          sources = excluded.sources,
+          profile_fingerprint = excluded.profile_fingerprint,
+          updated_at = CURRENT_TIMESTAMP`
     ).bind(
       assessmentId,
       concern_id,
       title,
       content,
-      sources ? JSON.stringify(sources) : null
+      sources ? JSON.stringify(sources) : null,
+      profile_fingerprint
     ).run();
 
     return c.json({ success: true });
@@ -1247,12 +1249,17 @@ app.get("/api/reports/:assessmentId/sections", async (c) => {
       return c.json({ error: "Invalid assessment id" }, 400);
     }
 
+    const profileFingerprint = c.req.query("profile_fingerprint");
+    if (!profileFingerprint) {
+      return c.json({ error: "profile_fingerprint is required" }, 400);
+    }
+
     const result = await c.env.DB.prepare(
       `SELECT concern_id, title, content, sources, updated_at
          FROM report_sections
-        WHERE assessment_id = ?
+        WHERE assessment_id = ? AND profile_fingerprint = ?
         ORDER BY id ASC`
-    ).bind(assessmentId).all();
+    ).bind(assessmentId, profileFingerprint).all();
 
     const sections = (result.results || []).map((row: any) => ({
       id: row.concern_id,
@@ -2674,6 +2681,26 @@ app.get('/sitemap.xml', async (c) => {
   }
 });
 // Perplexity API endpoint for Report Generation
+const ReportUserInputSchema = z.object({
+  destinationCountry: z.string().trim().min(1),
+  destinationCity: z.string().trim().min(1),
+  profession: z.string().trim().min(1),
+  age: z.string().trim().min(1),
+  lifestyle: z.string().trim().min(1),
+  monthlyBudget: z.number().nonnegative(),
+  locationPreference: z.string().trim().min(1),
+  climatePreference: z.string().trim().min(1),
+  priorities: z.object({
+    immigrationPolicies: z.number().min(0).max(5),
+    healthcare: z.number().min(0).max(5),
+    safety: z.number().min(0).max(5),
+    internet: z.number().min(0).max(5),
+    emigrationProcess: z.number().min(0).max(5),
+    easeOfImmigration: z.number().min(0).max(5),
+    localAcceptance: z.number().min(0).max(5)
+  })
+});
+
 app.post("/api/perplexity", async (c) => {
   const apiKey = c.env.PERPLEXITY_API_KEY;
   if (!apiKey) {
@@ -2697,8 +2724,15 @@ app.post("/api/perplexity", async (c) => {
 
   try {
     if (action === 'generateSummary') {
+      const inputResult = ReportUserInputSchema.safeParse(payload);
+      if (!inputResult.success) {
+        return c.json({ error: 'Complete customer assessment data is required', details: inputResult.error.flatten() }, 400);
+      }
+      const input = inputResult.data;
       const prompt = `
-        GEOGRAPHIC CONTEXT: ${payload.destinationCity}, ${payload.destinationCountry}.
+        GEOGRAPHIC CONTEXT: ${input.destinationCity}, ${input.destinationCountry}.
+        CUSTOMER PROFILE: Age ${input.age}; occupation ${input.profession}; monthly budget USD ${input.monthlyBudget}; ${input.lifestyle} lifestyle; preferred setting ${input.locationPreference}; preferred climate ${input.climatePreference}.
+        CUSTOMER PRIORITIES (0-5): ${JSON.stringify(input.priorities)}.
         TASK: Create a compelling 200-word RELATIONAL PREVIEW for an exhaustive Emigration Strategy.
         Focus on high-value intelligence like healthcare accessibility and financial transitions.
         IMPORTANT FORMATTING DIRECTIVE:
@@ -2737,10 +2771,26 @@ app.post("/api/perplexity", async (c) => {
 
     if (action === 'generateSection') {
       const { input, concern } = payload;
+      const inputResult = ReportUserInputSchema.safeParse(input);
+      if (!inputResult.success) {
+        return c.json({ error: 'Complete customer assessment data is required', details: inputResult.error.flatten() }, 400);
+      }
+      const customer = inputResult.data;
       const isFinance = concern.id === 'finance';
 
       let prompt = `
         ${concern.promptText}
+
+        AUTHORITATIVE CUSTOMER ASSESSMENT (do not substitute or infer a different destination):
+        - Destination: ${customer.destinationCity}, ${customer.destinationCountry}
+        - Age: ${customer.age}
+        - Occupation: ${customer.profession}
+        - Monthly budget: USD ${customer.monthlyBudget}
+        - Lifestyle: ${customer.lifestyle}
+        - Location preference: ${customer.locationPreference}
+        - Climate preference: ${customer.climatePreference}
+        - Priority ratings (0-5): ${JSON.stringify(customer.priorities)}
+        Every recommendation must be specific to this destination and profile. Do not discuss another country except for a clearly labeled comparison that directly helps this customer.
         
         FORMATTING DIRECTIVE:
         - Use clear, professional headers (#, ##, ###).

@@ -4,6 +4,18 @@ export interface UserInput {
   profession: string;
   age: string;
   lifestyle: string;
+  monthlyBudget: number;
+  locationPreference: string;
+  climatePreference: string;
+  priorities: {
+    immigrationPolicies: number;
+    healthcare: number;
+    safety: number;
+    internet: number;
+    emigrationProcess: number;
+    easeOfImmigration: number;
+    localAcceptance: number;
+  };
 }
 
 export interface Concern {
