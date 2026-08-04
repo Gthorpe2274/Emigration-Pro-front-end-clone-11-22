@@ -92,35 +92,56 @@ export default function Assessment() {
     setError('');
   };
 
-  const nextStep = () => {
-    if (currentStep === 1) {
-      if (!assessment.user_job.trim()) {
-        setError('Please enter your occupation');
-        return;
-      }
+  /**
+   * Returns a message describing what is still missing on a step, or null when
+   * it is complete. Kept as one function so the Next button and the final
+   * submit apply identical rules — an incomplete assessment produces a generic
+   * report the customer has already paid for, so it must not be reachable by
+   * any route through the form.
+   */
+  const validateStep = (step: number): string | null => {
+    if (step === 1) {
+      if (!assessment.user_job.trim()) return 'Please enter your occupation';
       if (assessment.user_age < 18 || assessment.user_age > 100) {
-        setError('Please enter a valid age between 18 and 100');
-        return;
+        return 'Please enter a valid age between 18 and 100';
       }
       if (assessment.monthly_budget < 100 || assessment.monthly_budget > 50000) {
-        setError('Please enter a valid monthly budget between $100 and $50,000');
-        return;
+        return 'Please enter a valid monthly budget between $100 and $50,000';
       }
       if (assessment.children_count > 0 && !assessment.children_ages.trim()) {
-        setError("Please enter the ages of the children relocating with you");
-        return;
+        return 'Please enter the ages of the children relocating with you';
       }
     }
 
-    if (currentStep === 2) {
-      if (!assessment.preferred_country) {
-        setError('Please select your preferred country');
-        return;
+    if (step === 2) {
+      if (!assessment.preferred_country) return 'Please select your preferred country';
+      // Cities are only offered for countries we hold data for. Where they are
+      // offered the choice is required: every section is researched against a
+      // named city, and leaving it blank yields a country-level report.
+      if (availableCities.length > 0 && !assessment.preferred_city) {
+        return 'Please select your preferred city — your report is researched for that specific city';
       }
-      if (!assessment.climate_preference) {
-        setError('Please select your preferred climate type');
-        return;
+      if (!assessment.climate_preference) return 'Please select your preferred climate type';
+    }
+
+    if (step === 3) {
+      const unrated = factors.filter(factor => {
+        const rating = assessment[factor.key as keyof AssessmentData] as number;
+        return !rating || rating === 0;
+      });
+      if (unrated.length > 0) {
+        return `Please rate all factors before submitting your assessment. You still need to rate: ${unrated.map(f => f.label).join(', ')}`;
       }
+    }
+
+    return null;
+  };
+
+  const nextStep = () => {
+    const problem = validateStep(currentStep);
+    if (problem) {
+      setError(problem);
+      return;
     }
 
     setCurrentStep(prev => prev + 1);
@@ -133,15 +154,16 @@ export default function Assessment() {
   };
 
   const submitAssessment = async () => {
-    // Validate all factors are rated (must be 1-5, not 0)
-    const unratedFactors = factors.filter(factor => {
-      const rating = assessment[factor.key as keyof AssessmentData] as number;
-      return !rating || rating === 0;
-    });
-
-    if (unratedFactors.length > 0) {
-      setError(`Please rate all factors before submitting your assessment. You still need to rate: ${unratedFactors.map(f => f.label).join(', ')}`);
-      return;
+    // Re-check every step, not just this one. A field can be left blank and
+    // then cleared later (changing country resets the city, for example), so
+    // passing step 2 earlier is no guarantee it is still complete now.
+    for (const step of [1, 2, 3]) {
+      const problem = validateStep(step);
+      if (problem) {
+        setCurrentStep(step);
+        setError(problem);
+        return;
+      }
     }
 
     setLoading(true);
@@ -583,15 +605,19 @@ export default function Assessment() {
               {availableCities.length > 0 && (
                 <div>
                   <label className="block text-sm font-semibold text-brand-ink mb-2">
-                    Preferred city (optional)
+                    Preferred city
                   </label>
+                  <p className="text-xs text-brand-muted mb-2">
+                    Your report is researched for this city specifically &mdash; schools, costs,
+                    healthcare and transport are all city-level.
+                  </p>
                   <div className="relative">
                     <select
                       value={assessment.preferred_city}
                       onChange={(e) => updateAssessment('preferred_city', e.target.value)}
                       className="w-full px-4 py-3.5 pr-10 rounded-lg border border-brand-border-strong bg-brand-surface text-brand-ink focus:ring-2 focus:ring-brand-accent focus:border-transparent appearance-none"
                     >
-                      <option value="">Any city in {assessment.preferred_country}</option>
+                      <option value="">Select a city...</option>
                       {availableCities.map(city => (
                         <option key={city} value={city}>{city}</option>
                       ))}
