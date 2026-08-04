@@ -380,18 +380,37 @@ export const CONCERNS: Concern[] = [
         ? `Create a practical schooling plan personalized to this family and specific to ${input.destinationCity}. Prioritize age-appropriate options and the stated needs.`
         : `The customer reported no relocating children. Provide a concise future-reference overview for ${input.destinationCity}, clearly label it as not currently applicable, and do not invent children or schooling needs.`}
       INCLUDE:
-      1. Named international, bilingual and private schools serving the city,
-         with the curricula they teach (IB, British, American, national).
-      2. Typical annual tuition ranges per school type, plus the enrolment,
-         registration and capital fees families are commonly surprised by.
-      3. How to access state/public schooling as a foreign resident: language
-         of instruction, catchment rules, and documents required to enrol.
-      4. Admissions reality: waiting lists, intake dates relative to the
-         academic calendar, entrance assessments, and how far ahead to apply.
-      5. Provision for children with additional learning needs or limited
-         local-language ability.
-      6. Higher education pathways locally, and whether local qualifications
-         are recognised for university entry back in the United States.
+      1. Education System Overview: compulsory school ages, local grade structure,
+         the school calendar, public/private/international options, and whether
+         foreign residents may enrol at all.
+      2. English-Language Options: reputable international, English-medium and
+         bilingual schools serving ${input.destinationCity}. For each named school give
+         location, age/grade range, language of instruction, curriculum (IB, British,
+         American or national), accreditation where verifiable, and a direct official
+         website.
+      3. Admissions & Timing: application windows, required records, assessments and
+         interviews, waiting lists, deposits, visa/residency documents, vaccination or
+         health records, and a recommended application timeline before the move.
+      4. Costs: current tuition ranges in local currency with USD equivalents, plus the
+         registration, capital, transport, meals, uniform, technology and extracurricular
+         fees families are commonly surprised by. Label estimates and state the school
+         year they apply to, because fees change.
+      5. Public-School Integration: eligibility, catchment or zoning rules, likely
+         language barriers, English-language-learner support, and realistic transition
+         strategies for a child who does not yet speak the local language.
+      6. Special Considerations: special educational needs and disability provision,
+         counselling, safeguarding standards, school transport and commute implications,
+         and the legality of homeschooling or alternatives.
+      7. Family Decision Guide: compare the strongest pathways by age group, budget,
+         curriculum continuity and neighbourhood; finish with a school-shortlisting
+         checklist and the relevant local education authority contact. Also cover whether
+         local qualifications are recognised for university entry back in the United States.
+      RESEARCH STANDARD: prioritise current official school and government sources.
+      Distinguish verified facts from estimates, state the effective school year for fees
+      and admissions detail, and flag anything the family must confirm directly. Do not
+      invent schools, fees, accreditations or availability.
+      FORMATTING: use clear narrative headers, comparison bullets and an actionable
+      checklist. Avoid markdown tables.
     `,
   },
 ];

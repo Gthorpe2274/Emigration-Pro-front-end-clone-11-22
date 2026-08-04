@@ -1,69 +1,140 @@
 import React from 'react';
 
-const SimpleMarkdown: React.FC<{ content: string | unknown }> = ({ content }) => {
-    const contentAsString = typeof content === 'string' ? content : '';
+/**
+ * Renderer for generated report sections.
+ *
+ * Parses line by line rather than by blank-line-separated blocks. The models
+ * routinely write a heading and its first paragraph on consecutive lines, and
+ * introduce a list with a lead-in sentence on the line above the bullets. Block
+ * parsing swallowed both cases: the paragraph after a heading was rendered as
+ * part of the heading, and lists collapsed into prose with the dashes inline.
+ */
 
-    // If the content starts with an HTML tag (like our finance table), render it directly
-    if (contentAsString.trim().startsWith('<') && contentAsString.includes('>')) {
-        return <div className="prose max-w-none report-text-area" dangerouslySetInnerHTML={{ __html: contentAsString }} />;
+const escapeHtml = (text: string) =>
+    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/** Bold, italic, code and bare links, applied after escaping. */
+const processInlines = (text: string) =>
+    escapeHtml(text)
+        .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-slate-900">$1</strong>')
+        .replace(/(^|[^*])\*([^*\n]+?)\*(?!\*)/g, '$1<em class="italic">$2</em>')
+        .replace(/`([^`]+)`/g, '<code class="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded text-[0.9em] border border-slate-200">$1</code>')
+        // Trailing research citations such as [1] — de-emphasised, not inline noise.
+        .replace(/\[(\d+)\]/g, '<sup class="text-[0.7em] text-slate-400 ml-0.5">[$1]</sup>');
+
+const BULLET = /^\s*[-*•]\s+(.*)$/;
+const NUMBERED = /^\s*\d+[.)]\s+(.*)$/;
+
+const SimpleMarkdown: React.FC<{ content: string | unknown }> = ({ content }) => {
+    const source = typeof content === 'string' ? content : '';
+
+    // Pre-built HTML (the cost-of-living table) is passed straight through.
+    if (source.trim().startsWith('<') && source.includes('>')) {
+        return (
+            <div
+                className="prose max-w-none report-text-area"
+                dangerouslySetInnerHTML={{ __html: source }}
+            />
+        );
     }
 
-    const processInlines = (text: string) => {
-        return text
-            .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-slate-950">$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em class="italic text-slate-900">$1</em>')
-            .replace(/`([^`]+)`/g, '<code class="bg-slate-100 text-slate-950 px-1.5 py-0.5 rounded text-sm font-bold border border-slate-200">$1</code>');
+    const lines = source.replace(/\r\n/g, '\n').split('\n');
+    const html: string[] = [];
+
+    let paragraph: string[] = [];
+    let listItems: string[] = [];
+    let listOrdered = false;
+
+    const flushParagraph = () => {
+        if (paragraph.length === 0) return;
+        const text = processInlines(paragraph.join(' ').trim());
+        if (text) html.push(`<p class="text-[15px] leading-7 text-slate-700 mb-5">${text}</p>`);
+        paragraph = [];
     };
 
-    const blocks = contentAsString
-        .split(/(\r\n|\n){2,}/)
-        .filter(block => {
-            const trimmed = block.trim();
-            // FILTER: Skip blocks that are just artifact headers without text
-            if (trimmed === '####' || trimmed === '###' || trimmed === '##' || trimmed === '#') return false;
-            // FILTER: Skip blocks that look like broken table artifacts
-            if (trimmed.startsWith('|') && trimmed.includes('---')) return false;
-            if (trimmed === '| |' || trimmed === '|') return false;
-            return trimmed !== '';
-        });
+    const flushList = () => {
+        if (listItems.length === 0) return;
+        const tag = listOrdered ? 'ol' : 'ul';
+        const marker = listOrdered ? 'list-decimal' : 'list-disc';
+        const items = listItems
+            .map(item => `<li class="pl-1.5 leading-7">${processInlines(item)}</li>`)
+            .join('');
+        html.push(
+            `<${tag} class="${marker} pl-6 mb-6 space-y-2 text-[15px] text-slate-700 marker:text-slate-400">${items}</${tag}>`
+        );
+        listItems = [];
+    };
 
-    const htmlContent = blocks.map(block => {
-        const trimmedBlock = block.trim();
+    const flushAll = () => {
+        flushParagraph();
+        flushList();
+    };
 
-        // Level 4 Header (Rendered as Bold High-Emphasis Sub-heading per instruction)
-        if (trimmedBlock.startsWith('#### ')) {
-            return `<p class="mt-6 mb-2"><strong class="text-sm font-black text-indigo-900 uppercase tracking-widest">${processInlines(trimmedBlock.substring(5))}</strong></p>`;
-        }
-        
-        // Level 3 Header
-        if (trimmedBlock.startsWith('### ')) {
-            return `<h3 class="text-lg font-black mt-8 mb-4 text-slate-950 leading-tight uppercase tracking-wider">${processInlines(trimmedBlock.substring(4))}</h3>`;
-        }
-        
-        // Level 2 Header
-        if (trimmedBlock.startsWith('## ')) {
-            return `<h2 class="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">${processInlines(trimmedBlock.substring(3))}</h2>`;
-        }
-        
-        // Level 1 Header
-        if (trimmedBlock.startsWith('# ')) {
-            return `<h1 class="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">${processInlines(trimmedBlock.substring(2))}</h1>`;
+    for (const rawLine of lines) {
+        const line = rawLine.trim();
+
+        if (line === '') {
+            flushAll();
+            continue;
         }
 
-        // List detection
-        if (trimmedBlock.split('\n').every(line => /^\s*[-*•]\s+/.test(line.trim()) || /^\s*\d+\.\s+/.test(line.trim()))) {
-             const listItems = trimmedBlock.split(/\r\n|\n/)
-                .map(item => item.replace(/^\s*([-*•]|\d+\.)\s+/, '').trim())
-                .filter(item => item) 
-                .map(item => `<li class="leading-relaxed mb-3 pl-2">${processInlines(item)}</li>`)
-                .join('');
-            return `<ul class="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">${listItems}</ul>`;
+        // Skip stray header markers and table separator artefacts.
+        if (/^#{1,6}$/.test(line)) continue;
+        if (/^\|?\s*:?-{3,}/.test(line) && line.includes('-')) continue;
+        if (line === '|' || line === '| |') continue;
+
+        const heading = /^(#{1,6})\s+(.*)$/.exec(line);
+        if (heading) {
+            flushAll();
+            const level = heading[1].length;
+            const text = processInlines(heading[2]);
+
+            if (level === 1) {
+                html.push(
+                    `<h1 class="text-[26px] font-semibold text-slate-900 leading-snug mt-10 mb-4 pb-3 border-b border-slate-200">${text}</h1>`
+                );
+            } else if (level === 2) {
+                html.push(
+                    `<h2 class="text-[20px] font-semibold text-slate-900 leading-snug mt-9 mb-3">${text}</h2>`
+                );
+            } else if (level === 3) {
+                html.push(
+                    `<h3 class="text-[16px] font-semibold text-slate-800 leading-snug mt-7 mb-2">${text}</h3>`
+                );
+            } else {
+                html.push(
+                    `<h4 class="text-[12px] font-semibold uppercase tracking-[0.08em] text-indigo-700 mt-6 mb-2">${text}</h4>`
+                );
+            }
+            continue;
         }
 
-        return `<p class="leading-relaxed mb-6 text-slate-950 font-medium text-base">${processInlines(trimmedBlock)}</p>`;
-    }).join('');
+        const numbered = NUMBERED.exec(line);
+        const bulleted = BULLET.exec(line);
 
-    return <div className="prose max-w-none report-text-area" dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+        if (numbered || bulleted) {
+            flushParagraph();
+            const ordered = Boolean(numbered);
+            // A change of list type starts a new list.
+            if (listItems.length > 0 && ordered !== listOrdered) flushList();
+            listOrdered = ordered;
+            listItems.push((numbered ? numbered[1] : bulleted![1]).trim());
+            continue;
+        }
+
+        // Ordinary prose: a list has ended if one was open.
+        flushList();
+        paragraph.push(line);
+    }
+
+    flushAll();
+
+    return (
+        <div
+            className="prose max-w-none report-text-area"
+            dangerouslySetInnerHTML={{ __html: html.join('') }}
+        />
+    );
 };
 
 export default SimpleMarkdown;
