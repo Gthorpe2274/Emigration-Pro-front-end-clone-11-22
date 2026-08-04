@@ -2798,6 +2798,7 @@ app.post("/api/perplexity", async (c) => {
       }
       const customer = inputResult.data;
       const isFinance = concern.id === 'finance';
+      const researchDate = new Date().toISOString().slice(0, 10);
 
       let prompt = `
         ${concern.promptText}
@@ -2815,6 +2816,16 @@ app.post("/api/perplexity", async (c) => {
         - Education preferences/support needs: ${customer.familyProfile.educationPreferences}
         - Priority ratings (0-5): ${JSON.stringify(customer.priorities)}
         Every recommendation must be specific to this destination and profile. Do not discuss another country except for a clearly labeled comparison that directly helps this customer.
+
+        REPORT RESEARCH STANDARD — AS OF ${researchDate}:
+        - Prefer current official government, regulator, public-utility, operator, hospital, school, and other primary sources. Use reputable secondary sources only when a primary source is unavailable.
+        - Give the source organization and publication/effective date next to every material statistic, price, eligibility rule, processing time, schedule, and safety claim.
+        - For rapidly changing facts, prefer evidence from the last 24 months and explicitly identify older evidence.
+        - Distinguish city-specific, regional, and national information. Never present national averages as city facts without labeling the limitation.
+        - Never fabricate rankings, prices, processing times, program eligibility, addresses, operating status, or numerical scores. If reliable information is unavailable or conflicting, say so and explain how the customer should verify it.
+        - Separate verified facts, reasonable estimates, and recommendations. State calculation assumptions and uncertainty ranges.
+        - Use absolute dates rather than vague phrases such as "currently" or "recently."
+        - End with a short "Verification Before Acting" checklist naming the official agencies or providers the customer should reconfirm.
         
         FORMATTING DIRECTIVE:
         - Use clear, professional headers (#, ##, ###).

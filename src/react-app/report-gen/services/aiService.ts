@@ -17,7 +17,19 @@ const sanitizeMarkdown = (text: string): string => {
 };
 
 const formatFinanceDataAsHtmlTable = (data: any): string => {
-  const { currencyName, currencyCode, budgetItems, importDuties, taxOptimizationStrategies } = data;
+  const {
+    currencyName,
+    currencyCode,
+    budgetItems,
+    assumptionsAndExchangeRate,
+    customerBudgetComparison,
+    estimatedMonthlyTotal,
+    estimatedSixMonthTotal,
+    estimatedAnnualTotal,
+    recommendedEmergencyFund,
+    importDuties,
+    taxOptimizationStrategies
+  } = data;
 
   let conversionButtonHtml = '';
   if (currencyCode && currencyName) {
@@ -80,6 +92,42 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
   }
 
   tableHtml += `</tbody></table></div>`;
+
+  const totalsHtml = `
+    <div class="not-prose my-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <div class="text-xs font-black uppercase tracking-wider text-slate-500">Monthly Total</div>
+        <div class="text-xl font-black text-slate-950 mt-2">${estimatedMonthlyTotal || 'Not available'}</div>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <div class="text-xs font-black uppercase tracking-wider text-slate-500">6-Month Total</div>
+        <div class="text-xl font-black text-slate-950 mt-2">${estimatedSixMonthTotal || 'Not available'}</div>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <div class="text-xs font-black uppercase tracking-wider text-slate-500">Annual Total</div>
+        <div class="text-xl font-black text-slate-950 mt-2">${estimatedAnnualTotal || 'Not available'}</div>
+      </div>
+      <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 shadow-sm">
+        <div class="text-xs font-black uppercase tracking-wider text-indigo-600">Emergency Fund</div>
+        <div class="text-xl font-black text-indigo-950 mt-2">${recommendedEmergencyFund || 'Not available'}</div>
+      </div>
+    </div>`;
+
+  const assumptionsHtml = assumptionsAndExchangeRate ? `
+    <div class="my-8">
+      <h3 class="text-2xl font-black mb-4 text-slate-950">Assumptions & Exchange Rate</h3>
+      <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-slate-800 leading-relaxed shadow-sm">
+        ${sanitizeMarkdown(assumptionsAndExchangeRate).replace(/\n/g, '<br/>')}
+      </div>
+    </div>` : '';
+
+  const budgetComparisonHtml = customerBudgetComparison ? `
+    <div class="my-8">
+      <h3 class="text-2xl font-black mb-4 text-slate-950">Your Budget Comparison</h3>
+      <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-200 text-indigo-950 leading-relaxed shadow-sm font-medium">
+        ${sanitizeMarkdown(customerBudgetComparison).replace(/\n/g, '<br/>')}
+      </div>
+    </div>` : '';
   
   const importDutiesHtml = importDuties ? `
     <div class="my-8">
@@ -107,7 +155,7 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
       </div>
     </div>` : '';
 
-  return conversionButtonHtml + tableHtml + importDutiesHtml + taxHtml;
+  return conversionButtonHtml + assumptionsHtml + tableHtml + totalsHtml + budgetComparisonHtml + importDutiesHtml + taxHtml;
 };
 
 export const generateReportSummary = async (userInput: UserInput): Promise<{ content: string; title: string }> => {

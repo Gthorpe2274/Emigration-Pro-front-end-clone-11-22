@@ -98,10 +98,21 @@ const financeSchema = {
                 required: ['category', 'item', 'initialSetupCost', 'monthlyOngoingCost', 'sixMonthTotal', 'notes']
             }
         },
+        assumptionsAndExchangeRate: { type: 'STRING' },
+        customerBudgetComparison: { type: 'STRING' },
+        estimatedMonthlyTotal: { type: 'STRING' },
+        estimatedSixMonthTotal: { type: 'STRING' },
+        estimatedAnnualTotal: { type: 'STRING' },
+        recommendedEmergencyFund: { type: 'STRING' },
         importDuties: { type: 'STRING' },
         taxOptimizationStrategies: { type: 'STRING' }
     },
-    required: ['currencyName', 'currencyCode', 'budgetItems', 'importDuties', 'taxOptimizationStrategies']
+    required: [
+      'currencyName', 'currencyCode', 'budgetItems', 'assumptionsAndExchangeRate',
+      'customerBudgetComparison', 'estimatedMonthlyTotal', 'estimatedSixMonthTotal',
+      'estimatedAnnualTotal', 'recommendedEmergencyFund', 'importDuties',
+      'taxOptimizationStrategies'
+    ]
 };
 
 export const CONCERNS: Concern[] = [
@@ -155,12 +166,15 @@ export const CONCERNS: Concern[] = [
       TASK: Create a definitive, chronological Step-by-Step Relocation Master Guide.
       
       TIMELINE STRUCTURE:
-      1. Phase 1: Preparation & Visa (Months 12-6 before move) - Focus on legal document gathering and initial application.
-      2. Phase 2: Logistics & Housing (Months 6-2 before move) - Focus on shipping quotes, local banking setup, and neighborhood scouting.
-      3. Phase 3: The Transition (Last 60 days) - Selling assets, terminating local contracts, and medical records transfer.
-      4. Phase 4: Arrival & Integration (Month 1-3 post-move) - Local ID registration, utility activation, and community integration.
+      1. Phase 1: Preparation & Visa (Months 12-6 before move) - Identify the most likely visa for this profile, current official processing estimates, eligibility gates, document dependencies, apostille/translation steps, document-expiration risks, fees, and official application links.
+      2. Phase 2: Logistics & Housing (Months 6-2 before move) - Housing search, deposits and guarantors, shipping, pets, schools when applicable, healthcare continuity, insurance, banking preparation, tax planning, and tasks that must wait for visa approval.
+      3. Phase 3: The Transition (Last 60 days) - Final visa checks, travel booking, sale or storage of assets, contract termination, mail, prescriptions, medical and school records, funds access, customs inventory, and arrival accommodation.
+      4. Phase 4: Arrival & Integration (Month 1-3 post-move) - Immigration registration, tax ID, banking, housing, utilities, phone/internet, healthcare, driver licensing, school enrollment when applicable, employment steps, and every applicable statutory deadline.
+      5. Dependencies & Critical Path - Show which tasks block later steps, responsible party, target date, documents needed, estimated cost, and completion evidence.
+      6. Contingency Plans - Provide fallback actions for visa delays, rejected documents, housing failure, shipping delays, medical interruption, or insufficient funds.
       
-      FORMATTING: Use a bold, chronological numbered list. Include "Critical Milestone" callouts for each phase.
+      PERSONALIZATION: Adapt the plan to age ${input.age}, occupation ${input.profession}, budget USD ${input.monthlyBudget}, ${input.familyProfile.childrenCount} relocating children, and the stated location and climate preferences. Do not include family or employment tasks that are inapplicable without labeling them optional.
+      FORMATTING: Use a chronological checklist with target timing, dependencies, official links, estimated costs, and "Critical Milestone" callouts for each phase.
     `,
   },
   {
@@ -177,6 +191,12 @@ export const CONCERNS: Concern[] = [
       2. Comprehensive breakdown of Public vs Private systems.
       3. Pharmaceutical costs for common prescriptions.
       4. Emergency infrastructure and primary contact protocols.
+      5. Public and private insurance eligibility, enrollment waiting periods, age-banded premiums, deductibles, exclusions, pre-existing-condition rules, and coverage for a new foreign resident.
+      6. Dental, vision, mental health, maternity when relevant, rehabilitation, specialist, disability-access, home-care, geriatric, and long-term-care availability and costs.
+      7. Vaccination requirements, medical-record and prescription transfer, controlled-medication rules, and continuity-of-care actions before departure.
+      8. Named English-speaking or internationally accredited providers where verifiable, realistic appointment and elective-care waiting times, and how referrals work.
+      9. A monthly healthcare budget compared with the customer's USD ${input.monthlyBudget} budget, including insurance and representative out-of-pocket scenarios.
+      Do not call a provider "best" or assign a ranking unless a named, current methodology supports it. Otherwise provide a comparison based on verifiable services, accreditation, location, and emergency capability.
     `,
   },
   {
@@ -186,9 +206,11 @@ export const CONCERNS: Concern[] = [
     Icon: FinanceIcon,
     prompt: (input: UserInput) => `
       GEOGRAPHIC CONTEXT: ${input.destinationCity}, ${input.destinationCountry}.
-      TASK: Create an itemized 6-month relocation budget for a ${input.profession} with a ${input.lifestyle} lifestyle.
+      TASK: Create an itemized monthly, 6-month, and annual relocation budget for a ${input.profession} with a ${input.lifestyle} lifestyle and a stated monthly budget of USD ${input.monthlyBudget}.
       
-      IMPORTANT: You are acting as a senior relocation financial analyst. Provide realistic local prices in ${input.destinationCountry}.
+      INCLUDE: Neighborhood-specific rent ranges, deposits, guarantor or insurance requirements, agent fees, furnishings, utilities, internet, mobile service, groceries, dining, transport, healthcare and insurance, education/childcare when applicable, taxes, banking, currency conversion, leisure, visas, shipping, and one-time setup costs.
+      CALCULATIONS: State the exchange-rate value and date used, show assumptions, avoid double-counting setup costs, calculate monthly/6-month/annual totals, recommend an emergency fund, and explicitly state whether the customer's budget is sufficient, tight, or insufficient with the largest variance drivers.
+      IMPORTANT: Provide realistic city-specific prices in ${input.destinationCountry}. When only national data exists, label it as national and explain the limitation.
     `,
     responseSchema: financeSchema,
   },
@@ -205,6 +227,10 @@ export const CONCERNS: Concern[] = [
       2. Crime statistics and neighborhood-level safety ratings in ${input.destinationCity}.
       3. Quality of local governance and rule of law for foreign residents.
       4. Emergency security protocols and embassy support availability.
+      5. Dated violent-crime, property-crime, hate-crime, corruption, protest, and civil-unrest indicators from official or methodologically transparent sources; distinguish national, regional, and city data.
+      6. Neighborhood-specific risk patterns, common tourist/expat scams, digital and financial fraud, transport and late-night risks, discrimination concerns, and practical mitigation for this customer's age and profile.
+      7. Police, ambulance, fire, coast guard where relevant, US embassy/consulate, crisis hotlines, emergency alert systems, and a household communications/evacuation plan.
+      Do not invent neighborhood scores or present anecdotal claims as statistics. State the reporting period, methodology limitations, under-reporting risks, and source for every quantitative comparison.
       FORMATTING: Professional narrative with clear headers.
     `,
   },
@@ -221,6 +247,10 @@ export const CONCERNS: Concern[] = [
       2. Air Quality Index (AQI) benchmarks: Seasonal fluctuations and pollution sources in ${input.destinationCity}.
       3. Natural disaster profiles: Risks of earthquakes, flooding, or heatwaves.
       4. Waste management and urban green space access.
+      5. Seasonal temperature, humidity, rainfall, mold, allergens, wildfire smoke, storms, drought, coastal or seismic exposure, and compatibility with the customer's ${input.climatePreference} climate preference.
+      6. Neighborhood-level flood, landslide, heat-island, industrial-pollution, and evacuation risks using official maps where available.
+      7. Building-level mitigation: filtration, dehumidification, cooling/heating, backup water, pest control, insurance implications, and questions to ask a landlord or inspector.
+      8. A seasonal preparedness calendar and a clear distinction between current measured conditions, historical risk, and future climate projections.
       FORMATTING: High-readability narrative headers.
     `,
   },
@@ -237,6 +267,10 @@ export const CONCERNS: Concern[] = [
       2. Mobile connectivity: 5G/4G coverage maps and best-performing local carriers.
       3. Reliability report: Frequency of outages and customer service response times for major ISPs.
       4. Remote work friendliness: Quality of co-working spaces and public Wi-Fi safety.
+      5. Neighborhood-level fiber availability, installation lead times, contract duration, deposits, equipment and activation fees, data caps, cancellation rules, and documents required from a foreign resident.
+      6. Independent speed-test evidence alongside provider-advertised speeds, latency and upload performance, outage history, and realistic backup options such as dual-SIM, hotspot, or secondary ISP.
+      7. Internet censorship, blocked services, lawful VPN use, surveillance/privacy considerations, cybersecurity and public-Wi-Fi precautions, and remote-employer security requirements.
+      8. Named coworking options with current pricing and opening hours where verifiable. Do not claim coverage at a specific address without provider or regulator evidence.
       FORMATTING: Detailed lists and narrative analysis.
     `,
   },
@@ -253,6 +287,10 @@ export const CONCERNS: Concern[] = [
       2. Road & Pavement Quality: Walkability and vehicle wear-and-tear expectations.
       3. Sanitation & Sewage: Quality of urban waste disposal and drainage systems.
       4. Future Infrastructure: Major upcoming projects that will impact life in ${input.destinationCity}.
+      5. Electricity voltage/frequency, plug standards, outage duration and seasonality, surge risk, building generators, solar/battery feasibility, and a sized backup recommendation for essential devices.
+      6. Water-supply interruption frequency, pressure, storage tanks, hot-water systems, gas availability, utility billing, connection deposits, foreign-resident documentation, and service restoration procedures.
+      7. Waste and recycling collection reliability, drainage and sewage overflow risk, elevator/building resilience, emergency shelters, and household continuity supplies for 72 hours and seven days.
+      8. Separate confirmed funded projects from proposals, give expected completion dates, and explain likely neighborhood impacts without duplicating the mobility or environmental sections.
       FORMATTING: Narrative white-paper style.
     `,
   },
@@ -268,6 +306,11 @@ export const CONCERNS: Concern[] = [
       1. Public transit analysis (Metro, Rail, Bus) and monthly pass costs.
       2. Guide to vehicle ownership: Import taxes, registration, and fuel benchmarks.
       3. Walkability scores for top 5 residential neighborhoods.
+      4. Typical commute times and service hours, late-night availability and safety, airport/rail-terminal access, intercity connections, taxi and rideshare availability, pricing, and common scams.
+      5. Driver-license conversion or testing, insurance, parking, tolls, inspections, traffic restrictions, and the realistic total monthly cost of ownership versus transit.
+      6. Accessibility for older adults, children, wheelchairs, and reduced mobility; sidewalk quality, station elevators, step-free routes, and paratransit where available.
+      7. Cycling infrastructure, helmet and road rules, crash risk, seasonal weather constraints, and safe route-planning tools.
+      Use current operator fares and schedules. If no defensible walkability score exists, provide a transparent criteria-based comparison rather than inventing a number.
     `,
   },
   {
@@ -282,6 +325,10 @@ export const CONCERNS: Concern[] = [
       1. Annual calendar of major festivals.
       2. Dining districts: High-end culinary scenes vs. local traditions.
       3. Arts infrastructure: Concert halls, theaters, and gallery hubs.
+      4. Local-language expectations, etiquette, dress, tipping, noise and alcohol rules, religious and cultural norms, and common adjustment challenges for Americans.
+      5. Named local—not only expat—community groups, professional associations, volunteering, faith communities, libraries, classes, and practical ways to build relationships.
+      6. Inclusion and discrimination considerations relevant to foreigners, race, religion, disability, age, gender, and LGBTQ+ residents, based on reliable legal and social evidence.
+      7. Accessibility, transit home after events, representative participation costs, reservation practices, and options aligned with the customer's ${input.lifestyle} lifestyle and budget.
     `,
   },
   {
@@ -296,6 +343,10 @@ export const CONCERNS: Concern[] = [
       1. Professional sports access and ticket benchmarks.
       2. Personal fitness: Gym chains, yoga studios, and swimming facilities.
       3. Outdoor: Hiking, cycling, and water sports availability.
+      4. Current membership, day-pass, equipment-rental, coaching, and event costs, plus age restrictions, required medical certificates, waivers, and insurance considerations.
+      5. Age-appropriate and accessible activities for a ${input.age}-year-old, including adaptive recreation, low-impact options, public facilities, and senior or family programs where applicable.
+      6. Seasonal availability and compatibility with the customer's ${input.climatePreference} preference, heat/air-quality/water-safety risks, emergency access, and safe transport to and from venues.
+      7. Named clubs, leagues, parks, trails, beaches, and facilities only when current access, location, and operating status can be verified.
     `,
   },
   {
