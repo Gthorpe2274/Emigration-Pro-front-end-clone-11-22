@@ -92,7 +92,9 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
       </thead>
       <tbody class="divide-y divide-slate-200">`;
 
-  for (const [category, categoryItems] of Object.entries(groupedByCategory)) {
+  // Object.entries widens the value to unknown here, so state the shape the
+  // reduce above already guarantees.
+  for (const [category, categoryItems] of Object.entries(groupedByCategory) as [string, any[]][]) {
     tableHtml += `
       <tr class="bg-slate-100">
         <td class="p-4 font-black text-slate-900 uppercase tracking-widest text-xs" colspan="4">
