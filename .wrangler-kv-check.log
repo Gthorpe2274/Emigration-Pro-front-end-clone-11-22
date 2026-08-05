@@ -1,0 +1,183 @@
+
+--- 2026-08-05T03:04:27.927Z debug
+🪵  Writing logs to "C:\1-Data\Sites\Dual Websites\Final Working Stacks\Report Gen\Working Repo warp\Emigration Pro-front end-11-22\.wrangler-kv-check.log"
+---
+
+--- 2026-08-05T03:04:27.926Z debug
+Metrics dispatcher: Posting data {"deviceId":"b689a09f-dd1c-4cc7-85f4-72429b37baea","event":"wrangler command started","timestamp":1785899067926,"properties":{"amplitude_session_id":1785899067917,"amplitude_event_id":0,"wranglerVersion":"4.50.0","osPlatform":"Windows","osVersion":"Windows 11 Home","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"jsonc","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":true,"argsUsed":["binding","prefix","remote"],"argsCombination":"binding, prefix, remote","command":"wrangler kv key list","args":{}}}
+---
+
+--- 2026-08-05T03:04:27.958Z debug
+.env file not found at "C:\1-Data\Sites\Dual Websites\Final Working Stacks\Report Gen\Working Repo warp\Emigration Pro-front end-11-22\.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-08-05T03:04:28.179Z debug
+-- START CF API REQUEST: GET https://api.cloudflare.com/client/v4/accounts/bd790ece1358808190f54787631bc270/storage/kv/namespaces/d9b6191b7e71482c93a3f99f70c37db9/keys
+---
+
+--- 2026-08-05T03:04:28.181Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-08-05T03:04:28.183Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-08-05T03:04:28.183Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-08-05T03:04:28.183Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-08-05T03:04:28.771Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-08-05T03:04:28.772Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-08-05T03:04:28.772Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-08-05T03:04:28.772Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-08-05T03:04:28.773Z log
+[
+  {
+    "name": "admin_login_attempts:50.19.73.146",
+    "expiration": 1785899811
+  }
+]
+---
+
+--- 2026-08-05T03:04:28.775Z debug
+Metrics dispatcher: Posting data {"deviceId":"b689a09f-dd1c-4cc7-85f4-72429b37baea","event":"list kv keys","timestamp":1785899068775,"properties":{"category":"Workers","wranglerVersion":"4.50.0","os":"win32:x64"}}
+---
+
+--- 2026-08-05T03:04:28.784Z debug
+Metrics dispatcher: Posting data {"deviceId":"b689a09f-dd1c-4cc7-85f4-72429b37baea","event":"wrangler command completed","timestamp":1785899068784,"properties":{"amplitude_session_id":1785899067917,"amplitude_event_id":1,"wranglerVersion":"4.50.0","osPlatform":"Windows","osVersion":"Windows 11 Home","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"jsonc","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":true,"argsUsed":["binding","prefix","remote"],"argsCombination":"binding, prefix, remote","command":"wrangler kv key list","args":{},"durationMs":936,"durationSeconds":0.936,"durationMinutes":0.015600000000000001}}
+---
+
+--- 2026-08-05T03:04:58.740Z debug
+🪵  Writing logs to "C:\1-Data\Sites\Dual Websites\Final Working Stacks\Report Gen\Working Repo warp\Emigration Pro-front end-11-22\.wrangler-kv-check.log"
+---
+
+--- 2026-08-05T03:04:58.739Z debug
+Metrics dispatcher: Posting data {"deviceId":"b689a09f-dd1c-4cc7-85f4-72429b37baea","event":"wrangler command started","timestamp":1785899098739,"properties":{"amplitude_session_id":1785899098733,"amplitude_event_id":0,"wranglerVersion":"4.50.0","osPlatform":"Windows","osVersion":"Windows 11 Home","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"jsonc","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":true,"argsUsed":["binding","remote"],"argsCombination":"binding, remote","command":"wrangler kv key delete","args":{}}}
+---
+
+--- 2026-08-05T03:04:58.766Z debug
+.env file not found at "C:\1-Data\Sites\Dual Websites\Final Working Stacks\Report Gen\Working Repo warp\Emigration Pro-front end-11-22\.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-08-05T03:04:58.887Z log
+
+ ⛅️ wrangler 4.50.0 (update available 4.118.0)
+──────────────────────────────────────────────
+---
+
+--- 2026-08-05T03:04:58.889Z log
+Resource location: remote 
+
+---
+
+--- 2026-08-05T03:04:58.942Z log
+
+---
+
+--- 2026-08-05T03:04:59.101Z error
+X [ERROR] REPORTS_KV has both a namespace ID and a preview ID. Specify "--preview" or "--preview false" to avoid writing data to the wrong namespace.
+
+
+---
+
+--- 2026-08-05T03:04:59.142Z debug
+Error: REPORTS_KV has both a namespace ID and a preview ID. Specify "--preview" or "--preview false" to avoid writing data to the wrong namespace.
+    at getKVNamespaceId (C:\1-Data\Sites\Dual Websites\Final Working Stacks\Report Gen\Working Repo warp\Emigration Pro-front end-11-22\node_modules\wrangler\wrangler-dist\cli.js:138819:11)
+    at Object.handler (C:\1-Data\Sites\Dual Websites\Final Working Stacks\Report Gen\Working Repo warp\Emigration Pro-front end-11-22\node_modules\wrangler\wrangler-dist\cli.js:184541:35)
+    at C:\1-Data\Sites\Dual Websites\Final Working Stacks\Report Gen\Working Repo warp\Emigration Pro-front end-11-22\node_modules\wrangler\wrangler-dist\cli.js:165070:20
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at run (C:\1-Data\Sites\Dual Websites\Final Working Stacks\Report Gen\Working Repo warp\Emigration Pro-front end-11-22\node_modules\wrangler\wrangler-dist\cli.js:47877:61)
+    at Object.handler (C:\1-Data\Sites\Dual Websites\Final Working Stacks\Report Gen\Working Repo warp\Emigration Pro-front end-11-22\node_modules\wrangler\wrangler-dist\cli.js:165052:13)
+---
+
+--- 2026-08-05T03:04:59.148Z debug
+Metrics dispatcher: Posting data {"deviceId":"b689a09f-dd1c-4cc7-85f4-72429b37baea","event":"wrangler command errored","timestamp":1785899099147,"properties":{"amplitude_session_id":1785899098733,"amplitude_event_id":1,"wranglerVersion":"4.50.0","osPlatform":"Windows","osVersion":"Windows 11 Home","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"jsonc","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":true,"argsUsed":["binding","remote"],"argsCombination":"binding, remote","command":"wrangler kv key delete","args":{},"durationMs":466,"durationSeconds":0.466,"durationMinutes":0.007766666666666667,"errorType":"UserError"}}
+---
+
+--- 2026-08-05T03:05:17.963Z debug
+🪵  Writing logs to "C:\1-Data\Sites\Dual Websites\Final Working Stacks\Report Gen\Working Repo warp\Emigration Pro-front end-11-22\.wrangler-kv-check.log"
+---
+
+--- 2026-08-05T03:05:17.962Z debug
+Metrics dispatcher: Posting data {"deviceId":"b689a09f-dd1c-4cc7-85f4-72429b37baea","event":"wrangler command started","timestamp":1785899117961,"properties":{"amplitude_session_id":1785899117942,"amplitude_event_id":0,"wranglerVersion":"4.50.0","osPlatform":"Windows","osVersion":"Windows 11 Home","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"jsonc","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":true,"argsUsed":["binding","preview","remote"],"argsCombination":"binding, preview, remote","command":"wrangler kv key delete","args":{}}}
+---
+
+--- 2026-08-05T03:05:18.005Z debug
+.env file not found at "C:\1-Data\Sites\Dual Websites\Final Working Stacks\Report Gen\Working Repo warp\Emigration Pro-front end-11-22\.env.local". Continuing... For more details, refer to https://developers.cloudflare.com/workers/wrangler/system-environment-variables/
+---
+
+--- 2026-08-05T03:05:18.185Z log
+
+ ⛅️ wrangler 4.50.0 (update available 4.118.0)
+──────────────────────────────────────────────
+---
+
+--- 2026-08-05T03:05:18.188Z log
+Resource location: remote 
+
+---
+
+--- 2026-08-05T03:05:18.242Z log
+Deleting the key "admin_login_attempts:50.19.73.146" on namespace d9b6191b7e71482c93a3f99f70c37db9.
+---
+
+--- 2026-08-05T03:05:18.251Z debug
+-- START CF API REQUEST: DELETE https://api.cloudflare.com/client/v4/accounts/bd790ece1358808190f54787631bc270/storage/kv/namespaces/d9b6191b7e71482c93a3f99f70c37db9/values/admin_login_attempts%3A50.19.73.146
+---
+
+--- 2026-08-05T03:05:18.251Z debug
+QUERY STRING: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-08-05T03:05:18.253Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-08-05T03:05:18.253Z debug
+INIT: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-08-05T03:05:18.253Z debug
+-- END CF API REQUEST
+---
+
+--- 2026-08-05T03:05:18.803Z debug
+-- START CF API RESPONSE: OK 200
+---
+
+--- 2026-08-05T03:05:18.805Z debug
+HEADERS: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-08-05T03:05:18.805Z debug
+RESPONSE: omitted; set WRANGLER_LOG_SANITIZE=false to include sanitized data
+---
+
+--- 2026-08-05T03:05:18.805Z debug
+-- END CF API RESPONSE
+---
+
+--- 2026-08-05T03:05:18.808Z debug
+Metrics dispatcher: Posting data {"deviceId":"b689a09f-dd1c-4cc7-85f4-72429b37baea","event":"delete kv key-value","timestamp":1785899118808,"properties":{"category":"Workers","wranglerVersion":"4.50.0","os":"win32:x64"}}
+---
+
+--- 2026-08-05T03:05:18.821Z debug
+Metrics dispatcher: Posting data {"deviceId":"b689a09f-dd1c-4cc7-85f4-72429b37baea","event":"wrangler command completed","timestamp":1785899118820,"properties":{"amplitude_session_id":1785899117942,"amplitude_event_id":1,"wranglerVersion":"4.50.0","osPlatform":"Windows","osVersion":"Windows 11 Home","nodeVersion":22,"packageManager":"npm","isFirstUsage":false,"configFileType":"jsonc","isCI":false,"isPagesCI":false,"isWorkersCI":false,"isInteractive":false,"hasAssets":true,"argsUsed":["binding","preview","remote"],"argsCombination":"binding, preview, remote","command":"wrangler kv key delete","args":{},"durationMs":960,"durationSeconds":0.96,"durationMinutes":0.016}}
+---

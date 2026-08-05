@@ -129,7 +129,7 @@ export default function Home() {
             Find Your New Home Country and Make a Living Wage
           </h2>
           <p className="text-3xl md:text-4xl text-brand-accent font-medium">
-            Get all you need here to make the move safely.
+            Get the information you need about the country and city of your choice.
           </p>
         </div>
       </section>
