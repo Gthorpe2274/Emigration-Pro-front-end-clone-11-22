@@ -150,7 +150,7 @@ export default function BlogPost() {
                 <div className="relative h-[400px] overflow-hidden bg-brand-bg border-b border-brand-border">
                   <img
                     src={post.featured_image}
-                    alt={post.title}
+                    alt={`${post.title} — How to leave the U.S.`}
                     className="w-full h-full object-cover"
                     style={{ filter: 'saturate(0.9)' }}
                     onError={(e) => {

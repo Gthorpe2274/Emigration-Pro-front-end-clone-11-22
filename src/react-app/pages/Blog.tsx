@@ -136,7 +136,7 @@ export default function Blog() {
                       <Link to={`/blog/${post.slug}`} className="block h-64 md:h-80 overflow-hidden">
                         <img
                           src={post.featured_image}
-                          alt={post.title}
+                          alt={`${post.title} — How to leave the U.S.`}
                           className="w-full h-full object-cover"
                           style={{ filter: 'saturate(0.9)' }}
                         />
