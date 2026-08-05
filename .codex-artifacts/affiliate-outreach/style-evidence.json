@@ -1,0 +1,153 @@
+{
+  "input": "C:\\1-Data\\Sites\\Dual Websites\\Final Working Stacks\\Report Gen\\Working Repo warp\\Emigration Pro-front end-11-22\\.codex-artifacts\\affiliate-outreach\\reference.docx",
+  "fonts_by_char_count": {},
+  "direct_run_formatting_runs": 71,
+  "direct_paragraph_formatting_paragraphs": 52,
+  "heading_like_paragraphs_not_heading_style": [
+    {
+      "para_index": 5,
+      "text": "What your viewers receive",
+      "style": "Normal"
+    },
+    {
+      "para_index": 6,
+      "text": "A free personalized city-level assessment",
+      "style": "Normal"
+    },
+    {
+      "para_index": 7,
+      "text": "A free destination-specific relocation portal",
+      "style": "Normal"
+    },
+    {
+      "para_index": 8,
+      "text": "A comprehensive 14-section Emigration Report",
+      "style": "Normal"
+    },
+    {
+      "para_index": 9,
+      "text": "Research supported by government and reliable sources",
+      "style": "Normal"
+    },
+    {
+      "para_index": 10,
+      "text": "What you receive",
+      "style": "Normal"
+    },
+    {
+      "para_index": 11,
+      "text": "35%\u201350% commission on every report purchased through your unique affiliate link",
+      "style": "Normal"
+    },
+    {
+      "para_index": 17,
+      "text": "EmigrationPro.com\ninfo@emigrationpro.com",
+      "style": "Normal"
+    },
+    {
+      "para_index": 18,
+      "text": "Greg Thorpe, Manager\nThe Emigration Pro Team",
+      "style": "Normal"
+    },
+    {
+      "para_index": 20,
+      "text": "EmigrationPro.com   |   Affiliate Partner Outreach",
+      "style": "Normal"
+    },
+    {
+      "para_index": 22,
+      "text": "To: [Creator Name] / [Channel Name]",
+      "style": "Normal"
+    },
+    {
+      "para_index": 23,
+      "text": "From: The Emigration Team",
+      "style": "Normal"
+    },
+    {
+      "para_index": 24,
+      "text": "Subject: A New Revenue Stream \u2014 Zero Cost, Real Value For Your Audience",
+      "style": "Normal"
+    },
+    {
+      "para_index": 29,
+      "text": "What Emigration Pro Does",
+      "style": "Normal"
+    },
+    {
+      "para_index": 35,
+      "text": "The Opportunity for You",
+      "style": "Normal"
+    },
+    {
+      "para_index": 39,
+      "text": "Why It Works",
+      "style": "Normal"
+    },
+    {
+      "para_index": 51,
+      "text": "The Emigration Pro Team",
+      "style": "Normal"
+    }
+  ],
+  "examples": {
+    "direct_paragraph_formatting": [
+      {
+        "para_index": 1,
+        "text": "First congratulations on your efforts. Your have built a great audience who are considering moving abroad. Improve your ",
+        "style": "Normal"
+      },
+      {
+        "para_index": 2,
+        "text": "Helping Them Plan Their Move \u2014 and Earn 35%\u201350%.",
+        "style": "Normal"
+      },
+      {
+        "para_index": 3,
+        "text": "We are offering an exclusive private affiliate partnership based on your excellent viewership, This means your channel a",
+        "style": "Normal"
+      },
+      {
+        "para_index": 4,
+        "text": "Your audience already turns to you for trusted guidance about living abroad. Emigration Pro gives them the personalized ",
+        "style": "Normal"
+      },
+      {
+        "para_index": 5,
+        "text": "What your viewers receive",
+        "style": "Normal"
+      }
+    ],
+    "direct_run_formatting": [
+      {
+        "para_index": 1,
+        "run_text": "First",
+        "style": "Normal"
+      },
+      {
+        "para_index": 1,
+        "run_text": " congratulations on your efforts. ",
+        "style": "Normal"
+      },
+      {
+        "para_index": 1,
+        "run_text": "Your",
+        "style": "Normal"
+      },
+      {
+        "para_index": 1,
+        "run_text": " have built a great audience who are considering moving abroad. Improve your bot",
+        "style": "Normal"
+      },
+      {
+        "para_index": 2,
+        "run_text": "Helping Them Plan Their Move \u2014 and Earn 35%\u201350%.",
+        "style": "Normal"
+      }
+    ]
+  },
+  "notes": [
+    "Direct formatting is not always wrong, but it often causes inconsistent output when templates change.",
+    "Heading-like paragraphs not using Heading styles can break TOC and accessibility."
+  ]
+}

@@ -318,6 +318,6 @@ Before going live, test the following scenarios:
 ## Support
 
 For integration support:
-- Email: info.emipro@gmail.com
+- Email: info@emigrationpro.com
 - Review API logs in your browser's network tab
 - Check Emigration Pro backend logs for detailed error messages

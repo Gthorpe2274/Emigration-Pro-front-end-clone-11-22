@@ -1,4 +1,4 @@
-import { UserInput, Concern } from '../types';
+import type { UserInput, Concern } from '../types';
 
 /**
  * Removes common AI markdown artifacts like broken table headers and empty separators.
@@ -16,6 +16,16 @@ const sanitizeMarkdown = (text: string): string => {
     .trim();
 };
 
+const escapeHtml = (value: unknown): string => String(value ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#039;');
+
+const formatNarrativeText = (value: unknown): string =>
+  escapeHtml(sanitizeMarkdown(String(value ?? ''))).replace(/\n/g, '<br/>');
+
 const formatFinanceDataAsHtmlTable = (data: any): string => {
   const {
     currencyName,
@@ -28,8 +38,9 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
     estimatedAnnualTotal,
     recommendedEmergencyFund,
     importDuties,
-    taxOptimizationStrategies
-  } = data;
+    taxOptimizationStrategies,
+    dataQualityWarning
+  } = data || {};
 
   let conversionButtonHtml = '';
   if (currencyCode && currencyName) {
@@ -40,21 +51,37 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
             </svg>
-            <span>Live Conversion: ${currencyName} (${currencyCode}) to USD</span>
+            <span>Live Conversion: ${escapeHtml(currencyName)} (${escapeHtml(currencyCode)}) to USD</span>
         </a>
       </div>
     `;
   }
 
-  const groupedByCategory = (budgetItems || []).reduce((acc: any, item: any) => {
-    const category = item.category || 'General';
+  const validBudgetItems = Array.isArray(budgetItems)
+    ? budgetItems.filter((item: any) => item && typeof item === 'object')
+    : [];
+
+  const groupedByCategory = validBudgetItems.reduce((acc: Record<string, any[]>, item: any) => {
+    const category = String(item.category || 'General');
     (acc[category] = acc[category] || []).push(item);
     return acc;
-  }, {});
+  }, {} as Record<string, any[]>);
+
+  const warningHtml = dataQualityWarning ? `
+    <div class="not-prose my-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm leading-relaxed text-amber-950">
+      <strong>Data-quality notice:</strong> ${escapeHtml(dataQualityWarning)}
+    </div>` : '';
 
   let tableHtml = `
   <div class="overflow-x-auto not-prose rounded-2xl border border-slate-200 shadow-lg my-8 bg-white">
-    <table class="min-w-full text-sm border-collapse">
+    <table class="w-full table-fixed text-sm border-collapse">
+      <caption class="sr-only">Itemized relocation cost-of-living budget</caption>
+      <colgroup>
+        <col style="width: 49%" />
+        <col style="width: 17%" />
+        <col style="width: 17%" />
+        <col style="width: 17%" />
+      </colgroup>
       <thead class="bg-slate-900">
         <tr>
           <th class="p-4 text-left font-black text-white uppercase tracking-wider">Item Details</th>
@@ -65,30 +92,39 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
       </thead>
       <tbody class="divide-y divide-slate-200">`;
 
-  for (const category in groupedByCategory) {
+  for (const [category, categoryItems] of Object.entries(groupedByCategory)) {
     tableHtml += `
       <tr class="bg-slate-100">
         <td class="p-4 font-black text-slate-900 uppercase tracking-widest text-xs" colspan="4">
           <div class="flex items-center gap-2">
             <span class="w-2 h-2 bg-indigo-600 rounded-full"></span>
-            ${category}
+            ${escapeHtml(category)}
           </div>
         </td>
       </tr>`;
       
-    groupedByCategory[category].forEach((item: any) => {
+    categoryItems.forEach((item: any) => {
       tableHtml += `
                 <tr class="hover:bg-indigo-50/30 transition-colors">
-                    <td class="p-4">
-                      <div class="font-bold text-slate-950 text-base">${item.item}</div>
-                      <div class="text-slate-500 text-xs mt-1 leading-relaxed">${item.notes}</div>
+                    <td class="p-4 align-top break-words">
+                      <div class="font-bold text-slate-950 text-base">${escapeHtml(item.item || 'Unspecified item')}</div>
+                      ${item.notes ? `<div class="text-slate-500 text-xs mt-1 leading-relaxed">${escapeHtml(item.notes)}</div>` : ''}
                     </td>
-                    <td class="p-4 text-slate-800 text-center font-medium tabular-nums border-l border-slate-100">${item.initialSetupCost}</td>
-                    <td class="p-4 text-slate-800 text-center font-medium tabular-nums border-l border-slate-100">${item.monthlyOngoingCost}</td>
-                    <td class="p-4 text-indigo-950 text-center font-black text-base tabular-nums border-l border-slate-100 bg-indigo-50/20">${item.sixMonthTotal}</td>
+                    <td class="p-4 align-top break-words text-slate-800 text-center font-medium tabular-nums border-l border-slate-100">${escapeHtml(item.initialSetupCost || '—')}</td>
+                    <td class="p-4 align-top break-words text-slate-800 text-center font-medium tabular-nums border-l border-slate-100">${escapeHtml(item.monthlyOngoingCost || '—')}</td>
+                    <td class="p-4 align-top break-words text-indigo-950 text-center font-black text-base tabular-nums border-l border-slate-100 bg-indigo-50/20">${escapeHtml(item.sixMonthTotal || '—')}</td>
                 </tr>
             `;
     });
+  }
+
+  if (validBudgetItems.length === 0) {
+    tableHtml += `
+      <tr>
+        <td colspan="4" class="p-6 text-center text-slate-600">
+          Itemized cost data was not returned. Please regenerate this section.
+        </td>
+      </tr>`;
   }
 
   tableHtml += `</tbody></table></div>`;
@@ -97,19 +133,19 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
     <div class="not-prose my-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
         <div class="text-xs font-black uppercase tracking-wider text-slate-500">Monthly Total</div>
-        <div class="text-xl font-black text-slate-950 mt-2">${estimatedMonthlyTotal || 'Not available'}</div>
+        <div class="text-xl font-black text-slate-950 mt-2">${escapeHtml(estimatedMonthlyTotal || 'Not available')}</div>
       </div>
       <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
         <div class="text-xs font-black uppercase tracking-wider text-slate-500">6-Month Total</div>
-        <div class="text-xl font-black text-slate-950 mt-2">${estimatedSixMonthTotal || 'Not available'}</div>
+        <div class="text-xl font-black text-slate-950 mt-2">${escapeHtml(estimatedSixMonthTotal || 'Not available')}</div>
       </div>
       <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
         <div class="text-xs font-black uppercase tracking-wider text-slate-500">Annual Total</div>
-        <div class="text-xl font-black text-slate-950 mt-2">${estimatedAnnualTotal || 'Not available'}</div>
+        <div class="text-xl font-black text-slate-950 mt-2">${escapeHtml(estimatedAnnualTotal || 'Not available')}</div>
       </div>
       <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 shadow-sm">
         <div class="text-xs font-black uppercase tracking-wider text-indigo-600">Emergency Fund</div>
-        <div class="text-xl font-black text-indigo-950 mt-2">${recommendedEmergencyFund || 'Not available'}</div>
+        <div class="text-xl font-black text-indigo-950 mt-2">${escapeHtml(recommendedEmergencyFund || 'Not available')}</div>
       </div>
     </div>`;
 
@@ -117,7 +153,7 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
     <div class="my-8">
       <h3 class="text-2xl font-black mb-4 text-slate-950">Assumptions & Exchange Rate</h3>
       <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-slate-800 leading-relaxed shadow-sm">
-        ${sanitizeMarkdown(assumptionsAndExchangeRate).replace(/\n/g, '<br/>')}
+        ${formatNarrativeText(assumptionsAndExchangeRate)}
       </div>
     </div>` : '';
 
@@ -125,7 +161,7 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
     <div class="my-8">
       <h3 class="text-2xl font-black mb-4 text-slate-950">Your Budget Comparison</h3>
       <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-200 text-indigo-950 leading-relaxed shadow-sm font-medium">
-        ${sanitizeMarkdown(customerBudgetComparison).replace(/\n/g, '<br/>')}
+        ${formatNarrativeText(customerBudgetComparison)}
       </div>
     </div>` : '';
   
@@ -138,7 +174,7 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
         Customs & Importation Duties
       </h3>
       <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-slate-800 leading-relaxed shadow-sm">
-        ${sanitizeMarkdown(importDuties).replace(/\n/g, '<br/>')}
+        ${formatNarrativeText(importDuties)}
       </div>
     </div>` : '';
 
@@ -151,11 +187,96 @@ const formatFinanceDataAsHtmlTable = (data: any): string => {
         Fiscal & Tax Optimization
       </h3>
       <div class="bg-indigo-50/30 p-6 rounded-2xl border border-indigo-100 text-slate-800 leading-relaxed shadow-sm">
-        ${sanitizeMarkdown(taxOptimizationStrategies).replace(/\n/g, '<br/>')}
+        ${formatNarrativeText(taxOptimizationStrategies)}
       </div>
     </div>` : '';
 
-  return conversionButtonHtml + assumptionsHtml + tableHtml + totalsHtml + budgetComparisonHtml + importDutiesHtml + taxHtml;
+  return conversionButtonHtml + warningHtml + assumptionsHtml + tableHtml + totalsHtml + budgetComparisonHtml + importDutiesHtml + taxHtml;
+};
+
+/** Remove common JSON wrappers without altering the contents of quoted strings. */
+const unwrapJsonResponse = (content: string): string => {
+  const trimmed = content.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+  const firstBrace = trimmed.indexOf('{');
+  const lastBrace = trimmed.lastIndexOf('}');
+  return firstBrace >= 0 && lastBrace > firstBrace
+    ? trimmed.slice(firstBrace, lastBrace + 1)
+    : trimmed;
+};
+
+/**
+ * Recover complete budget rows from a response cut off in the middle of its
+ * JSON object. This avoids ever rendering raw JSON as one giant paragraph.
+ */
+const recoverCompleteBudgetItems = (content: string): any[] => {
+  const budgetKeyIndex = content.indexOf('"budgetItems"');
+  const arrayStart = budgetKeyIndex >= 0 ? content.indexOf('[', budgetKeyIndex) : -1;
+  if (arrayStart < 0) return [];
+
+  const items: any[] = [];
+  let objectStart = -1;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = arrayStart + 1; index < content.length; index += 1) {
+    const char = content[index];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (char === '\\') escaped = true;
+      else if (char === '"') inString = false;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+    } else if (char === '{') {
+      if (depth === 0) objectStart = index;
+      depth += 1;
+    } else if (char === '}' && depth > 0) {
+      depth -= 1;
+      if (depth === 0 && objectStart >= 0) {
+        try {
+          items.push(JSON.parse(content.slice(objectStart, index + 1)));
+        } catch {
+          // Ignore only the malformed row and continue looking for later rows.
+        }
+        objectStart = -1;
+      }
+    } else if (char === ']' && depth === 0) {
+      break;
+    }
+  }
+
+  return items;
+};
+
+const recoverJsonStringField = (content: string, field: string): string | undefined => {
+  const match = new RegExp(`"${field}"\\s*:\\s*("(?:\\\\.|[^"\\\\])*")`).exec(content);
+  if (!match) return undefined;
+  try {
+    return JSON.parse(match[1]);
+  } catch {
+    return undefined;
+  }
+};
+
+export const formatFinanceResponseAsHtml = (content: string): string => {
+  const unwrapped = unwrapJsonResponse(content);
+  try {
+    return formatFinanceDataAsHtmlTable(JSON.parse(unwrapped));
+  } catch (error) {
+    console.warn('Finance JSON was incomplete; recovering complete table rows.', error);
+    const recoveredItems = recoverCompleteBudgetItems(content);
+    return formatFinanceDataAsHtmlTable({
+      currencyName: recoverJsonStringField(content, 'currencyName'),
+      currencyCode: recoverJsonStringField(content, 'currencyCode'),
+      budgetItems: recoveredItems,
+      dataQualityWarning: recoveredItems.length > 0
+        ? `The research response ended early. ${recoveredItems.length} complete budget rows were recovered; totals and unfinished rows are omitted.`
+        : 'The research provider did not return valid structured cost data.',
+    });
+  }
 };
 
 export const generateReportSummary = async (userInput: UserInput): Promise<{ content: string; title: string }> => {
@@ -233,13 +354,7 @@ export const generateReportSection = async (userInput: UserInput, concern: Conce
     let content = data.content;
 
     if (concern.id === 'finance' && concern.responseSchema) {
-      try {
-        const jsonData = JSON.parse(content);
-        content = formatFinanceDataAsHtmlTable(jsonData);
-      } catch (e) {
-        console.warn("JSON parse failed, falling back to raw text");
-        content = sanitizeMarkdown(content);
-      }
+      content = formatFinanceResponseAsHtml(content);
     } else {
       content = sanitizeMarkdown(content);
     }

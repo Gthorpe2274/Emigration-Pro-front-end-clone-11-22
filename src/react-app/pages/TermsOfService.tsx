@@ -46,7 +46,7 @@ export default function TermsOfService() {
               <p className="text-yellow-700">
                 If you do not receive your report within 24 hours of payment due to technical failure on our part, 
                 you may be eligible for a service credit equal to your purchase amount. This credit can be applied 
-                toward future purchases. To request a service credit, contact us at info.emipro@gmail.com with 
+                toward future purchases. To request a service credit, contact us at info@emigrationpro.com with
                 your payment confirmation.
               </p>
             </div>
@@ -99,7 +99,7 @@ export default function TermsOfService() {
             <p className="mb-6">
               For questions about these Terms of Service, contact us at:
               <br />
-              <strong>Email:</strong> info.emipro@gmail.com
+              <strong>Email:</strong> info@emigrationpro.com
               <br />
               <strong>Company:</strong> Clear Products, LLC
             </p>

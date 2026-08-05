@@ -207,10 +207,10 @@ export default function Footer() {
               </p>
 
               <a
-                href="mailto:info.emipro@gmail.com"
+                href="mailto:info@emigrationpro.com"
                 className="inline-block bg-brand-btn hover:bg-brand-ink-2 text-brand-btn-ink font-semibold py-3 px-8 rounded-lg transition duration-200 w-full"
               >
-                info.emipro@gmail.com
+                info@emigrationpro.com
               </a>
             </div>
           </div>

@@ -1415,7 +1415,7 @@ async function sendRelocationHubAccessEmail(
             <p style="margin: 0; color: #991b1b;">
               <strong>⚠️ DO NOT REPLY TO THIS EMAIL</strong><br>
               This is an automated message from an unmonitored email address. 
-              If you need assistance, please contact us at <a href="mailto:info.emipro@gmail.com" style="color: #991b1b; text-decoration: underline;">info.emipro@gmail.com</a>
+              If you need assistance, please contact us at <a href="mailto:info@emigrationpro.com" style="color: #991b1b; text-decoration: underline;">info@emigrationpro.com</a>
             </p>
           </div>
           
@@ -1445,7 +1445,7 @@ Access Your Relocation Hub: ${hubAccessUrl}
 
 ⚠️ DO NOT REPLY TO THIS EMAIL
 This is an automated message from an unmonitored email address. 
-If you need assistance, please contact us at info.emipro@gmail.com
+If you need assistance, please contact us at info@emigrationpro.com
 
 This access code provides 2 years of access to your relocation hub. Keep this information safe for future reference.
 
@@ -2834,7 +2834,7 @@ app.post("/api/perplexity", async (c) => {
       `;
 
       if (isFinance && concern.responseSchema) {
-        prompt += `\n\nCRITICAL: You MUST respond with ONLY a valid JSON object matching this schema: ${JSON.stringify(concern.responseSchema)}. Do not include any other text.`;
+        prompt += `\n\nCRITICAL: You MUST respond with ONLY a complete, valid JSON object matching this schema: ${JSON.stringify(concern.responseSchema)}. Do not include markdown fences or any other text. Keep each budget-item notes field under 35 words so the complete object is returned. Never stop mid-object.`;
       }
 
       const response = await fetch('https://api.perplexity.ai/chat/completions', {
@@ -2850,7 +2850,9 @@ app.post("/api/perplexity", async (c) => {
             { role: 'user', content: prompt }
           ],
           temperature: 0.1,
-          max_tokens: 2000
+          // Finance uses a large structured budget. The previous 2,000-token
+          // limit cut JSON off mid-row, which made the UI display raw JSON.
+          max_tokens: isFinance ? 8000 : 2000
         })
       });
 
