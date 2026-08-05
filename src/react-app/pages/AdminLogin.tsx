@@ -8,14 +8,26 @@ export default function AdminLogin() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (password === 'admin#123') {
-            sessionStorage.setItem('blogAdminAuth', 'true');
+        try {
+            const apiBase = window.location.hostname.includes('netlify.app')
+                ? 'https://emigration-pro.aiservices4biz.workers.dev'
+                : '';
+            const response = await fetch(`${apiBase}/api/admin/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password }),
+            });
+            const data = await response.json();
+            if (!response.ok || !data.token) {
+                throw new Error(data.error || 'Incorrect password.');
+            }
+            sessionStorage.setItem('blogAdminToken', data.token);
             setError('');
             navigate('/admin/blog');
-        } else {
-            setError('Incorrect password.');
+        } catch (loginError) {
+            setError(loginError instanceof Error ? loginError.message : 'Unable to sign in.');
             setPassword('');
         }
     };

@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom';
 import BlogAdmin from '../pages/BlogAdmin';
 
 export default function ProtectedAdmin() {
-    const isAuthenticated = sessionStorage.getItem('adminAuth') === 'true';
+    const isAuthenticated = Boolean(sessionStorage.getItem('blogAdminToken'));
     if (!isAuthenticated) {
         return <Navigate to="/admin/login" replace />;
     }

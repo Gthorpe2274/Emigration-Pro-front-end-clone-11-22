@@ -364,7 +364,9 @@ app.post('/api/admin/login', async (c) => {
     return c.json({ error: 'Too many login attempts. Try later.' }, 429);
   }
   const { username, password } = await c.req.json();
-  if (username !== c.env.ADMIN_USERNAME || password !== c.env.ADMIN_PASSWORD) {
+  // The standalone system login supplies both fields. Blog Admin historically
+  // used a password-only form, so username remains optional for that client.
+  if ((username && username !== c.env.ADMIN_USERNAME) || password !== c.env.ADMIN_PASSWORD) {
     await c.env.REPORTS_KV.put(attemptsKey, String(attempts + 1), { expirationTtl: 900 });
     return c.json({ error: 'Invalid credentials' }, 401);
   }
@@ -910,7 +912,9 @@ app.get('/api/blog/posts', async (c) => {
     const blogSeeded = seededResult ? seededResult.value === 'true' : false;
 
     let { results } = await c.env.DB.prepare(`
-      SELECT id, title, slug, featured_image, excerpt, published_date, author
+      SELECT id, title, slug, featured_image, featured_image_credit,
+             featured_image_credit_url, featured_image_source_url,
+             excerpt, published_date, author
       FROM blog_posts 
       WHERE is_published = 1 
       ORDER BY published_date DESC, created_at DESC
@@ -980,7 +984,9 @@ app.get('/api/blog/posts', async (c) => {
 
       // Re-fetch
       const newResults = await c.env.DB.prepare(`
-        SELECT id, title, slug, featured_image, excerpt, published_date, author
+        SELECT id, title, slug, featured_image, featured_image_credit,
+               featured_image_credit_url, featured_image_source_url,
+               excerpt, published_date, author
         FROM blog_posts 
         WHERE is_published = 1 
         ORDER BY published_date DESC, created_at DESC
@@ -1015,7 +1021,7 @@ app.get('/api/blog/posts/:slug', async (c) => {
 });
 
 // Admin: Get all posts
-app.get('/api/admin/blog/posts', async (c) => {
+app.get('/api/admin/blog/posts', adminAuth, async (c) => {
   try {
     const { results } = await c.env.DB.prepare(`
       SELECT * FROM blog_posts ORDER BY created_at DESC
@@ -1028,16 +1034,25 @@ app.get('/api/admin/blog/posts', async (c) => {
 });
 
 // Admin: Create post
-app.post('/api/admin/blog/posts', async (c) => {
+app.post('/api/admin/blog/posts', adminAuth, async (c) => {
   try {
     const body = await c.req.json();
-    const { title, slug, featured_image, body: content, excerpt, published_date, is_published, allow_comments, author } = body;
+    const {
+      title, slug, featured_image, featured_image_credit, featured_image_credit_url,
+      featured_image_source_url, body: content, excerpt, published_date,
+      is_published, allow_comments, author
+    } = body;
 
     await c.env.DB.prepare(`
-      INSERT INTO blog_posts (title, slug, featured_image, body, excerpt, published_date, is_published, allow_comments, author)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO blog_posts (
+        title, slug, featured_image, featured_image_credit, featured_image_credit_url,
+        featured_image_source_url, body, excerpt, published_date, is_published,
+        allow_comments, author
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
-      title, slug, featured_image, content, excerpt,
+      title, slug, featured_image, featured_image_credit || null,
+      featured_image_credit_url || null, featured_image_source_url || null,
+      content, excerpt,
       published_date, is_published ? 1 : 0, allow_comments ? 1 : 0, author
     ).run();
 
@@ -1049,18 +1064,27 @@ app.post('/api/admin/blog/posts', async (c) => {
 });
 
 // Admin: Update post
-app.put('/api/admin/blog/posts/:id', async (c) => {
+app.put('/api/admin/blog/posts/:id', adminAuth, async (c) => {
   try {
     const id = c.req.param('id');
     const body = await c.req.json();
-    const { title, slug, featured_image, body: content, excerpt, published_date, is_published, allow_comments, author } = body;
+    const {
+      title, slug, featured_image, featured_image_credit, featured_image_credit_url,
+      featured_image_source_url, body: content, excerpt, published_date,
+      is_published, allow_comments, author
+    } = body;
 
     await c.env.DB.prepare(`
       UPDATE blog_posts 
-      SET title = ?, slug = ?, featured_image = ?, body = ?, excerpt = ?, published_date = ?, is_published = ?, allow_comments = ?, author = ?, updated_at = CURRENT_TIMESTAMP
+      SET title = ?, slug = ?, featured_image = ?, featured_image_credit = ?,
+          featured_image_credit_url = ?, featured_image_source_url = ?, body = ?,
+          excerpt = ?, published_date = ?, is_published = ?, allow_comments = ?,
+          author = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `).bind(
-      title, slug, featured_image, content, excerpt,
+      title, slug, featured_image, featured_image_credit || null,
+      featured_image_credit_url || null, featured_image_source_url || null,
+      content, excerpt,
       published_date, is_published ? 1 : 0, allow_comments ? 1 : 0, author, id
     ).run();
 
@@ -1072,7 +1096,7 @@ app.put('/api/admin/blog/posts/:id', async (c) => {
 });
 
 // Admin: Delete post
-app.delete('/api/admin/blog/posts/:id', async (c) => {
+app.delete('/api/admin/blog/posts/:id', adminAuth, async (c) => {
   try {
     const id = c.req.param('id');
     await c.env.DB.prepare('DELETE FROM blog_posts WHERE id = ?').bind(id).run();
@@ -1080,6 +1104,103 @@ app.delete('/api/admin/blog/posts/:id', async (c) => {
   } catch (error) {
     console.error('Error deleting post:', error);
     return c.json({ success: false, error: 'Failed to delete post' }, 500);
+  }
+});
+
+// Admin: Search Unsplash without exposing the application credential to the browser.
+app.get('/api/admin/blog/unsplash/search', adminAuth, async (c) => {
+  const accessKey = c.env.UNSPLASH_ACCESS_KEY;
+  if (!accessKey) {
+    return c.json({ error: 'Unsplash image search is not configured.' }, 503);
+  }
+
+  const query = (c.req.query('query') || '').trim();
+  if (query.length < 2 || query.length > 100) {
+    return c.json({ error: 'Search query must be between 2 and 100 characters.' }, 400);
+  }
+
+  try {
+    const searchUrl = new URL('https://api.unsplash.com/search/photos');
+    searchUrl.searchParams.set('query', query);
+    searchUrl.searchParams.set('per_page', '20');
+    searchUrl.searchParams.set('orientation', 'landscape');
+    searchUrl.searchParams.set('content_filter', 'high');
+
+    const response = await fetch(searchUrl.toString(), {
+      headers: {
+        Authorization: `Client-ID ${accessKey}`,
+        'Accept-Version': 'v1',
+      },
+    });
+
+    if (!response.ok) {
+      const details = await response.text();
+      console.error('Unsplash search failed:', response.status, details);
+      if (response.status === 401 || response.status === 403) {
+        return c.json({ error: 'Unsplash credentials were rejected.' }, 502);
+      }
+      if (response.status === 429) {
+        return c.json({ error: 'Unsplash search limit reached. Please try again later.' }, 429);
+      }
+      return c.json({ error: 'Unsplash image search is temporarily unavailable.' }, 502);
+    }
+
+    const data = await response.json() as any;
+    const results = Array.isArray(data.results) ? data.results.map((photo: any) => ({
+      id: String(photo.id || ''),
+      imageUrl: String(photo.urls?.regular || ''),
+      thumbnailUrl: String(photo.urls?.small || photo.urls?.regular || ''),
+      alt: String(photo.alt_description || photo.description || 'Unsplash photo'),
+      photographerName: String(photo.user?.name || photo.user?.username || 'Unsplash photographer'),
+      photographerUrl: String(photo.user?.links?.html || ''),
+      photoUrl: String(photo.links?.html || ''),
+      downloadLocation: String(photo.links?.download_location || ''),
+    })).filter((photo: any) => photo.id && photo.imageUrl && photo.downloadLocation) : [];
+
+    return c.json({ success: true, results });
+  } catch (error) {
+    console.error('Unsplash proxy error:', error);
+    return c.json({ error: 'Unsplash image search failed.' }, 500);
+  }
+});
+
+// Unsplash requires the API download endpoint to be triggered when a user
+// chooses a photo for use. The exact download_location URL is returned by the
+// search response and is validated here before the server calls it.
+app.post('/api/admin/blog/unsplash/track-download', adminAuth, async (c) => {
+  const accessKey = c.env.UNSPLASH_ACCESS_KEY;
+  if (!accessKey) {
+    return c.json({ error: 'Unsplash image search is not configured.' }, 503);
+  }
+
+  const { downloadLocation } = await c.req.json().catch(() => ({}));
+  if (typeof downloadLocation !== 'string') {
+    return c.json({ error: 'A valid Unsplash download location is required.' }, 400);
+  }
+
+  try {
+    const trackingUrl = new URL(downloadLocation);
+    const validPath = /^\/photos\/[A-Za-z0-9_-]+\/download$/.test(trackingUrl.pathname);
+    if (trackingUrl.protocol !== 'https:' || trackingUrl.hostname !== 'api.unsplash.com' || !validPath) {
+      return c.json({ error: 'Invalid Unsplash download location.' }, 400);
+    }
+
+    const response = await fetch(trackingUrl.toString(), {
+      headers: {
+        Authorization: `Client-ID ${accessKey}`,
+        'Accept-Version': 'v1',
+      },
+    });
+
+    if (!response.ok) {
+      console.error('Unsplash download tracking failed:', response.status, await response.text());
+      return c.json({ error: 'Unable to register the selected Unsplash image.' }, 502);
+    }
+
+    return c.json({ success: true });
+  } catch (error) {
+    console.error('Unsplash tracking proxy error:', error);
+    return c.json({ error: 'Unable to register the selected Unsplash image.' }, 500);
   }
 });
 
@@ -2156,15 +2277,8 @@ app.get("/api/admin/email-leads", async (c) => {
   }
 });
 
-// NOTE: A second, unreachable set of "/api/admin/blog/posts" GET/POST/PUT/DELETE handlers
-// (gated by the Bearer-token `adminAuth` middleware, with a BlogPostSchema zod validator)
-// used to live here. Hono routes the same method+path to whichever handler was registered
-// first, so those never actually ran — the plain handlers defined above (around line 1003)
-// are the ones serving every request from BlogAdmin.tsx, which authenticates itself
-// differently (a client-side password gate + X-API-Key header, not a Bearer token). Removed
-// as dead code; if you want the blog admin API to require real server-side auth, the
-// existing handlers above need adminAuth added AND BlogAdmin.tsx updated to send an
-// Authorization: Bearer <token> header instead of X-API-Key.
+// The blog CRUD and image-management routes use the same server-issued bearer
+// session as the rest of the protected admin API.
 
 // Helper function for image generation
 async function handleGenerateImage(c: any) {

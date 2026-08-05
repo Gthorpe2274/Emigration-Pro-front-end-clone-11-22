@@ -18,6 +18,9 @@ interface BlogPost {
   title: string;
   slug: string;
   featured_image?: string;
+  featured_image_credit?: string;
+  featured_image_credit_url?: string;
+  featured_image_source_url?: string;
   body: string;
   excerpt?: string;
   published_date?: string;
@@ -27,11 +30,21 @@ interface BlogPost {
   created_at: string;
 }
 
+interface UnsplashSearchResult {
+  id: string;
+  imageUrl: string;
+  thumbnailUrl: string;
+  alt: string;
+  photographerName: string;
+  photographerUrl: string;
+  photoUrl: string;
+  downloadLocation: string;
+}
+
 export default function BlogAdmin() {
   // Authentication state
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('adminAuth') === 'true';
-  });
+  const [adminToken, setAdminToken] = useState(() => sessionStorage.getItem('blogAdminToken') || '');
+  const isAuthenticated = Boolean(adminToken);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
 
@@ -48,7 +61,7 @@ export default function BlogAdmin() {
 
   // Unsplash Search State
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [searchResults, setSearchResults] = useState<UnsplashSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
 
@@ -56,6 +69,9 @@ export default function BlogAdmin() {
     title: '',
     slug: '',
     featured_image: '',
+    featured_image_credit: '',
+    featured_image_credit_url: '',
+    featured_image_source_url: '',
     body: '',
     excerpt: '',
     published_date: '',
@@ -65,22 +81,32 @@ export default function BlogAdmin() {
   });
 
   // Handle login
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'admin#123') {
-      sessionStorage.setItem('adminAuth', 'true');
-      setIsAuthenticated(true);
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.token) {
+        throw new Error(data.error || 'Incorrect password. Please try again.');
+      }
+      sessionStorage.setItem('blogAdminToken', data.token);
+      setAdminToken(data.token);
       setLoginError('');
-    } else {
-      setLoginError('Incorrect password. Please try again.');
+      setPassword('');
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : 'Unable to sign in.');
       setPassword('');
     }
   };
 
   // Handle logout
   const handleLogout = () => {
-    sessionStorage.removeItem('adminAuth');
-    setIsAuthenticated(false);
+    sessionStorage.removeItem('blogAdminToken');
+    setAdminToken('');
     setPassword('');
   };
 
@@ -105,14 +131,14 @@ export default function BlogAdmin() {
     if (isAuthenticated) {
       fetchAllPosts();
     }
-  }, [isAuthenticated]);
+  }, [adminToken]);
 
   const fetchAllPosts = async () => {
     try {
       const apiBase = getApiBaseUrl();
       const response = await fetch(`${apiBase}/api/admin/blog/posts`, {
         headers: {
-          'X-API-Key': 'admin#123'
+          Authorization: `Bearer ${adminToken}`
         }
       });
 
@@ -168,7 +194,7 @@ export default function BlogAdmin() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'X-API-Key': 'admin#123'
+          Authorization: `Bearer ${adminToken}`
         },
         body: JSON.stringify(formData)
       });
@@ -211,6 +237,9 @@ export default function BlogAdmin() {
       title: post.title,
       slug: post.slug,
       featured_image: post.featured_image || '',
+      featured_image_credit: post.featured_image_credit || '',
+      featured_image_credit_url: post.featured_image_credit_url || '',
+      featured_image_source_url: post.featured_image_source_url || '',
       body: post.body,
       excerpt: post.excerpt || '',
       published_date: post.published_date || '',
@@ -229,7 +258,7 @@ export default function BlogAdmin() {
       const response = await fetch(`${apiBase}/api/admin/blog/posts/${id}`, {
         method: 'DELETE',
         headers: {
-          'X-API-Key': 'admin#123'
+          Authorization: `Bearer ${adminToken}`
         }
       });
 
@@ -250,6 +279,9 @@ export default function BlogAdmin() {
       title: '',
       slug: '',
       featured_image: '',
+      featured_image_credit: '',
+      featured_image_credit_url: '',
+      featured_image_source_url: '',
       body: '',
       excerpt: '',
       published_date: '',
@@ -272,29 +304,20 @@ export default function BlogAdmin() {
     setSearchError('');
     
     try {
-      const apiKey = import.meta.env.VITE_UNSPLASH_ACCESS_KEY;
-      if (!apiKey || apiKey === 'your_key_here') {
-        setSearchError('Unsplash API key is missing. Please add VITE_UNSPLASH_ACCESS_KEY to your .env file.');
-        setIsSearching(false);
-        return;
-      }
-      
-      const response = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&per_page=20`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/blog/unsplash/search?query=${encodeURIComponent(searchQuery)}`, {
         headers: {
-          Authorization: `Client-ID ${apiKey}`
+          Authorization: `Bearer ${adminToken}`
         }
       });
       
       if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('Invalid API Key. Please check your VITE_UNSPLASH_ACCESS_KEY.');
-        }
-        throw new Error('Failed to fetch images from Unsplash');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to fetch images from Unsplash');
       }
       
       const data = await response.json();
-      if (data.results && data.results.length > 0) {
-        setSearchResults(data.results.map((img: any) => img.urls.regular));
+      if (Array.isArray(data.results) && data.results.length > 0) {
+        setSearchResults(data.results);
       } else {
         setSearchResults([]);
         setSearchError('No images found for this search term.');
@@ -304,6 +327,37 @@ export default function BlogAdmin() {
       setSearchError(err.message || 'An error occurred while searching.');
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const selectUnsplashImage = async (image: UnsplashSearchResult) => {
+    setSearchError('');
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/blog/unsplash/track-download`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify({ downloadLocation: image.downloadLocation }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Unable to register the selected Unsplash image.');
+      }
+
+      const attributionParams = 'utm_source=emigration_pro&utm_medium=referral';
+      const joiner = (url: string) => url.includes('?') ? '&' : '?';
+      setFormData({
+        ...formData,
+        featured_image: image.imageUrl,
+        featured_image_credit: image.photographerName,
+        featured_image_credit_url: `${image.photographerUrl}${joiner(image.photographerUrl)}${attributionParams}`,
+        featured_image_source_url: `${image.photoUrl}${joiner(image.photoUrl)}${attributionParams}`,
+      });
+      setShowImageModal(false);
+    } catch (error) {
+      setSearchError(error instanceof Error ? error.message : 'Unable to select this image.');
     }
   };
 
@@ -332,7 +386,7 @@ export default function BlogAdmin() {
       const response = await fetch(`${apiBase}/api/admin/blog/upload-image`, {
         method: 'POST',
         headers: {
-          'X-API-Key': 'admin#123'
+          Authorization: `Bearer ${adminToken}`
         },
         body: uploadFormData
       });
@@ -343,7 +397,13 @@ export default function BlogAdmin() {
 
       const data = await response.json();
       if (data.success) {
-        setFormData({ ...formData, featured_image: data.url });
+        setFormData({
+          ...formData,
+          featured_image: data.url,
+          featured_image_credit: '',
+          featured_image_credit_url: '',
+          featured_image_source_url: '',
+        });
         alert('Image uploaded successfully!');
       } else {
         alert('Error: ' + data.error);
@@ -483,7 +543,13 @@ export default function BlogAdmin() {
                       <input
                         type="text"
                         value={formData.featured_image}
-                        onChange={(e) => setFormData({ ...formData, featured_image: e.target.value })}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          featured_image: e.target.value,
+                          featured_image_credit: '',
+                          featured_image_credit_url: '',
+                          featured_image_source_url: '',
+                        })}
                         className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         placeholder="Enter image URL or select from library"
                       />
@@ -579,12 +645,54 @@ export default function BlogAdmin() {
 
                         <div className="flex-1 overflow-y-auto p-6">
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                            {(searchResults.length > 0 ? searchResults : blogImages[selectedCategory]).map((img, index) => (
+                            {searchResults.length > 0 ? searchResults.map((image) => (
+                              <div key={image.id} className="min-w-0">
+                                <button
+                                  type="button"
+                                  onClick={() => selectUnsplashImage(image)}
+                                  className="group relative aspect-video w-full rounded-lg overflow-hidden border-2 border-transparent hover:border-blue-500 focus:outline-none focus:border-blue-500 transition"
+                                >
+                                  <img
+                                    src={image.thumbnailUrl}
+                                    alt={image.alt}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                                    loading="lazy"
+                                  />
+                                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
+                                </button>
+                                <p className="mt-1 text-[11px] leading-tight text-gray-500 truncate">
+                                  Photo by{' '}
+                                  <a
+                                    href={`${image.photographerUrl}${image.photographerUrl.includes('?') ? '&' : '?'}utm_source=emigration_pro&utm_medium=referral`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline hover:text-blue-700"
+                                  >
+                                    {image.photographerName}
+                                  </a>{' '}
+                                  on{' '}
+                                  <a
+                                    href={`${image.photoUrl}${image.photoUrl.includes('?') ? '&' : '?'}utm_source=emigration_pro&utm_medium=referral`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="underline hover:text-blue-700"
+                                  >
+                                    Unsplash
+                                  </a>
+                                </p>
+                              </div>
+                            )) : blogImages[selectedCategory].map((img, index) => (
                               <button
-                                key={index}
+                                key={img}
                                 type="button"
                                 onClick={() => {
-                                  setFormData({ ...formData, featured_image: img });
+                                  setFormData({
+                                    ...formData,
+                                    featured_image: img,
+                                    featured_image_credit: '',
+                                    featured_image_credit_url: '',
+                                    featured_image_source_url: '',
+                                  });
                                   setShowImageModal(false);
                                 }}
                                 className="group relative aspect-video rounded-lg overflow-hidden border-2 border-transparent hover:border-blue-500 focus:outline-none focus:border-blue-500 transition"

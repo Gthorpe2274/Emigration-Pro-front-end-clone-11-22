@@ -11,6 +11,9 @@ interface BlogPostType {
   title: string;
   slug: string;
   featured_image?: string;
+  featured_image_credit?: string;
+  featured_image_credit_url?: string;
+  featured_image_source_url?: string;
   body: string;
   published_date: string;
   author?: string;
@@ -155,6 +158,28 @@ export default function BlogPost() {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
+                  {post.featured_image_credit && (
+                    <div className="absolute bottom-0 right-0 bg-black/70 px-3 py-1.5 text-[11px] text-white">
+                      Photo by{' '}
+                      <a
+                        href={post.featured_image_credit_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-blue-200"
+                      >
+                        {post.featured_image_credit}
+                      </a>{' '}
+                      on{' '}
+                      <a
+                        href={post.featured_image_source_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:text-blue-200"
+                      >
+                        Unsplash
+                      </a>
+                    </div>
+                  )}
                 </div>
               )}
 

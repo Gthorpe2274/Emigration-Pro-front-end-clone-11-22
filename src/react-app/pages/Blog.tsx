@@ -10,6 +10,9 @@ interface BlogPost {
   title: string;
   slug: string;
   featured_image?: string;
+  featured_image_credit?: string;
+  featured_image_credit_url?: string;
+  featured_image_source_url?: string;
   excerpt?: string;
   published_date: string;
   author?: string;
@@ -128,17 +131,41 @@ export default function Blog() {
                   key={post.id}
                   className="bg-brand-surface border border-brand-border rounded-xl overflow-hidden hover:border-brand-accent transition-colors"
                 >
-                  <Link to={`/blog/${post.slug}`} className="block">
-                    {post.featured_image && (
-                      <div className="relative h-64 md:h-80 overflow-hidden bg-brand-bg border-b border-brand-border">
+                  {post.featured_image && (
+                    <div className="relative bg-brand-bg border-b border-brand-border">
+                      <Link to={`/blog/${post.slug}`} className="block h-64 md:h-80 overflow-hidden">
                         <img
                           src={post.featured_image}
                           alt={post.title}
                           className="w-full h-full object-cover"
                           style={{ filter: 'saturate(0.9)' }}
                         />
-                      </div>
-                    )}
+                      </Link>
+                      {post.featured_image_credit && (
+                        <div className="absolute bottom-0 right-0 bg-black/70 px-3 py-1.5 text-[11px] text-white">
+                          Photo by{' '}
+                          <a
+                            href={post.featured_image_credit_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-blue-200"
+                          >
+                            {post.featured_image_credit}
+                          </a>{' '}
+                          on{' '}
+                          <a
+                            href={post.featured_image_source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:text-blue-200"
+                          >
+                            Unsplash
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <Link to={`/blog/${post.slug}`} className="block">
                     <div className="p-8 md:p-10">
                       <div className="flex items-center text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">
                         <time dateTime={post.published_date}>
