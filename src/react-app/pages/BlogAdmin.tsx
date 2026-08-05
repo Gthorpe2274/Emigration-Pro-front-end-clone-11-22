@@ -83,6 +83,11 @@ export default function BlogAdmin() {
   // Handle login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== 'admin#123') {
+      setLoginError('Incorrect password. Please try again.');
+      setPassword('');
+      return;
+    }
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/admin/login`, {
         method: 'POST',
@@ -94,6 +99,7 @@ export default function BlogAdmin() {
         throw new Error(data.error || 'Incorrect password. Please try again.');
       }
       sessionStorage.setItem('blogAdminToken', data.token);
+      sessionStorage.setItem('adminAuth', 'true');
       setAdminToken(data.token);
       setLoginError('');
       setPassword('');
@@ -106,6 +112,7 @@ export default function BlogAdmin() {
   // Handle logout
   const handleLogout = () => {
     sessionStorage.removeItem('blogAdminToken');
+    sessionStorage.removeItem('adminAuth');
     setAdminToken('');
     setPassword('');
   };
