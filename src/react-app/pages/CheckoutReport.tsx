@@ -206,6 +206,23 @@ export default function CheckoutReport() {
   };
 
   /**
+   * Email the buyer a direct link back to this report once it's finished.
+   *
+   * report_sections already makes closing the tab mid-generation harmless —
+   * reloading this same URL resumes it. The one gap was that a buyer who
+   * closed the tab (or lost it) had no way to find that URL again. The
+   * backend only sends this once per assessment, so it's safe to call on
+   * every completed generation, including a resumed/re-viewed one.
+   */
+  const sendRecoveryEmail = (assessmentId: string, email: string) => {
+    fetch(`/api/reports/${assessmentId}/send-recovery-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    }).catch(err => console.error('Failed to send report recovery email:', err));
+  };
+
+  /**
    * Generate the paid report, saving each section as it lands.
    *
    * Resumes from whatever is already stored, so a reload or a closed tab costs
@@ -249,6 +266,11 @@ export default function CheckoutReport() {
 
       if (collected.length === 0) {
         throw new Error('No report sections could be generated.');
+      }
+
+      const emailParam = searchParams.get('email');
+      if (emailParam) {
+        sendRecoveryEmail(assessmentId, emailParam);
       }
 
       setStep(AppStep.PREVIEW_FULL);

@@ -315,7 +315,7 @@ export const generateReportSummary = async (userInput: UserInput): Promise<{ con
   }
 };
 
-export const generateReportSection = async (userInput: UserInput, concern: Concern): Promise<{ content: string; sources: { title: string; uri: string }[] }> => {
+export const generateReportSection = async (userInput: UserInput, concern: Concern): Promise<{ content: string; sources: { title: string; uri: string; isVideo?: boolean }[] }> => {
   if (!userInput.destinationCountry || !userInput.destinationCity || !userInput.profession || !userInput.age) {
     throw new Error('Customer assessment data is incomplete; report generation was stopped.');
   }

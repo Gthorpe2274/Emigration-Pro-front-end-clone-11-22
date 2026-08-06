@@ -37,7 +37,9 @@ export interface ReportSectionData {
   id: string;
   title: string;
   content: string;
-  sources: { title: string; uri: string }[];
+  // isVideo flags sources from video platforms (YouTube/TikTok) that are
+  // allowed only as a last resort — the UI shows a caveat for these.
+  sources: { title: string; uri: string; isVideo?: boolean }[];
 }
 
 export enum AppStep {

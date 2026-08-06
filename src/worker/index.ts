@@ -1412,6 +1412,53 @@ app.get("/api/reports/:assessmentId/sections", async (c) => {
   }
 });
 
+// Send a one-time "your report is ready" recovery email carrying a direct
+// link back to /checkout-report. Report content already survives a closed
+// tab (report_sections + the resume logic above); this closes the remaining
+// gap, which is that the buyer has no way to find their way back to it.
+//
+// Idempotent by design: the UPDATE only succeeds once per assessment
+// (recovery_email_sent_at starts NULL and is set atomically), so calling
+// this endpoint repeatedly — e.g. because the buyer reloads a finished
+// report — never sends a second copy.
+const SendRecoveryEmailSchema = z.object({
+  email: z.string().trim().email()
+});
+
+app.post("/api/reports/:assessmentId/send-recovery-email", zValidator("json", SendRecoveryEmailSchema), async (c) => {
+  try {
+    const assessmentId = parseInt(c.req.param("assessmentId"), 10);
+    if (!Number.isFinite(assessmentId)) {
+      return c.json({ error: "Invalid assessment id" }, 400);
+    }
+    const { email } = c.req.valid("json");
+
+    const claim = await c.env.DB.prepare(
+      `UPDATE assessments
+          SET recovery_email_sent_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND recovery_email_sent_at IS NULL`
+    ).bind(assessmentId).run();
+
+    if (!claim.meta || claim.meta.changes === 0) {
+      // Already sent (or the assessment doesn't exist) — no-op either way.
+      return c.json({ success: true, alreadySent: true });
+    }
+
+    const result = await sendReportRecoveryEmail(email, assessmentId, c.env.RESEND_API_KEY);
+    if (!result.success) {
+      // The claim is already set, so we won't retry automatically. Log for
+      // manual follow-up rather than failing the request — the buyer's
+      // report itself is unaffected either way.
+      console.warn('Failed to send report recovery email:', result.error);
+    }
+
+    return c.json({ success: true, alreadySent: false, emailSent: result.success });
+  } catch (error) {
+    console.error("Error sending report recovery email:", error);
+    return c.json({ error: "Failed to send recovery email" }, 500);
+  }
+});
+
 // GET report preview summary
 app.get("/api/assessments/:id/report-preview", async (c) => {
   try {
@@ -1602,6 +1649,166 @@ This access code provides 2 years of access to your relocation hub. Keep this in
     };
   }
 }
+
+// Email sending helper: a direct link back to the buyer's finished report.
+//
+// report_sections persists every section as it's generated, and reloading
+// /checkout-report with the same assessment_id + email resumes/re-shows the
+// report at no extra cost (see the /api/reports/:assessmentId/sections
+// routes). The only thing missing if a buyer closes the tab before
+// downloading is a way back to that URL — this email is that way back.
+async function sendReportRecoveryEmail(
+  email: string,
+  assessmentId: number,
+  resendApiKey: string | undefined
+): Promise<{ success: boolean; error?: string }> {
+  if (!resendApiKey) {
+    console.warn('RESEND_API_KEY not configured, skipping recovery email send');
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  const reportUrl = `https://emigrationpro.com/checkout-report?assessment_id=${assessmentId}&email=${encodeURIComponent(email)}&payment_success=true`;
+
+  const emailBody = {
+    from: 'Emigration Pro <noreply@emigrationpro.com>',
+    to: email,
+    subject: 'Your Emigration Pro Report Is Ready',
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(to right, #2563eb, #7c3aed); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+          <h1 style="color: white; margin: 0;">Emigration Pro</h1>
+        </div>
+
+        <div style="background: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+          <p style="font-size: 16px; color: #1f2937; margin-top: 0;">
+            Your personalized relocation report has finished generating and is saved to your account. You can return to this link any time to view or download it &mdash; it does not expire.
+          </p>
+
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${reportUrl}"
+               style="background: linear-gradient(to right, #2563eb, #7c3aed); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+              View Your Report
+            </a>
+          </div>
+
+          <p style="color: #6b7280; font-size: 13px; word-break: break-all;">
+            Or copy this link: <a href="${reportUrl}" style="color: #2563eb;">${reportUrl}</a>
+          </p>
+
+          <div style="background: #fee2e2; border-left: 4px solid #dc2626; padding: 15px; border-radius: 4px; margin: 25px 0;">
+            <p style="margin: 0; color: #991b1b;">
+              <strong>⚠️ DO NOT REPLY TO THIS EMAIL</strong><br>
+              This is an automated message from an unmonitored email address.
+              If you need assistance, please contact us at <a href="mailto:info@emigrationpro.com" style="color: #991b1b; text-decoration: underline;">info@emigrationpro.com</a>
+            </p>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; color: #6b7280; font-size: 12px;">
+          <p>© 2024 Emigration Pro. All rights reserved.</p>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+Your personalized relocation report has finished generating and is saved to your account. You can return to this link any time to view or download it — it does not expire.
+
+View Your Report: ${reportUrl}
+
+⚠️ DO NOT REPLY TO THIS EMAIL
+This is an automated message from an unmonitored email address.
+If you need assistance, please contact us at info@emigrationpro.com
+
+© 2024 Emigration Pro. All rights reserved.
+    `
+  };
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(emailBody),
+    });
+
+    const data = await response.json() as any;
+
+    if (!response.ok) {
+      console.error('Resend API error (recovery email):', data);
+      return { success: false, error: data.message || 'Failed to send email' };
+    }
+
+    console.log('Report recovery email sent successfully:', data.id);
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending recovery email:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+// Diagnostic endpoint backing /admin/email-test. That page has existed and
+// pointed at this exact path since it was built, but this route never did —
+// every "Send Test Email" click has been hitting a 404, which is also why it
+// never surfaced *why* purchase emails (sendRelocationHubAccessEmail /
+// sendReportRecoveryEmail) weren't arriving: the one tool built to check that
+// was itself broken. Deliberately unauthenticated to match how the frontend
+// already calls it (SystemLogin's gate is client-side only); tighten this if
+// abuse becomes a concern before public launch.
+const TestSendEmailSchema = z.object({
+  email: z.string().trim().email()
+});
+
+app.post("/api/test/send-email", zValidator("json", TestSendEmailSchema), async (c) => {
+  const resendApiKey = c.env.RESEND_API_KEY;
+  if (!resendApiKey) {
+    // This is almost certainly why no purchase email has ever arrived.
+    return c.json({ error: 'RESEND_API_KEY is not configured on this environment (wrangler secret put RESEND_API_KEY).' }, 500);
+  }
+
+  const { email } = c.req.valid("json");
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Emigration Pro <noreply@emigrationpro.com>',
+        to: email,
+        subject: 'Emigration Pro — Test Email',
+        html: '<p>This is a test email from the Emigration Pro email diagnostics page. If you received this, Resend delivery is working.</p>',
+        text: 'This is a test email from the Emigration Pro email diagnostics page. If you received this, Resend delivery is working.'
+      }),
+    });
+
+    const data = await response.json() as any;
+
+    if (!response.ok) {
+      // Surface Resend's actual error (e.g. unverified sending domain,
+      // invalid key, from-address not allowed) rather than swallowing it.
+      console.error('Resend API error (test email):', data);
+      return c.json({ error: data.message || `Resend API error: ${response.status}` }, 500);
+    }
+
+    return c.json({ success: true, messageId: data.id });
+  } catch (error) {
+    console.error('Error sending test email:', error);
+    return c.json({ error: error instanceof Error ? error.message : 'Unknown error' }, 500);
+  }
+});
 
 // Email gateway endpoint - For report generation app access
 // Creates CRM record and returns a relative /checkout-report URL (staying on
@@ -2836,6 +3043,89 @@ const ReportUserInputSchema = z.object({
   })
 });
 
+// Domains that repeatedly show up as low-authority sources (social media,
+// forums, crowd-sourced travel sites) for legal/regulatory/statistical
+// claims. Video platforms are deliberately NOT excluded here — they're
+// allowed as a last resort (see VIDEO_PLATFORM_HOSTNAME_PATTERNS below) with
+// a mandatory caveat, since no other source may cover certain hyper-local or
+// firsthand details. Perplexity's `search_domain_filter` accepts at most 10
+// entries, so this list is capped to the highest-value excludes; broader
+// pattern matching is applied separately when we filter returned citations.
+const PERPLEXITY_EXCLUDED_SEARCH_DOMAINS = [
+  'reddit.com',
+  'quora.com',
+  'facebook.com',
+  'instagram.com',
+  'pinterest.com',
+  'wikivoyage.org',
+  'tripadvisor.com',
+  'internations.org',
+  'expatforum.com',
+  'expatexchange.com',
+];
+
+// Broader, uncapped set of hostname substrings used to strip out low-authority
+// citations after the fact, even if Perplexity's own search filter missed one
+// or the model cited something from outside the excluded search domains.
+// Video platforms are intentionally excluded from this blacklist — see
+// VIDEO_PLATFORM_HOSTNAME_PATTERNS, which flags rather than removes them.
+const WEAK_SOURCE_HOSTNAME_PATTERNS = [
+  'reddit.com', 'quora.com', 'facebook.com', 'instagram.com', 'pinterest.com',
+  'twitter.com', 'x.com', 'wikivoyage.org', 'tripadvisor.com', 'internations.org',
+  'expatforum.com', 'expatexchange.com', 'city-data.com', 'nomadlist.com',
+  'blogspot.com', 'wordpress.com', 'medium.com', 'wikihow.com', 'substack.com',
+];
+
+// Video platforms are allowed as a source of last resort — some firsthand or
+// hyper-local detail genuinely isn't published anywhere else. When a citation
+// comes from one of these, we don't strip it, but we do flag it so the report
+// can carry a caveat that the claim wasn't independently verifiable and should
+// be confirmed with the video's producer (or the relevant official body).
+const VIDEO_PLATFORM_HOSTNAME_PATTERNS = ['youtube.com', 'youtu.be', 'tiktok.com'];
+
+const isWeakSource = (hostname: string): boolean => {
+  const h = hostname.toLowerCase();
+  return WEAK_SOURCE_HOSTNAME_PATTERNS.some(pattern => h === pattern || h.endsWith(`.${pattern}`));
+};
+
+const isVideoPlatformSource = (hostname: string): boolean => {
+  const h = hostname.toLowerCase();
+  return VIDEO_PLATFORM_HOSTNAME_PATTERNS.some(pattern => h === pattern || h.endsWith(`.${pattern}`));
+};
+
+// Concerns where the content is inherently legal/regulatory/tax rather than
+// lifestyle or comparative pricing: US departure obligations + destination
+// residency pathways, US Social Security/Medicare + destination senior
+// benefits eligibility, and work authorization/employment law. For these,
+// video and general secondary sources are not an acceptable fallback — the
+// customer can be materially harmed by an unofficial claim about eligibility,
+// fees, or deadlines, so only official/government-grade sources are kept.
+const HIGH_STAKES_CONCERN_IDS = new Set(['visa', 'senior_benefits', 'situation']);
+
+// A handful of non-government multilateral/treaty bodies that are still
+// authoritative enough to stand alongside official government sources for
+// high-stakes legal/regulatory topics (e.g., SSA totalization agreements,
+// ILO labor standards).
+const TRUSTED_MULTILATERAL_DOMAINS = ['worldbank.org', 'imf.org', 'oecd.org', 'who.int', 'un.org', 'ilo.org', 'unhcr.org'];
+
+// Heuristic: does this hostname look like an official government domain?
+// Covers common government TLD/subdomain conventions across countries
+// (.gov, .gob., .gouv., .gc.ca, europa.eu institutions, .mil) rather than
+// hardcoding every country's specific agency, since destination country
+// varies per report.
+const isOfficialLookingDomain = (hostname: string): boolean => {
+  const h = hostname.toLowerCase();
+  if (/(^|\.)gov(\.[a-z]{2})?$/.test(h)) return true; // x.gov, x.gov.uk, x.gov.pa, etc.
+  if (h.includes('.gov.')) return true;
+  if (h.includes('.gob.') || h.endsWith('.gob')) return true; // Spanish-speaking countries
+  if (h.includes('.gouv.') || h.endsWith('.gouv.fr')) return true; // French-speaking countries
+  if (h.endsWith('.mil') || h.includes('.mil.')) return true;
+  if (h.endsWith('.gc.ca')) return true; // Canada
+  if (h === 'europa.eu' || h.endsWith('.europa.eu')) return true;
+  if (h === 'usembassy.gov' || h.endsWith('.usembassy.gov') || h === 'travel.state.gov' || h === 'state.gov') return true;
+  return TRUSTED_MULTILATERAL_DOMAINS.some(d => h === d || h.endsWith(`.${d}`));
+};
+
 app.post("/api/perplexity", async (c) => {
   const apiKey = c.env.PERPLEXITY_API_KEY;
   if (!apiKey) {
@@ -2843,7 +3133,7 @@ app.post("/api/perplexity", async (c) => {
   }
 
   const { action, payload } = await c.req.json();
-  const modelName = 'sonar'; 
+  const modelName = 'sonar';
 
   const sanitizeMarkdown = (text: string): string => {
     if (!text) return "";
@@ -2890,7 +3180,8 @@ app.post("/api/perplexity", async (c) => {
             { role: 'user', content: prompt }
           ],
           temperature: 0.2,
-          max_tokens: 1000
+          max_tokens: 1000,
+          search_domain_filter: PERPLEXITY_EXCLUDED_SEARCH_DOMAINS.map(d => `-${d}`)
         })
       });
 
@@ -2913,6 +3204,7 @@ app.post("/api/perplexity", async (c) => {
       }
       const customer = inputResult.data;
       const isFinance = concern.id === 'finance';
+      const isHighStakes = HIGH_STAKES_CONCERN_IDS.has(concern.id);
       const researchDate = new Date().toISOString().slice(0, 10);
 
       let prompt = `
@@ -2933,7 +3225,11 @@ app.post("/api/perplexity", async (c) => {
         Every recommendation must be specific to this destination and profile. Do not discuss another country except for a clearly labeled comparison that directly helps this customer.
 
         REPORT RESEARCH STANDARD — AS OF ${researchDate}:
-        - Prefer current official government, regulator, public-utility, operator, hospital, school, and other primary sources. Use reputable secondary sources only when a primary source is unavailable.
+        - SOURCE HIERARCHY (STRICT, in order of preference):
+          1. TIER 1 — PRIMARY/OFFICIAL: government ministries and agencies (e.g., immigration/migration authority, labor ministry, tax authority, national statistics institute, central bank), regulators, public utilities, embassies/consulates, and official operator/hospital/school sites for the DESTINATION country, plus relevant US federal agencies where the topic touches US obligations (IRS.gov, SSA.gov, Medicare.gov, FinCEN.gov, travel.state.gov). Name the specific agency next to any fact sourced from it.
+          2. TIER 2 — REPUTABLE SECONDARY (use only when no Tier 1 source exists): established cost-of-living/statistics aggregators (e.g., Numbeo, Mercer), major international organizations (World Bank, IMF, OECD, WHO), accredited news organizations, established relocation/immigration law firms, and .edu/.gov-adjacent research bodies.
+          3. TIER 3 — LAST RESORT, VIDEO PLATFORMS ONLY (YouTube, TikTok): use a video source only when no Tier 1 or Tier 2 source covers that specific fact, and only for firsthand/hyper-local detail (e.g., what a specific neighborhood or office actually looks like) rather than for legal, regulatory, tax, eligibility, or statistical claims. Whenever a video source is used, say explicitly in the text that this information is not otherwise independently verifiable and should be confirmed with the video's producer (or the relevant official body) before the customer acts on it.
+          4. FORBIDDEN AS EVIDENCE (ALL OTHER SOCIAL/FORUM/CROWD SOURCES): social media posts (Reddit, Facebook, Instagram, X/Twitter, Pinterest), forums (expat forums, city-data, Quora), crowd-edited travel sites (Wikivoyage, TripAdvisor), and unverified personal blogs. NEVER cite these for any claim, and do not use them to fill a gap when no Tier 1/Tier 2 source exists — instead state that verifiable data was not found and tell the customer how to confirm it directly with the relevant official body.
         - Give the source organization and publication/effective date next to every material statistic, price, eligibility rule, processing time, schedule, and safety claim.
         - For rapidly changing facts, prefer evidence from the last 24 months and explicitly identify older evidence.
         - Distinguish city-specific, regional, and national information. Never present national averages as city facts without labeling the limitation.
@@ -2941,12 +3237,24 @@ app.post("/api/perplexity", async (c) => {
         - Separate verified facts, reasonable estimates, and recommendations. State calculation assumptions and uncertainty ranges.
         - Use absolute dates rather than vague phrases such as "currently" or "recently."
         - End with a short "Verification Before Acting" checklist naming the official agencies or providers the customer should reconfirm.
-        
+
         FORMATTING DIRECTIVE:
         - Use clear, professional headers (#, ##, ###).
         - Use bullet points for lists.
         - DO NOT output empty table headers.
       `;
+
+      if (isHighStakes) {
+        prompt += `
+
+        HIGH-STAKES TOPIC — GOVERNMENT SOURCES REQUIRED, NO TIER 2/3 FALLBACK:
+        This section covers legal, tax, immigration, or employment-law facts where an unofficial claim could cost the customer money or legal status. For every eligibility rule, fee, tax obligation, filing requirement, processing time, deadline, work-authorization rule, or benefit calculation:
+        - You MUST identify and name the specific official government agency (by its real name and, where you know it, its official domain) — e.g., for the United States: IRS.gov, SSA.gov, Medicare.gov, FinCEN.gov, USCIS, travel.state.gov; for the destination country: its immigration/migration authority, its labor ministry, and/or its tax authority, by their actual names.
+        - Tier 2 reputable secondary sources (news, law firm summaries) may only ADD context, never REPLACE an official source, for these fact types.
+        - Video platforms, social media, and forums MUST NOT be used for any legal, regulatory, tax, eligibility, or employment-law claim in this section, even as a last resort.
+        - If you cannot find or confirm a fact through an official government source, say so explicitly rather than presenting an estimate as settled fact, and tell the customer exactly which agency to contact to confirm it.
+        `;
+      }
 
       if (isFinance && concern.responseSchema) {
         prompt += `\n\nCRITICAL: You MUST respond with ONLY a complete, valid JSON object matching this schema: ${JSON.stringify(concern.responseSchema)}. Do not include markdown fences or any other text. Keep each budget-item notes field under 35 words so the complete object is returned. Never stop mid-object.`;
@@ -2967,7 +3275,8 @@ app.post("/api/perplexity", async (c) => {
           temperature: 0.1,
           // Finance uses a large structured budget. The previous 2,000-token
           // limit cut JSON off mid-row, which made the UI display raw JSON.
-          max_tokens: isFinance ? 8000 : 2000
+          max_tokens: isFinance ? 8000 : 2000,
+          search_domain_filter: PERPLEXITY_EXCLUDED_SEARCH_DOMAINS.map(d => `-${d}`)
         })
       });
 
@@ -2982,11 +3291,39 @@ app.post("/api/perplexity", async (c) => {
       const sources = (data.citations || []).map((url: string) => {
         try {
             const domain = new URL(url).hostname.replace('www.', '');
-            return { title: domain, uri: url };
+            // Keep the title as a plain domain so the UI's single-line,
+            // truncated source chip still displays cleanly; the video caveat
+            // is surfaced separately via isVideo so the frontend can show a
+            // badge/note instead of silently truncating a long sentence.
+            return { title: domain, uri: url, isVideo: isVideoPlatformSource(domain) };
         } catch {
             return { title: 'Source', uri: url };
         }
-      }).filter((s: any, i: number, a: any[]) => a.findIndex(t => t.uri === s.uri) === i);
+      })
+        // Defense-in-depth: even though search_domain_filter steers Perplexity's
+        // own retrieval away from weak sources, strip any that slip through
+        // (or that the model cites from memory) before they reach the report.
+        .filter((s: { title: string; uri: string }) => {
+          try {
+            return !isWeakSource(new URL(s.uri).hostname);
+          } catch {
+            return true;
+          }
+        })
+        // High-stakes legal/tax/immigration/labor topics: no video, and no
+        // fallback to unofficial secondary sources — keep only government
+        // and trusted-multilateral domains so every citation the customer
+        // sees for these sections is authoritative.
+        .filter((s: { title: string; uri: string }) => {
+          if (!isHighStakes) return true;
+          try {
+            const hostname = new URL(s.uri).hostname;
+            return isOfficialLookingDomain(hostname);
+          } catch {
+            return false;
+          }
+        })
+        .filter((s: any, i: number, a: any[]) => a.findIndex(t => t.uri === s.uri) === i);
 
       return c.json({ content: rawText, sources }, 200);
     }

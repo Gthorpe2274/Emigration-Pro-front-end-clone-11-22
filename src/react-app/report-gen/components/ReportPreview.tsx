@@ -51,6 +51,11 @@ const ReportSection: React.FC<{ section: ReportSectionData; index: number; total
     {section.sources && section.sources.length > 0 && (
       <div className="mb-16 break-after-page relative pb-10">
         <h3 className="text-2xl font-bold text-slate-950 border-b border-slate-200 pb-2 mb-6">Sources — {section.title}</h3>
+        {section.sources.some(s => s.isVideo) && (
+          <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4 font-medium">
+            Sources marked <span className="font-black uppercase tracking-wide">Video</span> below were not independently verifiable through official or reputable secondary sources. Confirm details directly with the video's producer before acting on them.
+          </p>
+        )}
         <ul className="grid gap-3 grid-cols-1 sm:grid-cols-2">
           {section.sources.map((source, idx) => (
             <li key={idx} className="rounded-xl border border-slate-200 bg-slate-50 p-3 transition duration-200 hover:border-indigo-300 hover:bg-white hover:shadow-md flex items-center justify-between gap-4">
@@ -67,6 +72,9 @@ const ReportSection: React.FC<{ section: ReportSectionData; index: number; total
                   </svg>
                 </a>
                 <p className="text-slate-900 font-bold text-xs truncate">{getSourceWebsiteName(source)}</p>
+                {source.isVideo && (
+                  <span className="text-[9px] uppercase tracking-[0.1em] text-amber-700 bg-amber-100 border border-amber-300 font-black px-1.5 py-0.5 rounded shrink-0">Video</span>
+                )}
               </div>
               <span className="text-[9px] uppercase tracking-[0.1em] text-slate-400 font-black shrink-0">Source {idx + 1}</span>
             </li>
