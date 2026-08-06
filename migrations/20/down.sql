@@ -1,0 +1,1 @@
+ALTER TABLE assessments DROP COLUMN generation_failure_email_sent_at;

@@ -82,6 +82,7 @@ export default function CheckoutReport() {
   const [reportData, setReportData] = useState<ReportSectionData[]>([]);
   const [loadingMessage, setLoadingMessage] = useState('Initializing your report...');
   const [error, setError] = useState<string | null>(null);
+  const [paidGenerationFailed, setPaidGenerationFailed] = useState(false);
 
   useEffect(() => {
     const assessmentIdParam = searchParams.get('assessment_id');
@@ -222,6 +223,35 @@ export default function CheckoutReport() {
     }).catch(err => console.error('Failed to send report recovery email:', err));
   };
 
+  /** Tell a paid buyer immediately that their saved report can be resumed free. */
+  const sendGenerationFailureEmail = (assessmentId: string, email: string) => {
+    fetch(`/api/reports/${assessmentId}/send-generation-failure-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify({ email })
+    }).catch(err => console.error('Failed to send generation recovery email:', err));
+  };
+
+  const generateSectionWithRetry = async (input: UserInput, concern: typeof CONCERNS[number]) => {
+    const maximumAttempts = 3;
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= maximumAttempts; attempt++) {
+      try {
+        return await generateReportSection(input, concern);
+      } catch (err) {
+        lastError = err;
+        if (attempt < maximumAttempts) {
+          setLoadingMessage(`The research service paused. Retrying ${concern.title} (${attempt + 1}/${maximumAttempts})...`);
+          await new Promise(resolve => window.setTimeout(resolve, attempt * 1500));
+        }
+      }
+    }
+
+    throw lastError;
+  };
+
   /**
    * Generate the paid report, saving each section as it lands.
    *
@@ -231,6 +261,7 @@ export default function CheckoutReport() {
   const startFullReport = async (input: UserInput, concerns: string[], assessmentId: string) => {
     setStep(AppStep.GENERATING_FULL);
     setError(null);
+    setPaidGenerationFailed(false);
 
     const wanted = CONCERNS.filter(c => concerns.includes(c.id));
 
@@ -251,7 +282,7 @@ export default function CheckoutReport() {
 
         setLoadingMessage(`Researching ${concern.title}… (${i + 1}/${wanted.length})`);
 
-        const result = await generateReportSection(input, concern);
+        const result = await generateSectionWithRetry(input, concern);
         const section: ReportSectionData = {
           id: concern.id,
           title: concern.title,
@@ -276,6 +307,9 @@ export default function CheckoutReport() {
       setStep(AppStep.PREVIEW_FULL);
     } catch (err) {
       console.error(err);
+      const emailParam = searchParams.get('email');
+      if (emailParam) sendGenerationFailureEmail(assessmentId, emailParam);
+      setPaidGenerationFailed(true);
       setError(err instanceof Error ? err.message : 'Failed to generate your report.');
       setStep(AppStep.ERROR);
     } finally {
@@ -336,12 +370,26 @@ export default function CheckoutReport() {
           <div className="text-center py-20 animate-fade-in">
             <h2 className="text-2xl font-bold text-red-600 mb-4">Oops, something went wrong</h2>
             <p className="text-slate-600 mb-8">{error}</p>
-            <button 
-              onClick={handleBackToAssessment}
-              className="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition"
-            >
-              Back to Assessment
-            </button>
+            {paidGenerationFailed && userInput ? (
+              <div className="max-w-xl mx-auto">
+                <p className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-emerald-900">
+                  Your payment is safe and every successfully completed section has been saved. Resume below without paying again. We also emailed this recovery information to you.
+                </p>
+                <button
+                  onClick={() => startFullReport(userInput, selectedConcerns, searchParams.get('assessment_id') || '')}
+                  className="bg-indigo-600 text-white font-bold py-3 px-7 rounded-lg hover:bg-indigo-700 transition"
+                >
+                  Resume Report — No Payment Required
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={handleBackToAssessment}
+                className="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition"
+              >
+                Back to Assessment
+              </button>
+            )}
           </div>
         )}
 

@@ -1425,6 +1425,18 @@ const SendRecoveryEmailSchema = z.object({
   email: z.string().trim().email()
 });
 
+async function assessmentBelongsToEmail(env: Env, assessmentId: number, email: string): Promise<boolean> {
+  const owner = await env.DB.prepare(
+    `SELECT 1 FROM email_leads
+      WHERE assessment_id = ? AND lower(email) = lower(?)
+     UNION ALL
+     SELECT 1 FROM relocation_hub_access
+      WHERE assessment_id = ? AND lower(email) = lower(?)
+     LIMIT 1`
+  ).bind(assessmentId, email, assessmentId, email).first();
+  return Boolean(owner);
+}
+
 app.post("/api/reports/:assessmentId/send-recovery-email", zValidator("json", SendRecoveryEmailSchema), async (c) => {
   try {
     const assessmentId = parseInt(c.req.param("assessmentId"), 10);
@@ -1456,6 +1468,47 @@ app.post("/api/reports/:assessmentId/send-recovery-email", zValidator("json", Se
   } catch (error) {
     console.error("Error sending report recovery email:", error);
     return c.json({ error: "Failed to send recovery email" }, 500);
+  }
+});
+
+// One-time notice sent when all automatic generation retries are exhausted.
+// It reassures the buyer that no second payment is required and gives them a
+// direct resume link. The ownership check prevents this endpoint being used as
+// an arbitrary email sender.
+app.post("/api/reports/:assessmentId/send-generation-failure-email", zValidator("json", SendRecoveryEmailSchema), async (c) => {
+  try {
+    const assessmentId = parseInt(c.req.param("assessmentId"), 10);
+    if (!Number.isFinite(assessmentId)) return c.json({ error: "Invalid assessment id" }, 400);
+
+    const { email } = c.req.valid("json");
+    if (!await assessmentBelongsToEmail(c.env, assessmentId, email)) {
+      return c.json({ error: "Assessment and email do not match" }, 403);
+    }
+
+    const claim = await c.env.DB.prepare(
+      `UPDATE assessments
+          SET generation_failure_email_sent_at = CURRENT_TIMESTAMP
+        WHERE id = ? AND generation_failure_email_sent_at IS NULL`
+    ).bind(assessmentId).run();
+
+    if (!claim.meta || claim.meta.changes === 0) {
+      return c.json({ success: true, alreadySent: true });
+    }
+
+    const result = await sendGenerationFailureEmail(email, assessmentId, c.env.RESEND_API_KEY);
+    if (!result.success) {
+      // Release the claim so a later failure can retry delivery.
+      await c.env.DB.prepare(
+        `UPDATE assessments SET generation_failure_email_sent_at = NULL WHERE id = ?`
+      ).bind(assessmentId).run();
+      console.warn('Failed to send generation failure email:', result.error);
+      return c.json({ error: "Email delivery failed" }, 502);
+    }
+
+    return c.json({ success: true, alreadySent: false });
+  } catch (error) {
+    console.error("Error sending generation failure email:", error);
+    return c.json({ error: "Failed to send generation failure email" }, 500);
   }
 });
 
@@ -1755,6 +1808,39 @@ If you need assistance, please contact us at info@emigrationpro.com
       error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
+}
+
+async function sendGenerationFailureEmail(
+  email: string,
+  assessmentId: number,
+  resendApiKey: string | undefined
+): Promise<{ success: boolean; error?: string }> {
+  if (!resendApiKey) return { success: false, error: 'Email service not configured' };
+
+  const reportUrl = `https://emigrationpro.com/checkout-report?assessment_id=${assessmentId}&email=${encodeURIComponent(email)}&payment_success=true`;
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${resendApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: 'Emigration Pro <noreply@emigrationpro.com>',
+      to: email,
+      subject: 'Your report is saved — resume without paying again',
+      html: `<p>We encountered a temporary problem while generating your Emigration Pro report.</p>
+        <p><strong>You have already paid and will not be charged again.</strong> Every successfully completed section was saved.</p>
+        <p><a href="${reportUrl}">Resume your report generation</a></p>
+        <p>If the issue continues, contact <a href="mailto:info@emigrationpro.com">info@emigrationpro.com</a> and include assessment ${assessmentId}.</p>`,
+      text: `We encountered a temporary problem while generating your Emigration Pro report. You have already paid and will not be charged again. Every successfully completed section was saved. Resume here: ${reportUrl}\n\nIf the issue continues, contact info@emigrationpro.com and include assessment ${assessmentId}.`
+    })
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    return { success: false, error: `Resend ${response.status}: ${body}` };
+  }
+  return { success: true };
 }
 
 // Diagnostic endpoint backing /admin/email-test. That page has existed and
