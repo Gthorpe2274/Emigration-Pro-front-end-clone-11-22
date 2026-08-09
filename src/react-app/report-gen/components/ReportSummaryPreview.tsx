@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ReportSectionData } from '../types';
 import SimpleMarkdown from './SimpleMarkdown';
-import { CONFIG } from '../config';
+import { buildCheckoutUrl, isPaymentLinkConfigured } from '../config';
 
 interface ReportSummaryPreviewProps {
   summaryData: ReportSectionData;
@@ -16,7 +16,8 @@ const ReportSummaryPreview: React.FC<ReportSummaryPreviewProps> = ({ summaryData
   const [emailError, setEmailError] = useState('');
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   
-  const stripeUrl = (CONFIG.STRIPE_PAYMENT_LINK_URL || '').trim();
+  // Validated once here; the URL itself is assembled per click by buildCheckoutUrl.
+  const isConfigured = isPaymentLinkConfigured();
 
   // Persist the affiliate ref code if the user landed here directly with ?ref=.
   // EmailCaptureModal does the same, but it is not guaranteed to have been shown
@@ -67,27 +68,16 @@ const ReportSummaryPreview: React.FC<ReportSummaryPreviewProps> = ({ summaryData
     }
   };
 
-  // Validation logic
-  const isConfigured = !!stripeUrl && 
-                       stripeUrl.startsWith('http') && 
-                       !stripeUrl.toLowerCase().includes('your_payment_link');
-
-  const getCheckoutUrl = () => {
-    let url = new URL(stripeUrl);
-    if (email) {
-      url.searchParams.set('prefilled_email', email);
-    }
-    // By the time the paywall renders, the user has navigated away from the
-    // affiliate landing URL, so ?ref= is usually gone. Fall back to the copy
-    // persisted in sessionStorage or attribution is silently lost.
-    const ref =
-      new URLSearchParams(window.location.search).get('ref') ||
-      sessionStorage.getItem('affiliateRef');
-    if (ref) {
-      url.searchParams.set('client_reference_id', ref);
-    }
-    return url.toString();
-  };
+  const getCheckoutUrl = () =>
+    buildCheckoutUrl({
+      email,
+      // By the time the paywall renders, the user has navigated away from the
+      // affiliate landing URL, so ?ref= is usually gone. Fall back to the copy
+      // persisted in sessionStorage or attribution is silently lost.
+      affiliateRef:
+        new URLSearchParams(window.location.search).get('ref') ||
+        sessionStorage.getItem('affiliateRef'),
+    });
 
   /**
    * CRITICAL FIX FOR IFRAME ENVIRONMENTS:

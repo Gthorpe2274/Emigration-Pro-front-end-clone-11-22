@@ -1,5 +1,19 @@
 # Stripe Payment Link Redirect Setup
 
+> **OUTDATED — do not follow the success URL below.**
+>
+> This document describes a browser-side contract
+> (`?payment_success=true&customer_email={CHECKOUT_EMAIL}`) that the app no
+> longer implements. The live redirect is resolved server-side by the Worker and
+> requires the session id instead:
+>
+> ```
+> https://emigrationpro.com/api/checkout-return?session_id={CHECKOUT_SESSION_ID}
+> ```
+>
+> See **ROTATING_THE_STRIPE_LINK.md** for the current procedure. The rest of
+> this file is kept only for historical context.
+
 ## Overview
 
 After payment completion, Stripe needs to redirect users to your report generation app with payment confirmation and customer email.
