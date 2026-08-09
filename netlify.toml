@@ -12,6 +12,16 @@
   status = 200
   force = true
 
+# The sitemap is generated dynamically by the Worker (it enumerates published blog
+# posts from D1). Without this rule the SPA catch-all below swallows /sitemap.xml and
+# serves index.html, so robots.txt was advertising a sitemap that returned HTML.
+# Must stay above the catch-all: Netlify applies the first matching rule.
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "https://emigration-pro.aiservices4biz.workers.dev/sitemap.xml"
+  status = 200
+  force = true
+
 # SPA redirect rule - all non-API routes should be handled by React Router
 [[redirects]]
   from = "/*"

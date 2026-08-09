@@ -4,6 +4,8 @@ import { Star } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
+import { useSEO } from '@/react-app/hooks/useSEO';
+import { PAGE_SEO } from '@/shared/page-seo';
 
 const destinations = [
   { name: 'Portugal', flag: '🇵🇹', tier: 'Tier 1', visa: 'D7 · Golden Visa', desc: 'Robust healthcare, English-friendly cities, and an established expat community in Porto and Lisbon.', cost: '62' },
@@ -51,6 +53,25 @@ const testimonials = [
 ];
 
 export default function Home() {
+  useSEO({
+    title: PAGE_SEO['/'].title,
+    description: PAGE_SEO['/'].description,
+    canonicalPath: '/',
+    appendSiteName: !PAGE_SEO['/'].standaloneTitle,
+    // Deliberately not FAQPage: Google requires FAQ markup to mirror Q&A text that is
+    // actually visible on the page, and this page is not laid out as Q&A.
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': 'https://emigrationpro.com/#webpage',
+      url: 'https://emigrationpro.com/',
+      name: PAGE_SEO['/'].title,
+      isPartOf: { '@id': 'https://emigrationpro.com/#website' },
+      about: { '@id': 'https://emigrationpro.com/#organization' },
+      inLanguage: 'en-US',
+    },
+  });
+
   const [showEmailModal, setShowEmailModal] = useState(false);
 
   const handleEmailSubmit = () => {

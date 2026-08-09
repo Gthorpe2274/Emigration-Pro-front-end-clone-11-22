@@ -4,6 +4,8 @@ import { ArrowLeft, Star, MapPin, ChevronDown, Compass, Users, CheckCircle, Cloc
 import { CountryData } from '@/shared/types';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
+import { useSEO } from '@/react-app/hooks/useSEO';
+import { PAGE_SEO } from '@/shared/page-seo';
 
 interface AssessmentData {
   user_age: number;
@@ -42,6 +44,12 @@ const stepMeta = [
 ];
 
 export default function Assessment() {
+  useSEO({
+    title: PAGE_SEO['/assessment'].title,
+    description: PAGE_SEO['/assessment'].description,
+    canonicalPath: '/assessment',
+  });
+
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);

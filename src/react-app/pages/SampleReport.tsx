@@ -1,14 +1,17 @@
-import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Navigation from '@/react-app/components/Navigation';
+import { useSEO } from '@/react-app/hooks/useSEO';
 
 export function SampleReport() {
   const location = useLocation();
   const returnTo = location.state?.returnTo;
 
-  useEffect(() => {
-    document.title = "Emigration Pro Report Rio de Janeiro";
-  }, []);
+  useSEO({
+    title: 'Sample Relocation Report — Rio de Janeiro',
+    description:
+      'A partial sample of the Emigration Pro personalized relocation report, covering healthcare strategy, cost of living and political stability for Rio de Janeiro, Brazil.',
+    canonicalPath: '/sample-report',
+  });
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -65,7 +68,7 @@ export function SampleReport() {
 
           <div className="p-8 md:p-16">
             <div className="text-center mb-16 space-y-2">
-              <h1 className="text-4xl font-black text-slate-950 tracking-tight">Relocation Analysis Report</h1>
+              <h2 className="text-4xl font-black text-slate-950 tracking-tight">Relocation Analysis Report</h2>
               <p className="text-slate-950 font-bold">Rio de Janeiro, Brazil</p>
               <div className="flex justify-center items-center gap-2 text-sm text-slate-600 pt-2 font-bold uppercase tracking-widest">
                 <span>Emigration Pro</span>
@@ -110,7 +113,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Healthcare Strategy Report: 78-Year-Old Professional in Rio de Janeiro</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Healthcare Strategy Report: 78-Year-Old Professional in Rio de Janeiro</h2>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">Neighborhood-Specific Hospital Rankings</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Copacabana & Leme (Ultra-Premium)</strong></li>
@@ -399,7 +402,7 @@ export function SampleReport() {
                     This is a partial sample
                   </div>
                   <p className="leading-relaxed mb-6 text-slate-950 font-medium text-base">This analysis provides a comprehensive overview of the political and security environment in Brazil, with a specific focus on Rio de Janeiro, for the 2024–2025 period.</p>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">1. Current Political Landscape</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">1. Current Political Landscape</h2>
                   <p className="leading-relaxed mb-6 text-slate-950 font-medium">The Brazilian political environment remains deeply polarized, characterized by a tension between the executive branch and segments of the opposition, as well as significant judicial activity involving high-ranking figures.</p>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Recent Strife and Legal Developments:</strong> In late 2024, the Federal Police officially indicted former President Jair Bolsonaro and 36 others for an alleged coup attempt intended to prevent President Luiz Inácio Lula da Silva from taking office. This has maintained a high level of political friction and remains a focal point for potential civil unrest among supporters.</li>
@@ -407,7 +410,7 @@ export function SampleReport() {
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">2024 Municipal Elections:</strong> The October 2024 local elections saw a significant increase in political violence, with hundreds of incidents of harassment and several killings reported. This highlights a persistent "grassroots" volatility where local political disputes can escalate into physical confrontations.</li>
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Stability Outlook:</strong> Despite the rhetoric, federal institutions—specifically the Supreme Court and the Superior Electoral Court—have demonstrated resilience in maintaining the constitutional order. However, the high level of "political violence" (which increased 400% between 2018 and 2022) remains a structural risk for the 2026 general election cycle.</li>
                   </ul>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">2. Rio de Janeiro: Crime Statistics & Safety Ratings</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">2. Rio de Janeiro: Crime Statistics & Safety Ratings</h2>
                   <p className="leading-relaxed mb-6 text-slate-950 font-medium">Public security in Rio de Janeiro is a study in contrasts. While overall intentional violent deaths have dropped to historical lows, specific property crimes and "mafia-style" organized crime (the <em>milícias</em>) present ongoing challenges.</p>
                   <h3 className="text-lg font-black mt-8 mb-4 text-slate-950 leading-tight uppercase tracking-wider">General Crime Trends (2024–2025)</h3>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
@@ -422,7 +425,7 @@ export function SampleReport() {
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">High Risk (Centro / Downtown):</strong> Avoid at night and on weekends when foot traffic is low. Historical highs in cell phone and vehicle thefts.</li>
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Extreme Risk (North Zone - Penha, Complexo do Alemão; West Zone Favelas):</strong> Active conflict zones. Frequent police operations and factional fighting. In late 2025, significant traffic disruptions occurred on major arteries (Avenida Brasil) due to these conflicts.</li>
                   </ul>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">3. Governance and Rule of Law for Foreigners</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">3. Governance and Rule of Law for Foreigners</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Rule of Law Index:</strong> According to the 2024 World Justice Project, Brazil’s rule of law score improved for the first time in eight years, ranking 80th globally.</li>
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Corruption and Transparency:</strong> While endemic at high levels, the judiciary remains independent. Navigating large-scale business bureaucracy may still involve "grey areas."</li>
@@ -443,7 +446,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Environmental Health Assessment: Rio de Janeiro</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Environmental Health Assessment: Rio de Janeiro</h2>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Tap Water Analysis: Potability and Risk Factors</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Potability Status:</strong> Water from the Guandu Treatment Plant meets federal standards, but distribution network age causes secondary contamination.</li>
@@ -481,7 +484,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Digital Infrastructure Report: Rio de Janeiro (2024–2025)</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Digital Infrastructure Report: Rio de Janeiro (2024–2025)</h2>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Home Internet: Fiber Optic Infrastructure</h2>
                   <h3 className="text-lg font-black mt-8 mb-4 text-slate-950 leading-tight uppercase tracking-wider">Major Providers and Typical Plans</h3>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
@@ -512,7 +515,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Critical Urban Infrastructure Analysis</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Critical Urban Infrastructure Analysis</h2>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Power Grid Reliability</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Reliability:</strong> System under strain during summer months (Nov-April). Voltage instability due to informal connections is a risk.</li>
@@ -540,7 +543,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Education and Schooling Briefing for Rio de Janeiro</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Education and Schooling Briefing for Rio de Janeiro</h2>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. International, Bilingual, and Local Schools</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">The British School:</strong> British and international curricula across multiple Rio campuses.</li>
@@ -569,7 +572,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Rio de Janeiro Transportation White-Paper</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Rio de Janeiro Transportation White-Paper</h2>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Public Transit Analysis</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Modals:</strong> MetrôRio (Lines 1, 2, 4), SuperVia (Commuter Rail), BRT, VLT, and Barcas (Ferries).</li>
@@ -592,7 +595,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Rio de Janeiro Cultural and Entertainment Dossier</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Rio de Janeiro Cultural and Entertainment Dossier</h2>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Annual Calendar of Major Festivals</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Rio Carnival:</strong> Feb/March. Special Group parades at Sambadrome.</li>
@@ -619,7 +622,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Professional Sports and Personal Fitness</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Professional Sports and Personal Fitness</h2>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Professional Sports</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Football:</strong> Maracanã Stadium (Flamengo, Fluminense). Ticket benchmarks R$ 60-150.</li>
@@ -642,7 +645,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Senior Benefits and Tax Advantages</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Senior Benefits and Tax Advantages</h2>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Tax Advantages (65+)</h2>
                   <p className="leading-relaxed mb-6 text-slate-950 font-medium">Double exemption bracket for retirement income. Reciprocity treaties prevent double taxation with USA/UK/Germany.</p>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">2. Statute of the Elderly Benefits</h2>
@@ -666,7 +669,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">SWOT Analysis: Retirement in Rio (Age 78)</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">SWOT Analysis: Retirement in Rio (Age 78)</h2>
                   <h3 className="text-lg font-black mt-8 mb-4 text-slate-950 leading-tight uppercase tracking-wider">Strengths & Opportunities</h3>
                   <p className="leading-relaxed mb-6 text-slate-950 font-medium">High purchasing power with foreign currency, world-class healthcare in Zona Sul, and strong social integration for seniors. Real estate in premium neighborhoods serves as a strong hedge.</p>
                   <h3 className="text-lg font-black mt-8 mb-4 text-slate-950 leading-tight uppercase tracking-wider">Weaknesses & Threats</h3>
@@ -688,7 +691,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Legal Dossier: Residency in Brazil</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Legal Dossier: Residency in Brazil</h2>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">1. Retirement Visa (VITEM XIV)</h2>
                   <p className="leading-relaxed mb-6 text-slate-950 font-medium">Proof of USD 2,000/mo recurring income required. Apostilled documents and sworn translations are mandatory.</p>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">2. Customs & Duties</h2>
@@ -708,7 +711,7 @@ export function SampleReport() {
                   <div className="mb-8 inline-block bg-orange-500/10 border border-orange-500/50 text-orange-400 px-6 py-2 rounded-full text-xl font-bold uppercase tracking-wider">
                     This is a partial sample
                   </div>
-                  <h1 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Rio de Janeiro Relocation Roadmap</h1>
+                  <h2 className="text-3xl font-black mt-14 mb-8 text-slate-950 leading-tight border-l-4 border-indigo-600 pl-4">Rio de Janeiro Relocation Roadmap</h2>
                   <h2 className="text-2xl font-black mt-12 mb-6 border-b-2 border-slate-200 pb-3 text-slate-950 leading-tight">Chronological Checklist</h2>
                   <ul className="list-disc pl-8 space-y-2 mb-8 text-slate-950 font-medium">
                     <li className="leading-relaxed mb-3 pl-2"><strong className="font-black text-slate-950">Months 12-6:</strong> Obtain CPF and apply for VITEM XIV at consulate.</li>

@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import BlogIndex from '../components/BlogIndex';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
 import { useSEO } from '../hooks/useSEO';
+import { KEY_PAGES } from '@/shared/page-seo';
 
 interface BlogPostType {
   id: number;
@@ -15,9 +16,25 @@ interface BlogPostType {
   featured_image_credit_url?: string;
   featured_image_source_url?: string;
   body: string;
+  excerpt?: string;
   published_date: string;
+  updated_at?: string;
   author?: string;
   allow_comments: boolean;
+}
+
+/** Build a meta-description-length summary: prefer the excerpt, else derive from the body. */
+function summarize(excerpt: string | undefined, body: string): string {
+  const source = excerpt?.trim() || body;
+  const plain = source
+    .replace(/<[^>]*>/g, ' ')        // html tags
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1') // markdown links/images -> their text
+    .replace(/[#*_`>]/g, '')          // markdown emphasis and heading marks
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (plain.length <= 160) return plain;
+  // Cut on a word boundary so the description doesn't end mid-word.
+  return `${plain.slice(0, 157).replace(/\s+\S*$/, '')}…`;
 }
 
 export default function BlogPost() {
@@ -39,7 +56,44 @@ export default function BlogPost() {
 
   useSEO({
     title: post ? post.title : 'Loading Post...',
-    description: post ? (post.body.substring(0, 160).replace(/<[^>]*>?/gm, '')) : undefined
+    // Prefer the hand-written excerpt. The fallback strips markup *before* truncating —
+    // the previous order cut the first 160 raw characters and then stripped tags, which
+    // on a post opening with markup left a description of a few stray words.
+    description: post ? summarize(post.excerpt, post.body) : undefined,
+    canonicalPath: slug ? `/blog/${slug}` : undefined,
+    image: post?.featured_image,
+    type: 'article',
+    // A bad slug renders the error state; don't let that be indexed.
+    noindex: !loading && !post,
+    jsonLd: post
+      ? [
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: post.title,
+            description: summarize(post.excerpt, post.body),
+            image: post.featured_image ? [post.featured_image] : undefined,
+            datePublished: post.published_date,
+            dateModified: post.updated_at || post.published_date,
+            author: { '@type': 'Person', name: post.author || 'Emigration Pro' },
+            publisher: { '@id': 'https://emigrationpro.com/#organization' },
+            mainEntityOfPage: {
+              '@type': 'WebPage',
+              '@id': `https://emigrationpro.com/blog/${post.slug}`,
+            },
+            inLanguage: 'en-US',
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://emigrationpro.com/' },
+              { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://emigrationpro.com/blog' },
+              { '@type': 'ListItem', position: 3, name: post.title },
+            ],
+          },
+        ]
+      : undefined,
   });
 
   const fetchPost = async () => {
@@ -220,6 +274,36 @@ export default function BlogPost() {
                     </>
                   );
                 })()}
+
+                {/*
+                  Real in-content links to the conversion pages. The CTA below this
+                  article opens a modal, so before this block a post's only outbound
+                  links went back to /blog — none of the page's authority reached the
+                  assessment or country pages.
+                */}
+                <nav
+                  aria-label="Related pages"
+                  className="mt-16 pt-10 border-t border-brand-border"
+                >
+                  <h2 className="font-brand-serif font-medium text-2xl text-brand-ink mb-6">
+                    Plan your own move
+                  </h2>
+                  <ul className="grid sm:grid-cols-2 gap-4">
+                    {KEY_PAGES.map((page) => (
+                      <li key={page.href}>
+                        <Link
+                          to={page.href}
+                          className="block h-full p-5 bg-brand-bg border border-brand-border rounded-xl hover:border-brand-accent transition-colors"
+                        >
+                          <span className="block font-semibold text-brand-ink mb-1">
+                            {page.label}
+                          </span>
+                          <span className="block text-sm text-brand-muted">{page.blurb}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
 
                 {post.allow_comments && (
                   <div className="mt-16 pt-10 border-t border-brand-border">

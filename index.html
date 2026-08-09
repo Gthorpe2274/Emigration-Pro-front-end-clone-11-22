@@ -5,23 +5,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- SEO Indexing Enabled -->
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
   <meta name="googlebot" content="index, follow" />
   <meta name="bingbot" content="index, follow" />
-  <meta property="og:title" content="Emigration Pro" />
+  <!-- Default description. Per-route pages override this via the useSEO hook. -->
+  <meta name="description"
+    content="Plan your move abroad from the U.S. Take the free country-match assessment, then get a personalized report on visas, cost of living, healthcare and taxes." />
+  <link rel="canonical" href="https://emigrationpro.com/" />
+  <meta property="og:title" content="Emigration Pro — Plan Your Move Abroad from the U.S." />
   <meta property="og:description"
-    content="Expert emigration guidance for US citizens seeking their perfect international destination" />
-  <meta property="og:image" content="https://mocha-cdn.com/og.png" type="image/png" />
-  <meta property="og:url" content="https://o6gfg673pq5wu.mocha.app" />
+    content="A country-match assessment and personalized relocation reports covering visas, cost of living, healthcare and taxes for Americans moving abroad." />
+  <meta property="og:image" content="https://emigrationpro.com/images/elderly-couple-documents.jpg" />
+  <meta property="og:image:width" content="1024" />
+  <meta property="og:image:height" content="576" />
+  <meta property="og:image:alt" content="A couple reviewing relocation paperwork together" />
+  <meta property="og:url" content="https://emigrationpro.com/" />
   <meta property="og:type" content="website" />
-  <meta property="og:author" content="Emigration Pro" />
+  <meta property="og:locale" content="en_US" />
   <meta property="og:site_name" content="Emigration Pro" />
-  <meta property="twitter:card" content="summary_large_image" />
-  <meta property="twitter:site" content="@emigrationpro" />
-  <meta property="twitter:title" content="Emigration Pro" />
-  <meta property="twitter:description"
-    content="Expert emigration guidance for US citizens seeking their perfect international destination" />
-  <meta property="twitter:image" content="https://mocha-cdn.com/og.png" type="image/png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@emigrationpro" />
+  <meta name="twitter:title" content="Emigration Pro — Plan Your Move Abroad from the U.S." />
+  <meta name="twitter:description"
+    content="A country-match assessment and personalized relocation reports covering visas, cost of living, healthcare and taxes for Americans moving abroad." />
+  <meta name="twitter:image" content="https://emigrationpro.com/images/elderly-couple-documents.jpg" />
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -169,33 +176,102 @@
     })();
   </script>
   <title>
-    Emigration Pro
+    Emigration Pro — Plan Your Move Abroad from the U.S.
   </title>
+
+  <!-- Static structured data. This is in the served HTML rather than injected by React
+       because AI crawlers (GPTBot, ClaudeBot, PerplexityBot) do not execute JavaScript. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://emigrationpro.com/#organization",
+        "name": "Emigration Pro",
+        "url": "https://emigrationpro.com/",
+        "logo": "https://emigrationpro.com/images/logo-full.png",
+        "description": "Emigration Pro helps U.S. citizens plan a move abroad with a country-match assessment and personalized relocation reports.",
+        "sameAs": ["https://twitter.com/emigrationpro"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://emigrationpro.com/#website",
+        "url": "https://emigrationpro.com/",
+        "name": "Emigration Pro",
+        "publisher": { "@id": "https://emigrationpro.com/#organization" },
+        "inLanguage": "en-US"
+      },
+      {
+        "@type": "Service",
+        "name": "Personalized Relocation Report",
+        "provider": { "@id": "https://emigrationpro.com/#organization" },
+        "serviceType": "Relocation planning report",
+        "areaServed": "US",
+        "audience": {
+          "@type": "Audience",
+          "audienceType": "U.S. citizens planning to live abroad"
+        },
+        "description": "A personalized report covering visa routes, cost of living, healthcare access, housing and tax considerations for a chosen destination city."
+      }
+    ]
+  }
+  </script>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="+p7Hb5ajGBjr94XhUnCf8w" async></script>
 </head>
 
 <body>
   <div id="root">
   </div>
+
+  <!--
+    Crawlable fallback. This app is a client-rendered SPA, so any crawler that does not
+    execute JavaScript sees an empty #root. Most AI crawlers are in that category, as is
+    any social/link unfurler. The block below gives them the site's core description and
+    an internal link graph to follow. React replaces #root above; this stays out of its way.
+  -->
+  <noscript>
+    <main>
+      <h1>Emigration Pro — plan your move abroad from the United States</h1>
+      <p>
+        Emigration Pro helps U.S. citizens work out where they could realistically move and
+        what it would actually take. Answer a structured assessment to see which countries
+        match your budget, profession, family situation and healthcare needs, then order a
+        personalized relocation report covering visa routes, cost of living, housing,
+        healthcare access and tax considerations for a specific destination city.
+      </p>
+      <h2>Start here</h2>
+      <ul>
+        <li><a href="https://emigrationpro.com/assessment">Country-match assessment</a> — find destinations that fit your circumstances.</li>
+        <li><a href="https://emigrationpro.com/best-countries">Popular countries for American expats</a> — Portugal, Spain, Mexico, Costa Rica, Germany and Canada.</li>
+        <li><a href="https://emigrationpro.com/sample-report">Sample relocation report</a> — see what the personalized report contains.</li>
+        <li><a href="https://emigrationpro.com/blog">Blog</a> — visa requirements, cost of living and relocation guides.</li>
+        <li><a href="https://emigrationpro.com/earn-abroad">Earn abroad</a> — building income while living overseas.</li>
+        <li><a href="https://emigrationpro.com/living-wage-business">Living wage online business</a> — self-employment options for expats.</li>
+        <li><a href="https://emigrationpro.com/about">About Emigration Pro</a></li>
+      </ul>
+    </main>
+  </noscript>
+
   <script type="module" src="/src/react-app/main.tsx">
   </script>
-  <!-- Override Mocha popup link globally -->
+
+  <!-- StatCounter Visitor Counter -->
+  <script type="text/javascript">
+    var sc_project = 13160824;
+    var sc_invisible = 1;
+    var sc_security = "a9d1f1b2";
+  </script>
+  <script type="text/javascript" src="https://www.statcounter.com/counter/counter.js" async="async">
+  </script>
+  <noscript>
+    <div class="statcounter">
+      <a title="Web Analytics" href="https://statcounter.com/" target="_blank">
+        <img class="statcounter" src="https://c.statcounter.com/13160824/0/a9d1f1b2/1/" alt="Web Analytics"
+          referrerpolicy="no-referrer-when-downgrade" />
+      </a>
+    </div>
+  </noscript>
 </body>
-<!-- StatCounter Visitor Counter -->
-<script type="text/javascript">
-  var sc_project = 13160824;
-  var sc_invisible = 1;
-  var sc_security = "a9d1f1b2";
-</script>
-<script type="text/javascript" src="https://www.statcounter.com/counter/counter.js" async="async">
-</script>
-<noscript>
-  <div class="statcounter">
-    <a title="Web Analytics" href="https://statcounter.com/" target="_blank">
-      <img class="statcounter" src="https://c.statcounter.com/13160824/0/a9d1f1b2/1/" alt="Web Analytics"
-        referrerpolicy="no-referrer-when-downgrade" />
-    </a>
-  </div>
-</noscript>
 
 </html>

@@ -1,7 +1,15 @@
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
+import { useSEO } from '@/react-app/hooks/useSEO';
 
 export default function PrivacyPolicy() {
+  useSEO({
+    title: 'Privacy Policy',
+    description:
+      'How Emigration Pro collects, uses and protects the information you provide through the assessment and report purchase process.',
+    canonicalPath: '/privacy',
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <Navigation />

@@ -3047,9 +3047,12 @@ Sitemap: ${baseUrl}/sitemap.xml`, 200, {
 
 // Dynamic sitemap.xml generation
 app.get('/sitemap.xml', async (c) => {
-  const url = new URL(c.req.url);
-  const baseUrl = url.origin;
-  
+  // Hard-coded rather than derived from the request origin. emigrationpro.com is served
+  // by Netlify, which proxies /sitemap.xml here — so the request arrives with the
+  // workers.dev host and url.origin would emit workers.dev <loc> URLs that search
+  // engines reject as cross-domain.
+  const baseUrl = 'https://emigrationpro.com';
+
   try {
     const { results } = await c.env.DB.prepare(`
       SELECT slug, updated_at, published_date 
@@ -3071,9 +3074,39 @@ app.get('/sitemap.xml', async (c) => {
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>${baseUrl}/best-countries</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/sample-report</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/earn-abroad</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/living-wage-business</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>${baseUrl}/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/privacy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/terms</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
   </url>
   <url>
     <loc>${baseUrl}/blog</loc>

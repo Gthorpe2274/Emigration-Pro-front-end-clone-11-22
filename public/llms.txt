@@ -1,0 +1,38 @@
+# Emigration Pro
+
+> Emigration Pro helps U.S. citizens plan a move abroad. It provides a structured
+> country-match assessment and sells personalized relocation reports covering visa
+> routes, cost of living, housing, healthcare access and tax considerations for a
+> specific destination city.
+
+Emigration Pro is a research and planning service, not a law firm or immigration
+consultancy. It does not file applications or provide legal advice. Reports are
+research summaries intended to help someone decide where to move and what the move
+would involve; visa rules change and should be confirmed against official government
+sources before acting.
+
+Audience: U.S. citizens and residents considering relocation abroad, including
+retirees, remote workers and self-employed people.
+
+## Core pages
+
+- [Home](https://emigrationpro.com/): What the service does and how the assessment and report fit together.
+- [Country-match assessment](https://emigrationpro.com/assessment): Free structured questionnaire covering budget, profession, age, family situation, climate and lifestyle preferences; returns matching destination countries.
+- [Popular countries for American expats](https://emigrationpro.com/best-countries): Overview of Portugal, Spain, Mexico, Costa Rica, Germany and Canada for U.S. movers.
+- [Sample relocation report](https://emigrationpro.com/sample-report): Partial example of the personalized report, showing the depth and section structure.
+- [About](https://emigrationpro.com/about): Who runs Emigration Pro and how the research is produced.
+
+## Guidance and income
+
+- [Earn abroad](https://emigrationpro.com/earn-abroad): Building sustainable self-employed income while living overseas.
+- [Living wage online business](https://emigrationpro.com/living-wage-business): Online business models that can cover living costs abroad.
+
+## Editorial
+
+- [Blog](https://emigrationpro.com/blog): Articles on visa requirements, cost of living, healthcare and country-specific relocation logistics.
+
+## Optional
+
+- [Privacy policy](https://emigrationpro.com/privacy)
+- [Terms of service](https://emigrationpro.com/terms)
+- [Sitemap](https://emigrationpro.com/sitemap.xml)

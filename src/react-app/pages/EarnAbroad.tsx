@@ -2,8 +2,16 @@ import { Link } from 'react-router-dom';
 import { Briefcase, Laptop, Rocket, DollarSign, TrendingUp, Shield } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
+import { useSEO } from '@/react-app/hooks/useSEO';
+import { PAGE_SEO } from '@/shared/page-seo';
 
 export default function EarnAbroad() {
+  useSEO({
+    title: PAGE_SEO['/earn-abroad'].title,
+    description: PAGE_SEO['/earn-abroad'].description,
+    canonicalPath: '/earn-abroad',
+  });
+
   return (
     <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
       <Navigation />

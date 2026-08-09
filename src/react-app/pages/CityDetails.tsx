@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
+import { useSEO } from '@/react-app/hooks/useSEO';
 
 interface CityInfo {
   name: string;
@@ -473,6 +474,19 @@ export default function CityDetails() {
       setLoading(false);
     }
   }, [country, city]);
+
+  useSEO({
+    title: cityData
+      ? `Living in ${cityData.name}, ${cityData.country} — Expat Guide`
+      : 'City Guide',
+    description: cityData
+      ? `${cityData.description} Cost of living, climate, healthcare, housing and practical details for Americans considering ${cityData.name}.`
+      : 'Practical city guides for Americans considering a move abroad.',
+    canonicalPath: country && city ? `/city/${country}/${city}` : undefined,
+    image: cityData?.image,
+    // Unresolved city slugs render a not-found state; keep those out of the index.
+    noindex: !loading && !cityData,
+  });
 
   if (loading) {
     return (

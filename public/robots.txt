@@ -1,8 +1,49 @@
+# https://emigrationpro.com/robots.txt
+
 User-agent: *
 Allow: /
+
+# Admin, internal tooling and one-off user artifacts. These are not useful in search
+# results and the report/result URLs are per-customer.
+Disallow: /admin/
+Disallow: /api/
+Disallow: /system-login
+Disallow: /test-reports
+Disallow: /file-converter
+Disallow: /results/
+Disallow: /relocation-hub/
+Disallow: /access-hub
+Disallow: /checkout-report
+
+# AI assistants and answer engines are welcome to read and cite the public pages.
+# Each is listed explicitly because several of these crawlers ignore the wildcard
+# group when a named group for them exists elsewhere, and because Google-Extended
+# and OAI-SearchBot control answer-engine inclusion separately from classic indexing.
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot
+User-agent: Applebot-Extended
+User-agent: Bingbot
+User-agent: DuckDuckBot
+User-agent: Amazonbot
+User-agent: meta-externalagent
+User-agent: cohere-ai
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /system-login
+Disallow: /test-reports
+Disallow: /file-converter
+Disallow: /results/
+Disallow: /relocation-hub/
+Disallow: /access-hub
+Disallow: /checkout-report
+
 Sitemap: https://emigrationpro.com/sitemap.xml
-
-
-
-
-

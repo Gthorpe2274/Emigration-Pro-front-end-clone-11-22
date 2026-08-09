@@ -1,7 +1,15 @@
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
+import { useSEO } from '@/react-app/hooks/useSEO';
 
 export default function TermsOfService() {
+  useSEO({
+    title: 'Terms of Service',
+    description:
+      'The terms governing use of Emigration Pro, including the scope of the relocation reports and the limits of the research they provide.',
+    canonicalPath: '/terms',
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <Navigation />

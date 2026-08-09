@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { MapPin, Star, Shield, Heart, Globe, TrendingUp, Users, CheckCircle } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
+import { useSEO } from '@/react-app/hooks/useSEO';
+import { PAGE_SEO } from '@/shared/page-seo';
 
 interface Country {
   name: string;
@@ -127,6 +129,24 @@ const bestCountries: Country[] = [
 ];
 
 export default function BestCountries() {
+  useSEO({
+    title: PAGE_SEO['/best-countries'].title,
+    description: PAGE_SEO['/best-countries'].description,
+    canonicalPath: '/best-countries',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: 'Popular countries for American expats',
+      itemListOrder: 'https://schema.org/ItemListOrderDescending',
+      itemListElement: bestCountries.map((country, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: country.name,
+        description: country.description,
+      })),
+    },
+  });
+
   const renderStars = (rating: number) => {
     return (
       <div className="flex items-center space-x-1">

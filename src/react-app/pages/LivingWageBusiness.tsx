@@ -2,8 +2,16 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Globe, Zap, Target, Award, Youtube } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
+import { useSEO } from '@/react-app/hooks/useSEO';
+import { PAGE_SEO } from '@/shared/page-seo';
 
 export default function LivingWageBusiness() {
+  useSEO({
+    title: PAGE_SEO['/living-wage-business'].title,
+    description: PAGE_SEO['/living-wage-business'].description,
+    canonicalPath: '/living-wage-business',
+  });
+
   return (
     <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
       <Navigation />

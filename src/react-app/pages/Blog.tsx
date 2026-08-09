@@ -4,6 +4,7 @@ import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
 import { useSEO } from '../hooks/useSEO';
+import { PAGE_SEO } from '@/shared/page-seo';
 
 interface BlogPost {
   id: number;
@@ -24,8 +25,26 @@ export default function Blog() {
   const [showEmailModal, setShowEmailModal] = useState(false);
 
   useSEO({
-    title: 'Blog',
-    description: 'Expert emigration guidance and news for US citizens seeking their perfect international destination.'
+    title: PAGE_SEO['/blog'].title,
+    description: PAGE_SEO['/blog'].description,
+    canonicalPath: '/blog',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'Blog',
+      '@id': 'https://emigrationpro.com/blog#blog',
+      name: 'Emigration Pro Blog',
+      description: PAGE_SEO['/blog'].description,
+      url: 'https://emigrationpro.com/blog',
+      publisher: { '@id': 'https://emigrationpro.com/#organization' },
+      inLanguage: 'en-US',
+      blogPost: posts.slice(0, 20).map((p) => ({
+        '@type': 'BlogPosting',
+        headline: p.title,
+        url: `https://emigrationpro.com/blog/${p.slug}`,
+        datePublished: p.published_date,
+        author: { '@type': 'Person', name: p.author || 'Emigration Pro' },
+      })),
+    },
   });
 
   const handleEmailSubmit = () => {

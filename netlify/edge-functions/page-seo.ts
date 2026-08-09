@@ -1,0 +1,102 @@
+import type { Config, Context } from '@netlify/edge-functions';
+import { PAGE_SEO, KEY_PAGES, SITE_ORIGIN, fullTitle } from '../../src/shared/page-seo.ts';
+
+/**
+ * Server-side SEO for the main marketing pages, mirroring what blog-seo.ts does for
+ * posts.
+ *
+ * Same underlying problem: this is a client-rendered SPA, so without this every one of
+ * these URLs serves an identical contentless shell. Googlebot renders the JS; the AI
+ * crawlers behind answer engines generally do not, so /best-countries and /assessment
+ * were indistinguishable from the homepage to them.
+ *
+ * Copy comes from src/shared/page-seo.ts, which the React pages also read, so the
+ * crawler-visible version cannot drift from the rendered one.
+ *
+ * Any failure returns the untouched shell — the behaviour that exists today.
+ */
+
+function esc(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function setMetaContent(html: string, key: string, value: string): string {
+  const pattern = new RegExp(
+    `(<meta\\s+(?:name|property)=["']${key}["'][^>]*content=["'])[^"']*(["'])`,
+    'i'
+  );
+  return html.replace(pattern, `$1${esc(value)}$2`);
+}
+
+export default async function handler(request: Request, context: Context) {
+  const response = await context.next();
+
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('text/html')) return response;
+
+  // Normalise a trailing slash so '/best-countries/' hits the same entry.
+  const rawPath = new URL(request.url).pathname;
+  const path = rawPath.length > 1 ? rawPath.replace(/\/$/, '') : rawPath;
+  const seo = PAGE_SEO[path];
+  if (!seo) return response;
+
+  try {
+    const url = `${SITE_ORIGIN}${path === '/' ? '/' : path}`;
+    const title = fullTitle(seo);
+
+    let html = await response.text();
+
+    html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(title)}</title>`);
+    html = setMetaContent(html, 'description', seo.description);
+    html = setMetaContent(html, 'og:title', title);
+    html = setMetaContent(html, 'og:description', seo.description);
+    html = setMetaContent(html, 'og:url', url);
+    html = setMetaContent(html, 'twitter:title', title);
+    html = setMetaContent(html, 'twitter:description', seo.description);
+    html = html.replace(
+      /<link\s+rel=["']canonical["'][^>]*>/i,
+      `<link rel="canonical" href="${esc(url)}" />`
+    );
+
+    // Internal links: page-specific ones first, then the key pages, minus self-links.
+    const links = [...(seo.links ?? []), ...KEY_PAGES.map((p) => ({ href: p.href, label: p.label }))]
+      .filter((link, index, all) => link.href !== path && all.findIndex((l) => l.href === link.href) === index);
+
+    const fallback =
+      `<main><h1>${esc(seo.heading)}</h1>` +
+      seo.summary.map((paragraph) => `<p>${esc(paragraph)}</p>`).join('') +
+      (links.length
+        ? `<nav><h2>Related</h2><ul>${links
+            .map((l) => `<li><a href="${SITE_ORIGIN}${esc(l.href)}">${esc(l.label)}</a></li>`)
+            .join('')}</ul></nav>`
+        : '') +
+      `</main>`;
+
+    // Insert ahead of the generic sitewide fallback already in index.html.
+    html = html.replace('<noscript>', `<noscript>${fallback}</noscript><noscript>`);
+
+    const headers = new Headers(response.headers);
+    headers.delete('content-length');
+    return new Response(html, { status: response.status, headers });
+  } catch (error) {
+    console.error('page-seo edge function failed, serving unmodified shell:', error);
+    return response;
+  }
+}
+
+export const config: Config = {
+  path: [
+    '/',
+    '/assessment',
+    '/best-countries',
+    '/sample-report',
+    '/earn-abroad',
+    '/living-wage-business',
+    '/blog',
+    '/about',
+  ],
+};

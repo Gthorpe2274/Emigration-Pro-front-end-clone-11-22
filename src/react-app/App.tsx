@@ -29,6 +29,7 @@ import LivingWageBusiness from './pages/LivingWageBusiness';
 import FileConverter from './pages/FileConverter';
 import AdminReportGen from './pages/AdminReportGen';
 import CheckoutReport from './pages/CheckoutReport';
+import NoIndex from './components/NoIndex';
 
 function App() {
   return (
@@ -37,33 +38,34 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/assessment" element={<Assessment />} />
-        <Route path="/results/:id" element={<Results />} />
-        <Route path="/relocation-hub/:id" element={<RelocationHub />} />
+        {/* Per-customer output — noindex, see components/NoIndex.tsx */}
+        <Route path="/results/:id" element={<NoIndex title="Your Results"><Results /></NoIndex>} />
+        <Route path="/relocation-hub/:id" element={<NoIndex title="Relocation Hub"><RelocationHub /></NoIndex>} />
         <Route path="/best-countries" element={<BestCountries />} />
         <Route path="/city/:country/:city" element={<CityDetails />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/sample-report" element={<SampleReport />} />
-        <Route path="/checkout-report" element={<CheckoutReport />} />
+        <Route path="/checkout-report" element={<NoIndex title="Checkout"><CheckoutReport /></NoIndex>} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
-        <Route path="/admin/config" element={<AdminConfig />} />
-        <Route path="/test-reports" element={<AdminReportGen />} />
-        <Route path="/admin/diagnostics" element={<WorkerDiagnostics />} />
-        <Route path="/admin/rag-dashboard" element={<RAGDashboard />} />
-        <Route path="/admin/email-test" element={<EmailTest />} />
-        <Route path="/admin/jobs" element={<JobProcessor />} />
-        <Route path="/admin/social-login" element={<SocialLogin />} />
+        <Route path="/admin/config" element={<NoIndex title="Admin Config"><AdminConfig /></NoIndex>} />
+        <Route path="/test-reports" element={<NoIndex title="Report Generator"><AdminReportGen /></NoIndex>} />
+        <Route path="/admin/diagnostics" element={<NoIndex title="Diagnostics"><WorkerDiagnostics /></NoIndex>} />
+        <Route path="/admin/rag-dashboard" element={<NoIndex title="RAG Dashboard"><RAGDashboard /></NoIndex>} />
+        <Route path="/admin/email-test" element={<NoIndex title="Email Test"><EmailTest /></NoIndex>} />
+        <Route path="/admin/jobs" element={<NoIndex title="Job Processor"><JobProcessor /></NoIndex>} />
+        <Route path="/admin/social-login" element={<NoIndex title="Social Login"><SocialLogin /></NoIndex>} />
         <Route path="/system-login" element={<Navigate to="/admin/crm" replace />} />
         <Route path="/admin/system-login" element={<Navigate to="/admin/crm" replace />} />
-        <Route path="/admin/crm" element={<CRM />} />
-        <Route path="/admin/blog" element={<BlogAdmin />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/access-hub" element={<PermanentRelocationHub />} />
+        <Route path="/admin/crm" element={<NoIndex title="CRM"><CRM /></NoIndex>} />
+        <Route path="/admin/blog" element={<NoIndex title="Blog Admin"><BlogAdmin /></NoIndex>} />
+        <Route path="/admin/login" element={<NoIndex title="Admin Login"><AdminLogin /></NoIndex>} />
+        <Route path="/access-hub" element={<NoIndex title="Relocation Hub"><PermanentRelocationHub /></NoIndex>} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/earn-abroad" element={<EarnAbroad />} />
         <Route path="/living-wage-business" element={<LivingWageBusiness />} />
-        <Route path="/file-converter" element={<FileConverter />} />
+        <Route path="/file-converter" element={<NoIndex title="File Converter"><FileConverter /></NoIndex>} />
       </Routes>
     </Router>
   );
