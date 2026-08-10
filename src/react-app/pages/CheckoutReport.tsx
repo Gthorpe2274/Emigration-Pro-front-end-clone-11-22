@@ -83,6 +83,7 @@ export default function CheckoutReport() {
   const [loadingMessage, setLoadingMessage] = useState('Initializing your report...');
   const [error, setError] = useState<string | null>(null);
   const [paidGenerationFailed, setPaidGenerationFailed] = useState(false);
+  const [isAdminAccess, setIsAdminAccess] = useState(false);
 
   useEffect(() => {
     const assessmentIdParam = searchParams.get('assessment_id');
@@ -100,7 +101,7 @@ export default function CheckoutReport() {
         if (!res.ok) throw new Error("Failed to fetch assessment.");
         return res.json();
       })
-      .then(data => {
+      .then(async data => {
         if (data.error) throw new Error(data.error);
 
         const assessment = data.assessment;
@@ -179,7 +180,22 @@ export default function CheckoutReport() {
         //    it always found nothing and fell back to asking for the details
         //    the buyer had already entered. Everything needed is on the
         //    assessment record, so no re-entry is required.
-        if (searchParams.get('payment_success') === 'true') {
+        if (searchParams.get('admin') === 'true') {
+          const token = sessionStorage.getItem('adminToken') || sessionStorage.getItem('blogAdminToken');
+          if (!token) throw new Error('Your admin session has expired. Please sign in again.');
+
+          const sessionResponse = await fetch('/api/admin/session', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!sessionResponse.ok) {
+            sessionStorage.removeItem('adminAuth');
+            sessionStorage.removeItem('adminToken');
+            throw new Error('Your admin session has expired. Please sign in again.');
+          }
+
+          setIsAdminAccess(true);
+          startFullReport(prepopulated, uniqueConcerns, assessmentIdParam, true);
+        } else if (searchParams.get('payment_success') === 'true') {
           activateHubAccess(assessmentIdParam, emailParam);
           startFullReport(prepopulated, uniqueConcerns, assessmentIdParam);
         } else {
@@ -258,7 +274,7 @@ export default function CheckoutReport() {
    * Resumes from whatever is already stored, so a reload or a closed tab costs
    * the buyer nothing and does not re-bill us for sections we already have.
    */
-  const startFullReport = async (input: UserInput, concerns: string[], assessmentId: string) => {
+  const startFullReport = async (input: UserInput, concerns: string[], assessmentId: string, adminRun = false) => {
     setStep(AppStep.GENERATING_FULL);
     setError(null);
     setPaidGenerationFailed(false);
@@ -300,7 +316,7 @@ export default function CheckoutReport() {
       }
 
       const emailParam = searchParams.get('email');
-      if (emailParam) {
+      if (emailParam && !adminRun) {
         sendRecoveryEmail(assessmentId, emailParam);
       }
 
@@ -308,7 +324,7 @@ export default function CheckoutReport() {
     } catch (err) {
       console.error(err);
       const emailParam = searchParams.get('email');
-      if (emailParam) sendGenerationFailureEmail(assessmentId, emailParam);
+      if (emailParam && !adminRun) sendGenerationFailureEmail(assessmentId, emailParam);
       setPaidGenerationFailed(true);
       setError(err instanceof Error ? err.message : 'Failed to generate your report.');
       setStep(AppStep.ERROR);
@@ -376,7 +392,7 @@ export default function CheckoutReport() {
                   Your payment is safe and every successfully completed section has been saved. Resume below without paying again. We also emailed this recovery information to you.
                 </p>
                 <button
-                  onClick={() => startFullReport(userInput, selectedConcerns, searchParams.get('assessment_id') || '')}
+                  onClick={() => startFullReport(userInput, selectedConcerns, searchParams.get('assessment_id') || '', isAdminAccess)}
                   className="bg-indigo-600 text-white font-bold py-3 px-7 rounded-lg hover:bg-indigo-700 transition"
                 >
                   Resume Report — No Payment Required
@@ -417,7 +433,7 @@ export default function CheckoutReport() {
             userInput={userInput}
             onRestart={handleBackToAssessment}
             onClone={() => {}}
-            isAdmin={false}
+            isAdmin={isAdminAccess}
           />
         )}
 

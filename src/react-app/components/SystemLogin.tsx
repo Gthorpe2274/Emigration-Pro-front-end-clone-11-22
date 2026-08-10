@@ -17,15 +17,28 @@ export default function SystemLogin({ onLoginSuccess }: SystemLoginProps) {
     setLoading(true);
     setError('');
 
-    // Simulate a brief loading delay for security appearance
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const apiBase = window.location.hostname.includes('netlify.app')
+        ? 'https://emigration-pro.aiservices4biz.workers.dev'
+        : '';
+      const response = await fetch(`${apiBase}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.token) {
+        throw new Error(data.error || 'Invalid password. Access denied.');
+      }
 
-    if (password === 'admin#123') {
-      // Store login status in sessionStorage
+      sessionStorage.setItem('adminToken', data.token);
+      sessionStorage.setItem('blogAdminToken', data.token);
       sessionStorage.setItem('adminAuth', 'true');
       onLoginSuccess();
-    } else {
-      setError('Invalid password. Access denied.');
+    } catch (loginError) {
+      sessionStorage.removeItem('adminToken');
+      sessionStorage.removeItem('adminAuth');
+      setError(loginError instanceof Error ? loginError.message : 'Unable to sign in.');
     }
     
     setLoading(false);

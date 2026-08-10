@@ -36,7 +36,8 @@ const factors = [
 export default function AdminReportGen() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('adminAuth') === 'true';
+    return sessionStorage.getItem('adminAuth') === 'true'
+      && Boolean(sessionStorage.getItem('adminToken') || sessionStorage.getItem('blogAdminToken'));
   });
   
   const [currentStep, setCurrentStep] = useState(1);
@@ -138,16 +139,13 @@ export default function AdminReportGen() {
       }
 
       setGenerationProgress(20);
-      setCurrentStatus('Creating secure test environment...');
+      setCurrentStatus('Creating assessment record...');
 
-      // Trigger the unified test report generation
-      // This endpoint now handles both record creation and generation in one atomic step
-      const reportResponse = await fetch(`/api/admin/generate-full-report`, {
+      // Create the same assessment record consumed by the paid report pipeline.
+      const reportResponse = await fetch('/api/assessments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assessmentData: submissionData
-        }),
+        body: JSON.stringify(submissionData),
       });
 
       if (!reportResponse.ok) {
@@ -164,18 +162,12 @@ export default function AdminReportGen() {
         throw new Error(errorMessage);
       }
 
-      setGenerationProgress(60);
-      setCurrentStatus('Researching and formatting report sections...');
-
       const reportData = await reportResponse.json();
-      
+      if (!reportData.id) throw new Error('Assessment was created without an ID.');
+
       setGenerationProgress(100);
-      setCurrentStatus('Report generated successfully!');
-      
-      setTimeout(() => {
-        setGeneratedReport(reportData.html);
-        setLoading(false);
-      }, 500);
+      setCurrentStatus('Opening the full report generator...');
+      navigate(`/checkout-report?assessment_id=${encodeURIComponent(reportData.id)}&email=${encodeURIComponent('admin@emigrationpro.com')}&admin=true`);
 
     } catch (err) {
       console.error('Generation error:', err);
@@ -456,4 +448,3 @@ export default function AdminReportGen() {
     </div>
   );
 }
-

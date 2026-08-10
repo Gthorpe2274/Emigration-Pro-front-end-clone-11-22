@@ -436,6 +436,12 @@ app.post('/api/admin/rotate-sessions', adminAuth, async (c) => {
   return c.json({ rotated: keys.length });
 });
 
+// Confirm that the browser still holds a valid server-issued admin session.
+// Admin-only frontend tools use this before unlocking privileged workflows.
+app.get('/api/admin/session', adminAuth, (c) => {
+  return c.json({ authenticated: true });
+});
+
 // Assessment submission schema - aligned with shared types
 const AssessmentSchema = z.object({
   user_age: z.number().min(18).max(100),
