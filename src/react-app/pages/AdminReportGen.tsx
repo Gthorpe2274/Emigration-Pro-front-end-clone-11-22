@@ -10,6 +10,9 @@ interface AssessmentData {
   user_age: number;
   user_job: string;
   monthly_budget: number;
+  children_count: number;
+  children_ages: string;
+  education_preferences: string;
   preferred_country: string;
   preferred_city: string;
   location_preference: 'beachside' | 'rural' | 'city';
@@ -51,17 +54,20 @@ export default function AdminReportGen() {
     user_age: 30,
     user_job: '',
     monthly_budget: 2000,
+    children_count: 0,
+    children_ages: '',
+    education_preferences: '',
     preferred_country: '',
     preferred_city: '',
     location_preference: 'city',
     climate_preference: '',
-    immigration_policies_importance: 3,
-    healthcare_importance: 3,
-    safety_importance: 3,
-    internet_importance: 3,
-    emigration_process_importance: 3,
-    ease_of_immigration_importance: 3,
-    local_acceptance_importance: 3,
+    immigration_policies_importance: 0,
+    healthcare_importance: 0,
+    safety_importance: 0,
+    internet_importance: 0,
+    emigration_process_importance: 0,
+    ease_of_immigration_importance: 0,
+    local_acceptance_importance: 0,
   });
 
   const [availableCities, setAvailableCities] = useState<string[]>([]);
@@ -89,28 +95,46 @@ export default function AdminReportGen() {
     setError('');
   };
 
-  const nextStep = () => {
-    if (currentStep === 1) {
-      if (!assessment.user_job.trim()) {
-        setError('Please enter your occupation');
-        return;
-      }
+  const validateStep = (step: number): string | null => {
+    if (step === 1) {
+      if (!assessment.user_job.trim()) return 'Please enter your occupation';
       if (assessment.user_age < 18 || assessment.user_age > 100) {
-        setError('Please enter a valid age between 18 and 100');
-        return;
+        return 'Please enter a valid age between 18 and 100';
+      }
+      if (assessment.monthly_budget < 100 || assessment.monthly_budget > 50000) {
+        return 'Please enter a valid monthly budget between $100 and $50,000';
+      }
+      if (assessment.children_count > 0 && !assessment.children_ages.trim()) {
+        return 'Please enter the ages of the children relocating with you';
       }
     }
-    if (currentStep === 2) {
-      if (!assessment.preferred_country) {
-        setError('Please select a country');
-        return;
+
+    if (step === 2) {
+      if (!assessment.preferred_country) return 'Please select your preferred country';
+      if (availableCities.length > 0 && !assessment.preferred_city) {
+        return 'Please select your preferred city — your report is researched for that specific city';
       }
-      if (!assessment.climate_preference) {
-        setError('Please select a climate preference');
-        return;
+      if (!assessment.climate_preference) return 'Please select your preferred climate type';
+    }
+
+    if (step === 3) {
+      const unrated = factors.filter(factor => !(assessment as any)[factor.key]);
+      if (unrated.length > 0) {
+        return `Please rate all factors before generating the report. You still need to rate: ${unrated.map(f => f.label).join(', ')}`;
       }
+    }
+
+    return null;
+  };
+
+  const nextStep = () => {
+    const problem = validateStep(currentStep);
+    if (problem) {
+      setError(problem);
+      return;
     }
     setCurrentStep(prev => prev + 1);
+    setError('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -120,6 +144,13 @@ export default function AdminReportGen() {
   };
 
   const generateFullReport = async () => {
+    const problem = validateStep(3);
+    if (problem) {
+      setError(problem);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setLoading(true);
     setError('');
     setGeneratedReport(null);
@@ -255,35 +286,108 @@ export default function AdminReportGen() {
               {currentStep === 1 && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div>
-                    <label className="block text-sm font-medium text-blue-200 mb-2">Occupation</label>
+                    <label className="block text-sm font-medium text-blue-200 mb-2">What is your age?</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={ageInputValue}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d{0,3}$/.test(value)) {
+                          setAgeInputValue(value);
+                          if (value) updateAssessment('user_age', parseInt(value, 10));
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const value = Math.min(100, Math.max(18, parseInt(e.target.value, 10) || 18));
+                        setAgeInputValue(String(value));
+                        updateAssessment('user_age', value);
+                      }}
+                      placeholder="Enter your age"
+                      className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                    <p className="text-xs text-blue-200/70 mt-2">Age affects visa eligibility and immigration pathways.</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-blue-200 mb-2">What is your occupation?</label>
                     <input
                       type="text"
                       value={assessment.user_job}
                       onChange={(e) => updateAssessment('user_job', e.target.value)}
-                      placeholder="e.g. Software Engineer, Retired Teacher"
+                      placeholder="e.g., Software Engineer, Teacher, Retired, Student"
                       className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:ring-2 focus:ring-blue-500 outline-none"
                     />
+                    <p className="text-xs text-blue-200/70 mt-2">Your profession affects skilled visa eligibility.</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-blue-200 mb-2">Age</label>
-                      <input
-                        type="number"
-                        value={assessment.user_age}
-                        onChange={(e) => updateAssessment('user_age', parseInt(e.target.value))}
-                        className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-blue-200 mb-2">Monthly Budget ($)</label>
-                      <input
-                        type="number"
-                        value={assessment.monthly_budget}
-                        onChange={(e) => updateAssessment('monthly_budget', parseInt(e.target.value))}
-                        className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-blue-200 mb-2">What is your monthly housing budget? (USD)</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={budgetInputValue}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (/^\d{0,5}$/.test(value)) {
+                          setBudgetInputValue(value);
+                          if (value) updateAssessment('monthly_budget', parseInt(value, 10));
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const value = Math.min(50000, Math.max(100, parseInt(e.target.value, 10) || 500));
+                        setBudgetInputValue(String(value));
+                        updateAssessment('monthly_budget', value);
+                      }}
+                      placeholder="2000"
+                      className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                    <p className="text-xs text-blue-200/70 mt-2">We’ll compare this with rental costs in the selected destination.</p>
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-blue-200 mb-2">How many children will relocate with you?</label>
+                    <select
+                      value={assessment.children_count}
+                      onChange={(e) => {
+                        const count = Number(e.target.value);
+                        setAssessment(prev => ({
+                          ...prev,
+                          children_count: count,
+                          children_ages: count === 0 ? '' : prev.children_ages,
+                          education_preferences: count === 0 ? '' : prev.education_preferences,
+                        }));
+                      }}
+                      className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    >
+                      {Array.from({ length: 11 }, (_, count) => (
+                        <option key={count} value={count} className="bg-gray-900">{count === 0 ? 'None' : count}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {assessment.children_count > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-blue-200 mb-2">Children’s ages</label>
+                        <input
+                          type="text"
+                          value={assessment.children_ages}
+                          onChange={(e) => updateAssessment('children_ages', e.target.value)}
+                          placeholder="e.g., 6 and 12"
+                          maxLength={100}
+                          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-blue-200 mb-2">Education needs or preferences</label>
+                        <input
+                          type="text"
+                          value={assessment.education_preferences}
+                          onChange={(e) => updateAssessment('education_preferences', e.target.value)}
+                          placeholder="e.g., IB curriculum, bilingual, learning support"
+                          maxLength={500}
+                          className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:ring-2 focus:ring-blue-500 outline-none"
+                        />
+                      </div>
+                    </div>
+                  )}
                   <button onClick={nextStep} className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition shadow-lg">Next Step</button>
                 </div>
               )}
@@ -293,33 +397,33 @@ export default function AdminReportGen() {
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-blue-200 mb-2">Preferred Country</label>
+                      <label className="block text-sm font-medium text-blue-200 mb-2">Preferred country</label>
                       <select
                         value={assessment.preferred_country}
                         onChange={(e) => updateAssessment('preferred_country', e.target.value)}
                         className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
                       >
                         <option value="" className="bg-gray-900">Select a country</option>
-                        {CountryData.countries.map(c => <option key={c} value={c} className="bg-gray-900">{c}</option>)}
+                        {[...CountryData.countries].sort().map(c => <option key={c} value={c} className="bg-gray-900">{c}</option>)}
                       </select>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-blue-200 mb-2">Preferred City (Optional)</label>
+                    {availableCities.length > 0 && <div>
+                      <label className="block text-sm font-medium text-blue-200 mb-2">Preferred city</label>
+                      <p className="text-xs text-blue-200/70 mb-2">The report’s schools, costs, healthcare, and transportation research will be specific to this city.</p>
                       <select
                         value={assessment.preferred_city}
                         onChange={(e) => updateAssessment('preferred_city', e.target.value)}
                         className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                        disabled={!assessment.preferred_country}
                       >
-                        <option value="" className="bg-gray-900">Any City</option>
+                        <option value="" className="bg-gray-900">Select a city...</option>
                         {availableCities.map(c => <option key={c} value={c} className="bg-gray-900">{c}</option>)}
                       </select>
-                    </div>
+                    </div>}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-blue-200 mb-2">Location Type</label>
+                      <label className="block text-sm font-medium text-blue-200 mb-2">Location preference</label>
                       <div className="grid grid-cols-3 gap-2">
                         {(['city', 'beachside', 'rural'] as const).map(type => (
                           <button
@@ -337,19 +441,19 @@ export default function AdminReportGen() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-blue-200 mb-2">Climate Preference</label>
+                      <label className="block text-sm font-medium text-blue-200 mb-2">Preferred climate type</label>
                       <select
                         value={assessment.climate_preference}
                         onChange={(e) => updateAssessment('climate_preference', e.target.value as any)}
                         className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
                       >
                         <option value="" className="bg-gray-900">Select Climate</option>
-                        <option value="tropical" className="bg-gray-900">Tropical</option>
-                        <option value="mediterranean" className="bg-gray-900">Mediterranean</option>
-                        <option value="temperate" className="bg-gray-900">Temperate</option>
-                        <option value="seasonal" className="bg-gray-900">Seasonal</option>
-                        <option value="dry" className="bg-gray-900">Dry/Arid</option>
-                        <option value="northern" className="bg-gray-900">Northern/Cold</option>
+                        <option value="tropical" className="bg-gray-900">Tropical (Hot &amp; Humid Year-Round)</option>
+                        <option value="seasonal" className="bg-gray-900">Seasonal (4 Distinct Seasons)</option>
+                        <option value="dry" className="bg-gray-900">Dry/Arid (Desert-like)</option>
+                        <option value="mediterranean" className="bg-gray-900">Mediterranean (Hot, Dry Summers; Mild, Wet Winters)</option>
+                        <option value="temperate" className="bg-gray-900">Temperate (Mild Temperatures, Moderate Rainfall)</option>
+                        <option value="northern" className="bg-gray-900">Northern (Cold Winters, Mild Summers)</option>
                       </select>
                     </div>
                   </div>
@@ -366,8 +470,14 @@ export default function AdminReportGen() {
                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="grid gap-4">
                     {factors.map(f => (
-                      <div key={f.key} className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
-                        <span className="text-sm font-medium text-blue-100">{f.label}</span>
+                      <div key={f.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/5 border border-white/10 rounded-xl">
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl" aria-hidden="true">{f.icon}</span>
+                          <div>
+                            <div className="text-sm font-medium text-blue-100">{f.label}</div>
+                            <p className="text-xs text-blue-200/70 mt-1">{f.description}</p>
+                          </div>
+                        </div>
                         {renderStarRating(f.key, (assessment as any)[f.key])}
                       </div>
                     ))}
