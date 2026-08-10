@@ -6,6 +6,7 @@ import BlogIndex from '../components/BlogIndex';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
 import { useSEO } from '../hooks/useSEO';
 import { KEY_PAGES } from '@/shared/page-seo';
+import { applyBlogImageAlt, getBlogImageAlt } from '../utils/blogImageAlt';
 
 interface BlogPostType {
   id: number;
@@ -171,6 +172,8 @@ export default function BlogPost() {
     );
   }
 
+  const imageAlt = getBlogImageAlt(post.title, post.slug);
+
   return (
     <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
       <Navigation />
@@ -204,7 +207,7 @@ export default function BlogPost() {
                 <div className="relative h-[400px] overflow-hidden bg-brand-bg border-b border-brand-border">
                   <img
                     src={post.featured_image}
-                    alt={`${post.title} — How to leave the U.S.`}
+                    alt={imageAlt}
                     className="w-full h-full object-cover"
                     style={{ filter: 'saturate(0.9)' }}
                     onError={(e) => {
@@ -257,7 +260,7 @@ export default function BlogPost() {
                 {(() => {
                   const { styles, body } = extractStyles(post.body);
 
-                  const processedBody = body
+                  const processedBody = applyBlogImageAlt(body, imageAlt)
                     .replace(/>\s*\n\s*</g, '><')
                     .replace(/\n{2,}/g, '<br /><br />')
                     .replace(/\n/g, '<br />');

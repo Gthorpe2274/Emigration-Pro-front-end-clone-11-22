@@ -129,7 +129,7 @@ export default function Home() {
 
           <div className="relative">
             <div className="aspect-[4/5] rounded-xl overflow-hidden bg-brand-surface border border-brand-border">
-              <img src="/images/hero-1.png" alt="" className="w-full h-full object-cover" style={{ filter: 'saturate(0.9)' }} />
+              <img src="/images/hero-1.png" alt="How to leave the US" className="w-full h-full object-cover" style={{ filter: 'saturate(0.9)' }} />
             </div>
             <div className="hidden sm:block absolute -left-8 bottom-12 w-64 p-5 bg-brand-bg border border-brand-border rounded-lg shadow-xl">
               <div className="font-brand-serif text-3xl font-medium text-brand-ink leading-none">14</div>
