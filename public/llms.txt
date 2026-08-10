@@ -2,8 +2,8 @@
 
 > Emigration Pro helps U.S. citizens plan a move abroad. It provides a structured
 > country-match assessment and sells personalized relocation reports covering visa
-> routes, cost of living, housing, healthcare access and tax considerations for a
-> specific destination city.
+> routes, employment, healthcare, living costs, safety, infrastructure and practical
+> relocation planning for one destination city across 14 categories.
 
 Emigration Pro is a research and planning service, not a law firm or immigration
 consultancy. It does not file applications or provide legal advice. Reports are
@@ -21,6 +21,30 @@ retirees, remote workers and self-employed people.
 - [Popular countries for American expats](https://emigrationpro.com/best-countries): Overview of Portugal, Spain, Mexico, Costa Rica, Germany and Canada for U.S. movers.
 - [Sample relocation report](https://emigrationpro.com/sample-report): Partial example of the personalized report, showing the depth and section structure.
 - [About](https://emigrationpro.com/about): Who runs Emigration Pro and how the research is produced.
+- [Moving abroad glossary](https://emigrationpro.com/moving-abroad-glossary): Plain-English definitions of 25 visa, residency, document, U.S. tax, healthcare and arrival terms, with practical examples and public-source links.
+
+## Personalized report structure
+
+Each report researches one destination city across these 14 categories:
+
+1. Steps to Take to Leave America
+2. Job Market Analysis
+3. Master Relocation Timeline & Guide
+4. Comprehensive Healthcare Mapping
+5. Cost of Living
+6. Political Stability & Security
+7. Environmental & Water Quality
+8. Digital Connectivity & Internet
+9. Infrastructure & Power Reliability
+10. Mobility & Urban Connectivity
+11. Culture, Arts & Entertainment
+12. Sports & Active Recreation
+13. Senior & Retirement Benefits
+14. Children's Education & Schooling
+
+Reports use relevant national, regional and local government sources for immigration,
+tax, healthcare, public-safety and other decision-critical information. Reports also
+identify source links so readers can verify time-sensitive facts.
 
 ## Guidance and income
 

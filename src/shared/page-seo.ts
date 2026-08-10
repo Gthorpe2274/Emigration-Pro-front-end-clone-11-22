@@ -54,6 +54,11 @@ export const KEY_PAGES: { href: string; label: string; blurb: string }[] = [
     label: 'Learn how to earn abroad',
     blurb: 'Building self-employed income while living overseas.',
   },
+  {
+    href: '/moving-abroad-glossary',
+    label: 'Use the moving abroad glossary',
+    blurb: 'Plain-English definitions for visas, residency, taxes, documents and healthcare.',
+  },
 ];
 
 export const PAGE_SEO: Record<string, PageSEO> = {
@@ -65,7 +70,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     heading: 'Plan your move abroad from the United States',
     summary: [
       'Emigration Pro helps U.S. citizens work out where they could realistically move and what it would actually take. A free structured assessment matches your budget, profession, age, family situation and healthcare needs against destination countries.',
-      'From there, a personalized relocation report covers the specifics for a chosen city: which visa routes you qualify for, what living there costs month to month, how healthcare access works, what housing looks like, and the tax considerations of leaving the U.S.',
+      'The personalized relocation report researches one destination city across 14 categories: U.S. departure and visa steps, employment, relocation timeline, healthcare, cost of living, political stability and security, environmental and water quality, digital connectivity, infrastructure and power, mobility, culture, recreation, retirement benefits, and children\'s education.',
       'Emigration Pro is a research and planning service, not a law firm. It does not file applications or give legal advice, and visa rules should be confirmed against official government sources before acting.',
     ],
   },
@@ -90,13 +95,13 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     ],
   },
   '/sample-report': {
-    title: 'Sample Relocation Report — Rio de Janeiro',
+    title: 'Sample Relocation Report — Bangkok, Thailand',
     description:
-      'A partial sample of the Emigration Pro relocation report, covering healthcare, cost of living and political stability for Rio de Janeiro, Brazil.',
-    heading: 'Sample relocation report: Rio de Janeiro, Brazil',
+      'Explore a 14-section Emigration Pro relocation report for Bangkok covering visas, employment, healthcare, costs, safety, infrastructure and education.',
+    heading: 'Sample relocation report: Bangkok, Thailand',
     summary: [
-      'A partial sample of the personalized relocation report, built for a 78-year-old professional relocating to Rio de Janeiro.',
-      'It shows the report structure: steps to leave the U.S., job market analysis, a master relocation timeline, healthcare mapping down to named hospitals by neighborhood, cost of living, political stability and security, and environmental and water quality.',
+      'This watermarked Bangkok sample shows the research depth, source links and recommendations included in an Emigration Pro personalized relocation report.',
+      'The report covers 14 categories: steps to leave America, job market analysis, a master relocation timeline, comprehensive healthcare mapping, cost of living, political stability and security, environmental and water quality, digital connectivity and internet, infrastructure and power reliability, mobility and urban connectivity, culture and entertainment, sports and recreation, senior and retirement benefits, and children\'s education.',
     ],
   },
   '/earn-abroad': {
@@ -134,8 +139,20 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       'Who runs Emigration Pro, how the relocation research is produced, and what the service does and does not do.',
     heading: 'About Emigration Pro',
     summary: [
-      'Emigration Pro produces relocation research for U.S. citizens considering a move abroad, combining structured country matching with personalized, city-level reporting.',
-      'It is a research and planning service. It does not file visa applications, and it does not provide legal or immigration advice.',
+      'Emigration Pro was founded by G. Lynn Thorpe, Esq., a Columbia University School of Law graduate, international attorney, longtime International Living member and extensive international traveler.',
+      'The service produces city-level relocation research for U.S. citizens. Reports prioritize relevant national, regional and local government sources for immigration, tax, healthcare, public-safety and other decision-critical information.',
+      'Emigration Pro is a research and planning service. It does not file visa applications, and it does not provide legal or immigration advice.',
+    ],
+  },
+  '/moving-abroad-glossary': {
+    title: 'Moving Abroad Glossary for Americans',
+    description:
+      'Understand 25 essential moving-abroad terms covering visas, residency, documents, U.S. taxes, healthcare and international relocation.',
+    heading: 'Moving abroad glossary for Americans',
+    summary: [
+      'Plain-English definitions of the visa, residency, document, U.S. tax, healthcare and arrival terminology Americans encounter when planning an international move.',
+      'Each entry explains why the term matters, provides a practical relocation example and links to an authoritative public source where a suitable source is available.',
+      'Definitions are general educational information. Requirements vary by country and change over time, so applicants should confirm current rules with the responsible government authority.',
     ],
   },
 };

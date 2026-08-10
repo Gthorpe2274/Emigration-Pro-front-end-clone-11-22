@@ -3,11 +3,13 @@ import { Shield, Heart, DollarSign, Users, Globe, CheckCircle, Landmark, FileChe
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import { useSEO } from '../hooks/useSEO';
+import { PAGE_SEO } from '@/shared/page-seo';
 
 export default function AboutUs() {
   useSEO({
-    title: 'About Us',
-    description: 'Meet Emigration Pro founder G. Lynn Thorpe, Esq. and learn how governmental sources inform our international relocation reports.'
+    title: PAGE_SEO['/about'].title,
+    description: PAGE_SEO['/about'].description,
+    canonicalPath: '/about',
   });
 
   return (

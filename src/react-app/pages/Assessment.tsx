@@ -303,8 +303,9 @@ export default function Assessment() {
               </h1>
 
               <p className="text-lg text-brand-muted mb-8 max-w-xl mx-auto leading-relaxed">
-                Answer a few questions about your priorities and preferences to get personalized
-                recommendations for your ideal emigration destination.
+                The free assessment compares your age, profession, monthly budget, family needs,
+                climate preference, and seven relocation priorities to identify compatible destination
+                countries and cities.
               </p>
 
               {/* Step Indicators */}

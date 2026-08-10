@@ -30,6 +30,7 @@ import FileConverter from './pages/FileConverter';
 import AdminReportGen from './pages/AdminReportGen';
 import CheckoutReport from './pages/CheckoutReport';
 import NoIndex from './components/NoIndex';
+import Glossary from './pages/Glossary';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
         <Route path="/city/:country/:city" element={<CityDetails />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/sample-report" element={<SampleReport />} />
+        <Route path="/moving-abroad-glossary" element={<Glossary />} />
         <Route path="/checkout-report" element={<NoIndex title="Checkout"><CheckoutReport /></NoIndex>} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />

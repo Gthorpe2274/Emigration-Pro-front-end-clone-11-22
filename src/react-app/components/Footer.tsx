@@ -102,6 +102,11 @@ export default function Footer() {
           <div>
             <h3 className="text-white text-lg font-semibold mb-4 font-brand-serif">Resources</h3>
             <ul className="space-y-3">
+              <li>
+                <Link to="/moving-abroad-glossary" className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm">
+                  Moving Abroad Glossary
+                </Link>
+              </li>
               <li className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}

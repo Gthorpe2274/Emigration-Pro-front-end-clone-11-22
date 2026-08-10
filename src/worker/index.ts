@@ -3210,6 +3210,11 @@ app.get('/sitemap.xml', async (c) => {
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>${baseUrl}/moving-abroad-glossary</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>${baseUrl}/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>

@@ -117,8 +117,9 @@ export default function Home() {
               <span className="italic text-brand-ink-2">leaving the U.S.</span>
             </h1>
             <p className="text-lg leading-relaxed text-brand-muted max-w-xl mb-10">
-              You don&apos;t move to a country — you move to a city. The only place to get city-level
-              data, where others only provide country-level data.
+              Emigration Pro&apos;s personalized relocation report researches one destination city
+              across 14 categories, including visa eligibility, monthly living costs, healthcare
+              access, safety, infrastructure, education, and U.S. departure considerations.
             </p>
             <div className="flex flex-wrap items-center gap-4 mb-8">
               <div className="flex flex-col gap-1.5 items-center">
@@ -131,12 +132,12 @@ export default function Home() {
                 </Link>
                 <span className="text-[13px] text-brand-muted font-medium">Find the City that suits you best.</span>
               </div>
-              <a
-                href="#report"
+              <Link
+                to="/sample-report"
                 className="px-6 py-4 text-brand-ink border border-brand-border-strong rounded-lg font-semibold text-base bg-brand-bg hover:bg-brand-surface transition-colors"
               >
                 See sample report
-              </a>
+              </Link>
             </div>
             <div className="flex flex-wrap items-center gap-6 text-sm text-brand-muted">
               <span className="inline-flex items-center gap-1.5"><span className="text-brand-accent font-bold">&#10003;</span> No credit card</span>
@@ -193,7 +194,8 @@ export default function Home() {
                 <span className="font-brand-serif text-4xl font-medium text-brand-ink leading-none">01</span>
                 <span className="text-xs uppercase tracking-wide text-brand-muted font-semibold">Free</span>
               </div>
-              <h3 className="font-brand-serif text-2xl font-medium text-brand-ink mb-3">Assessment</h3>
+              <h3 className="font-brand-serif text-2xl font-medium text-brand-ink mb-1">Assessment</h3>
+              <div className="text-[13px] text-brand-muted font-medium mb-3">Find the City that suits you best.</div>
               <p className="text-base leading-relaxed text-brand-muted">Answer questions about age, profession, family, and priorities. Get an instant compatibility analysis for your chosen destination.</p>
             </div>
             <div className="p-8 bg-brand-bg border border-brand-border rounded-xl">

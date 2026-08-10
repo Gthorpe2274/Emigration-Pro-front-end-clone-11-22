@@ -1,5 +1,6 @@
 import type { Config, Context } from '@netlify/edge-functions';
 import { PAGE_SEO, KEY_PAGES, SITE_ORIGIN, fullTitle } from '../../src/shared/page-seo.ts';
+import { GLOSSARY_TERMS } from '../../src/shared/glossary-data.ts';
 
 /**
  * Server-side SEO for the main marketing pages, mirroring what blog-seo.ts does for
@@ -66,9 +67,20 @@ export default async function handler(request: Request, context: Context) {
     const links = [...(seo.links ?? []), ...KEY_PAGES.map((p) => ({ href: p.href, label: p.label }))]
       .filter((link, index, all) => link.href !== path && all.findIndex((l) => l.href === link.href) === index);
 
+    const glossaryContent = path === '/moving-abroad-glossary'
+      ? `<section><h2>Glossary terms</h2>${GLOSSARY_TERMS.map((entry) =>
+          `<article id="${esc(entry.term.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''))}">` +
+          `<h3>${esc(entry.term)}</h3><p>${esc(entry.definition)}</p>` +
+          `<p><strong>Why it matters:</strong> ${esc(entry.significance)}</p>` +
+          `<p><strong>Example:</strong> ${esc(entry.example)}</p>` +
+          `<p><a href="${esc(entry.source.url)}">${esc(entry.source.label)}</a></p></article>`
+        ).join('')}</section>`
+      : '';
+
     const prerenderedContent =
       `<main data-seo-prerendered="true"><h1>${esc(seo.heading)}</h1>` +
       seo.summary.map((paragraph) => `<p>${esc(paragraph)}</p>`).join('') +
+      glossaryContent +
       (links.length
         ? `<nav><h2>Related</h2><ul>${links
             .map((l) => `<li><a href="${SITE_ORIGIN}${esc(l.href)}">${esc(l.label)}</a></li>`)
@@ -76,7 +88,7 @@ export default async function handler(request: Request, context: Context) {
         : '') +
       `</main>`;
 
-    const structuredData = {
+    const webPageStructuredData = {
       '@context': 'https://schema.org',
       '@type': 'WebPage',
       '@id': `${url}#webpage`,
@@ -101,6 +113,30 @@ export default async function handler(request: Request, context: Context) {
         ],
       },
     };
+
+    const structuredData = path === '/moving-abroad-glossary'
+      ? {
+          '@context': 'https://schema.org',
+          '@graph': [
+            { ...webPageStructuredData, '@context': undefined },
+            {
+              '@type': 'DefinedTermSet',
+              '@id': `${url}#term-set`,
+              name: 'Moving Abroad Glossary for Americans',
+              description: seo.description,
+              url,
+              inLanguage: 'en-US',
+              hasDefinedTerm: GLOSSARY_TERMS.map((entry) => ({
+                '@type': 'DefinedTerm',
+                '@id': `${url}#${entry.term.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`,
+                name: entry.term,
+                description: entry.definition,
+                inDefinedTermSet: `${url}#term-set`,
+              })),
+            },
+          ],
+        }
+      : webPageStructuredData;
 
     html = html.replace(
       '</head>',
@@ -137,5 +173,6 @@ export const config: Config = {
     '/living-wage-business',
     '/blog',
     '/about',
+    '/moving-abroad-glossary',
   ],
 };

@@ -18,7 +18,7 @@ export default function Navigation() {
           </Link>
 
           {/* Navigation Menu */}
-          <nav className="hidden md:flex md:items-center md:gap-7 text-sm font-medium">
+          <nav className="hidden md:flex md:items-center md:gap-5 text-sm font-medium">
             <Link to="/" className="text-brand-muted hover:text-brand-accent transition-colors">
               Home
             </Link>
@@ -36,6 +36,9 @@ export default function Navigation() {
             </Link>
             <Link to="/blog" className="text-brand-muted hover:text-brand-accent transition-colors">
               Blog
+            </Link>
+            <Link to="/moving-abroad-glossary" className="text-brand-muted hover:text-brand-accent transition-colors">
+              Glossary
             </Link>
             <Link to="/about" className="text-brand-muted hover:text-brand-accent transition-colors">
               About Us
