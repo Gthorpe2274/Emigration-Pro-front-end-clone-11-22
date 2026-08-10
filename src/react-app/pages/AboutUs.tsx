@@ -7,7 +7,7 @@ import { useSEO } from '../hooks/useSEO';
 export default function AboutUs() {
   useSEO({
     title: 'About Us',
-    description: 'Learn about Emigration Pro and our mission to help US citizens find their perfect international destination.'
+    description: 'Meet Emigration Pro founder G. Lynn Thorpe, Esq. and learn how governmental sources inform our international relocation reports.'
   });
 
   return (
@@ -196,7 +196,7 @@ export default function AboutUs() {
               <Globe className="w-12 h-12 text-brand-accent mx-auto mb-6" />
               <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink mb-6">Our Mission</h2>
               <p className="text-lg leading-relaxed text-brand-muted mb-10 max-w-3xl mx-auto">
-                We believe that in 2024, no one should have to choose between their safety, their health,
+                We believe that no one should have to choose between their safety, their health,
                 and their financial security. Through our decade of research, we've identified countries
                 where Americans can live with dignity, peace of mind, and genuine community support.
               </p>
