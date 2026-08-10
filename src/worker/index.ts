@@ -174,6 +174,54 @@ async function runScheduledVideoUpdates(env: Env): Promise<void> {
 // Initialize Hono app
 const app = new Hono<{ Bindings: Env }>();
 
+const SITE_ORIGIN = 'https://emigrationpro.com';
+const INDEXNOW_KEY = '72c62d03371f45b7a2177112fafe5a53';
+const INDEXNOW_KEY_LOCATION = `${SITE_ORIGIN}/${INDEXNOW_KEY}.txt`;
+
+function normalizePublicSlug(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function publicBlogUrl(slug: string): string {
+  return `${SITE_ORIGIN}/blog/${encodeURIComponent(slug)}`;
+}
+
+async function submitIndexNow(urls: string[]): Promise<void> {
+  const urlList = [...new Set(urls)].filter((url) => url.startsWith(`${SITE_ORIGIN}/`));
+  if (urlList.length === 0) return;
+
+  try {
+    const response = await fetch('https://api.indexnow.org/indexnow', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({
+        host: 'emigrationpro.com',
+        key: INDEXNOW_KEY,
+        keyLocation: INDEXNOW_KEY_LOCATION,
+        urlList,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`IndexNow submission failed (${response.status}):`, await response.text());
+    }
+  } catch (error) {
+    // IndexNow must never make publishing fail. Log it so Workers observability can
+    // surface transient network or provider errors.
+    console.error('IndexNow submission error:', error);
+  }
+}
+
+function queueIndexNow(c: { executionCtx: ExecutionContext }, urls: string[]): void {
+  c.executionCtx.waitUntil(submitIndexNow(urls));
+}
+
 // Global Error Handler to prevent HTML responses for API errors
 app.onError((err, c) => {
   console.error(`Global Error: ${err.message}`, err);
@@ -1044,6 +1092,11 @@ app.post('/api/admin/blog/posts', adminAuth, async (c) => {
       is_published, allow_comments, author
     } = body;
 
+    const normalizedSlug = normalizePublicSlug(slug || title);
+    if (!normalizedSlug) {
+      return c.json({ success: false, error: 'A valid title or slug is required' }, 400);
+    }
+
     await c.env.DB.prepare(`
       INSERT INTO blog_posts (
         title, slug, featured_image, featured_image_credit, featured_image_credit_url,
@@ -1051,13 +1104,17 @@ app.post('/api/admin/blog/posts', adminAuth, async (c) => {
         allow_comments, author
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
-      title, slug, featured_image, featured_image_credit || null,
+      title, normalizedSlug, featured_image, featured_image_credit || null,
       featured_image_credit_url || null, featured_image_source_url || null,
       content, excerpt,
       published_date, is_published ? 1 : 0, allow_comments ? 1 : 0, author
     ).run();
 
-    return c.json({ success: true });
+    if (is_published) {
+      queueIndexNow(c, [publicBlogUrl(normalizedSlug), `${SITE_ORIGIN}/blog`]);
+    }
+
+    return c.json({ success: true, slug: normalizedSlug });
   } catch (error) {
     console.error('Error creating post:', error);
     return c.json({ success: false, error: 'Failed to create post' }, 500);
@@ -1075,6 +1132,18 @@ app.put('/api/admin/blog/posts/:id', adminAuth, async (c) => {
       is_published, allow_comments, author
     } = body;
 
+    const existing = await c.env.DB.prepare(
+      'SELECT slug, is_published FROM blog_posts WHERE id = ?'
+    ).bind(id).first<{ slug: string; is_published: number }>();
+    if (!existing) {
+      return c.json({ success: false, error: 'Post not found' }, 404);
+    }
+
+    const normalizedSlug = normalizePublicSlug(slug || title);
+    if (!normalizedSlug) {
+      return c.json({ success: false, error: 'A valid title or slug is required' }, 400);
+    }
+
     await c.env.DB.prepare(`
       UPDATE blog_posts 
       SET title = ?, slug = ?, featured_image = ?, featured_image_credit = ?,
@@ -1083,13 +1152,21 @@ app.put('/api/admin/blog/posts/:id', adminAuth, async (c) => {
           author = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `).bind(
-      title, slug, featured_image, featured_image_credit || null,
+      title, normalizedSlug, featured_image, featured_image_credit || null,
       featured_image_credit_url || null, featured_image_source_url || null,
       content, excerpt,
       published_date, is_published ? 1 : 0, allow_comments ? 1 : 0, author, id
     ).run();
 
-    return c.json({ success: true });
+    const changedUrls: string[] = [];
+    if (existing.is_published) changedUrls.push(publicBlogUrl(existing.slug));
+    if (is_published) changedUrls.push(publicBlogUrl(normalizedSlug));
+    if (changedUrls.length > 0) {
+      changedUrls.push(`${SITE_ORIGIN}/blog`);
+      queueIndexNow(c, changedUrls);
+    }
+
+    return c.json({ success: true, slug: normalizedSlug });
   } catch (error) {
     console.error('Error updating post:', error);
     return c.json({ success: false, error: 'Failed to update post' }, 500);
@@ -1100,7 +1177,13 @@ app.put('/api/admin/blog/posts/:id', adminAuth, async (c) => {
 app.delete('/api/admin/blog/posts/:id', adminAuth, async (c) => {
   try {
     const id = c.req.param('id');
+    const existing = await c.env.DB.prepare(
+      'SELECT slug, is_published FROM blog_posts WHERE id = ?'
+    ).bind(id).first<{ slug: string; is_published: number }>();
     await c.env.DB.prepare('DELETE FROM blog_posts WHERE id = ?').bind(id).run();
+    if (existing?.is_published) {
+      queueIndexNow(c, [publicBlogUrl(existing.slug), `${SITE_ORIGIN}/blog`]);
+    }
     return c.json({ success: true });
   } catch (error) {
     console.error('Error deleting post:', error);
@@ -3116,9 +3199,10 @@ app.get('/sitemap.xml', async (c) => {
 
     for (const post of results) {
       const date = post.updated_at || post.published_date || new Date().toISOString();
+      const encodedSlug = encodeURIComponent(String(post.slug));
       sitemap += `
   <url>
-    <loc>${baseUrl}/blog/${post.slug}</loc>
+    <loc>${baseUrl}/blog/${encodedSlug}</loc>
     <lastmod>${new Date(date as string).toISOString().split('T')[0]}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -3458,6 +3542,10 @@ app.post("/api/perplexity", async (c) => {
 app.get('*', async (c) => {
   try {
     const url = new URL(c.req.url);
+
+    if (decodeURIComponent(url.pathname) === '/blog/Avoid Mistakes When Leaving') {
+      return c.redirect(`${SITE_ORIGIN}/blog/avoid-mistakes-when-leaving`, 301);
+    }
 
     // Explicitly handle favicon and other standard assets that might be missing
     // to prevent them from falling through to index.html and causing SSL issues

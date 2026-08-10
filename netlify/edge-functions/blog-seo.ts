@@ -67,13 +67,19 @@ function setMetaContent(html: string, key: string, value: string): string {
 }
 
 export default async function handler(request: Request, context: Context) {
+  const requestUrl = new URL(request.url);
+  const decodedPath = decodeURIComponent(requestUrl.pathname);
+  if (decodedPath === '/blog/Avoid Mistakes When Leaving') {
+    return Response.redirect(`${SITE_ORIGIN}/blog/avoid-mistakes-when-leaving`, 301);
+  }
+
   const response = await context.next();
 
   // Only rewrite real HTML documents; leave assets and API passthrough alone.
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) return response;
 
-  const slug = new URL(request.url).pathname.replace(/^\/blog\//, '').replace(/\/$/, '');
+  const slug = decodeURIComponent(requestUrl.pathname.replace(/^\/blog\//, '').replace(/\/$/, ''));
   if (!slug || slug.includes('/')) return response;
 
   try {
@@ -87,7 +93,7 @@ export default async function handler(request: Request, context: Context) {
     if (!data?.success || !data.post) return response;
 
     const post = data.post;
-    const url = `${SITE_ORIGIN}/blog/${post.slug}`;
+    const url = `${SITE_ORIGIN}/blog/${encodeURIComponent(post.slug)}`;
     const title = `${post.title} | Emigration Pro`;
     const description = summarize(post);
     const image = post.featured_image || `${SITE_ORIGIN}/images/elderly-couple-documents.jpg`;
