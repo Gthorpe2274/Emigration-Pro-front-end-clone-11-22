@@ -143,6 +143,42 @@ export default function LivingWageBusiness() {
             </div>
           </div>
 
+          <div id="youtuber" className="mb-20 scroll-mt-24">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="inline-flex items-center justify-center w-10 h-10 bg-brand-bg border border-brand-border rounded-xl">
+                <Youtube className="w-5 h-5 text-brand-accent" />
+              </div>
+              <h2 className="font-brand-serif font-medium text-3xl text-brand-ink">Youtuber</h2>
+            </div>
+            <div className="bg-brand-bg p-8 rounded-xl border border-brand-border shadow-sm">
+              <p className="text-sm leading-relaxed text-brand-muted">Build an audience and monetize through ads and sponsorships. Resources for this category are coming soon.</p>
+            </div>
+          </div>
+
+          <div id="affiliate" className="mb-20 scroll-mt-24">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="inline-flex items-center justify-center w-10 h-10 bg-brand-bg border border-brand-border rounded-xl">
+                <Globe className="w-5 h-5 text-brand-accent" />
+              </div>
+              <h2 className="font-brand-serif font-medium text-3xl text-brand-ink">Affiliate</h2>
+            </div>
+            <div className="bg-brand-bg p-8 rounded-xl border border-brand-border shadow-sm">
+              <p className="text-sm leading-relaxed text-brand-muted">Earn commissions by promoting products you trust. Resources for this category are coming soon.</p>
+            </div>
+          </div>
+
+          <div id="digital-sales" className="mb-20 scroll-mt-24">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="inline-flex items-center justify-center w-10 h-10 bg-brand-bg border border-brand-border rounded-xl">
+                <Zap className="w-5 h-5 text-brand-accent" />
+              </div>
+              <h2 className="font-brand-serif font-medium text-3xl text-brand-ink">Digital Sales</h2>
+            </div>
+            <div className="bg-brand-bg p-8 rounded-xl border border-brand-border shadow-sm">
+              <p className="text-sm leading-relaxed text-brand-muted">Create and sell digital products, courses, and software. Resources for this category are coming soon.</p>
+            </div>
+          </div>
+
           <div id="agency" className="scroll-mt-24">
             <div className="flex items-center gap-3 mb-8">
               <div className="inline-flex items-center justify-center w-10 h-10 bg-brand-bg border border-brand-border rounded-xl">
