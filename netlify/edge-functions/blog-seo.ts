@@ -143,14 +143,19 @@ export default async function handler(request: Request, context: Context) {
         `<li><a href="${SITE_ORIGIN}${esc(page.href)}">${esc(page.label)}</a> — ${esc(page.blurb)}</li>`
     ).join('');
 
-    html = html.replace(
-      '<noscript>',
-      `<noscript><article><h1>${esc(post.title)}</h1>` +
+    const prerenderedArticle =
+      `<article data-seo-prerendered="true"><h1>${esc(post.title)}</h1>` +
         `<p><em>${esc(description)}</em></p>` +
         `<p>${esc(articleText)}</p>` +
         `<nav><h2>Plan your own move</h2><ul>${relatedLinks}` +
         `<li><a href="${SITE_ORIGIN}/blog">More relocation guides</a></li></ul></nav>` +
-        `</article></noscript><noscript>`
+        `</article>`;
+
+    // Serve the article as ordinary initial HTML. React replaces #root after startup;
+    // crawlers that do not execute JavaScript can still index the article body.
+    html = html.replace(
+      /<div\s+id=["']root["']\s*>\s*<\/div>/i,
+      `<div id="root">${prerenderedArticle}</div>`
     );
 
     const headers = new Headers(response.headers);

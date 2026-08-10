@@ -66,8 +66,8 @@ export default async function handler(request: Request, context: Context) {
     const links = [...(seo.links ?? []), ...KEY_PAGES.map((p) => ({ href: p.href, label: p.label }))]
       .filter((link, index, all) => link.href !== path && all.findIndex((l) => l.href === link.href) === index);
 
-    const fallback =
-      `<main><h1>${esc(seo.heading)}</h1>` +
+    const prerenderedContent =
+      `<main data-seo-prerendered="true"><h1>${esc(seo.heading)}</h1>` +
       seo.summary.map((paragraph) => `<p>${esc(paragraph)}</p>`).join('') +
       (links.length
         ? `<nav><h2>Related</h2><ul>${links
@@ -76,8 +76,47 @@ export default async function handler(request: Request, context: Context) {
         : '') +
       `</main>`;
 
-    // Insert ahead of the generic sitewide fallback already in index.html.
-    html = html.replace('<noscript>', `<noscript>${fallback}</noscript><noscript>`);
+    const structuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      '@id': `${url}#webpage`,
+      url,
+      name: title,
+      description: seo.description,
+      isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
+      about: { '@id': `${SITE_ORIGIN}/#organization` },
+      inLanguage: 'en-US',
+      breadcrumb: {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: `${SITE_ORIGIN}/`,
+          },
+          ...(path === '/'
+            ? []
+            : [{ '@type': 'ListItem', position: 2, name: seo.heading, item: url }]),
+        ],
+      },
+    };
+
+    html = html.replace(
+      '</head>',
+      `<script type="application/ld+json">${JSON.stringify(structuredData).replace(
+        /</g,
+        '\\u003c'
+      )}</script></head>`
+    );
+
+    // Put meaningful page content in the ordinary initial DOM. React replaces the
+    // contents of #root once the application starts, while non-JS crawlers receive a
+    // real document instead of an empty root or content hidden in <noscript>.
+    html = html.replace(
+      /<div\s+id=["']root["']\s*>\s*<\/div>/i,
+      `<div id="root">${prerenderedContent}</div>`
+    );
 
     const headers = new Headers(response.headers);
     headers.delete('content-length');
