@@ -1491,10 +1491,32 @@ app.get("/api/reports/:assessmentId/sections", async (c) => {
       id: row.concern_id,
       title: row.title,
       content: row.content,
-      sources: row.sources ? JSON.parse(row.sources) : []
+      sources: (() => {
+        try {
+          const parsed = row.sources ? JSON.parse(row.sources) : [];
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      })()
     }));
 
-    return c.json({ success: true, sections });
+    // Older reports may contain citations saved before link-health validation
+    // was introduced. Validate all unique URLs as one bounded batch, then
+    // remove confirmed failures while preserving section and source order.
+    const uniqueSources = Array.from(new Map(
+      sections.flatMap(section => section.sources)
+        .filter((source: any) => source && typeof source.uri === 'string')
+        .map((source: ReportSource) => [source.uri, source])
+    ).values()) as ReportSource[];
+    const reachableSources = await filterReachableSources(uniqueSources, c.env.REPORTS_KV);
+    const reachableUris = new Set(reachableSources.map(source => source.uri));
+    const validatedSections = sections.map(section => ({
+      ...section,
+      sources: section.sources.filter((source: ReportSource) => reachableUris.has(source.uri))
+    }));
+
+    return c.json({ success: true, sections: validatedSections });
   } catch (error) {
     console.error("Error fetching report sections:", error);
     return c.json({ error: "Failed to fetch report sections" }, 500);
@@ -3335,6 +3357,159 @@ const isOfficialLookingDomain = (hostname: string): boolean => {
   return TRUSTED_MULTILATERAL_DOMAINS.some(d => h === d || h.endsWith(`.${d}`));
 };
 
+type ReportSource = { title: string; uri: string; isVideo?: boolean };
+type LinkHealth = 'working' | 'broken' | 'unknown';
+type LinkHealthResult = { health: LinkHealth; finalUrl?: string };
+
+const LINK_HEALTH_CACHE_PREFIX = 'report-link-health:v1:';
+const LINK_CHECK_TIMEOUT_MS = 7000;
+const LINK_CHECK_CONCURRENCY = 5;
+const MAX_LINK_REDIRECTS = 5;
+
+/**
+ * Prevent citation checking from becoming an SSRF primitive. Redirect targets
+ * are checked with the same rules before they are followed.
+ */
+const isSafePublicCitationUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || url.username || url.password) return false;
+    if (url.port && url.port !== '443') return false;
+
+    const hostname = url.hostname.toLowerCase().replace(/^\[|\]$/g, '').replace(/\.$/, '');
+    if (!hostname || hostname === 'localhost' || hostname.endsWith('.localhost') ||
+        hostname.endsWith('.local') || hostname.endsWith('.internal') ||
+        hostname.endsWith('.lan') || hostname.endsWith('.home')) return false;
+
+    // Reject IPv6 loopback, unspecified, link-local, unique-local and
+    // IPv4-mapped literals. Public DNS hostnames remain eligible.
+    // Literal IP citations are unnecessary for reports. Rejecting all IPv6
+    // literals is safer than attempting to enumerate every reserved range.
+    if (hostname.includes(':')) return false;
+
+    const ipv4 = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    if (!ipv4) return true;
+    const octets = ipv4.slice(1).map(Number);
+    if (octets.some(n => n > 255)) return false;
+    const [a, b, c] = octets;
+    return !(
+      a === 0 || a === 10 || a === 127 || a >= 224 ||
+      (a === 100 && b >= 64 && b <= 127) ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 192 && b === 0 && (c === 0 || c === 2)) ||
+      (a === 198 && (b === 18 || b === 19 || (b === 51 && c === 100))) ||
+      (a === 203 && b === 0 && c === 113)
+    );
+  } catch {
+    return false;
+  }
+};
+
+const linkHealthCacheKey = async (url: string): Promise<string> => {
+  const bytes = new TextEncoder().encode(url);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  const hash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+  return `${LINK_HEALTH_CACHE_PREFIX}${hash}`;
+};
+
+const fetchCitationHop = async (url: string, method: 'HEAD' | 'GET'): Promise<Response> => {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LINK_CHECK_TIMEOUT_MS);
+  try {
+    return await fetch(url, {
+      method,
+      redirect: 'manual',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'EmigrationPro-LinkValidator/1.0',
+        'Accept': 'text/html,application/xhtml+xml,application/pdf;q=0.9,*/*;q=0.5',
+        ...(method === 'GET' ? { Range: 'bytes=0-1023' } : {})
+      }
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+};
+
+const requestCitation = async (startUrl: string, method: 'HEAD' | 'GET'): Promise<{ response: Response; finalUrl: string }> => {
+  let currentUrl = startUrl;
+  for (let redirectCount = 0; redirectCount <= MAX_LINK_REDIRECTS; redirectCount++) {
+    if (!isSafePublicCitationUrl(currentUrl)) throw new Error('Unsafe citation URL');
+    const response = await fetchCitationHop(currentUrl, method);
+    if (response.status < 300 || response.status >= 400) return { response, finalUrl: currentUrl };
+
+    const location = response.headers.get('Location');
+    if (!location) return { response, finalUrl: currentUrl };
+    if (response.body) await response.body.cancel();
+    currentUrl = new URL(location, currentUrl).toString();
+  }
+  throw new Error('Too many citation redirects');
+};
+
+const checkCitationHealth = async (url: string, cache: KVNamespace): Promise<LinkHealthResult> => {
+  if (!isSafePublicCitationUrl(url)) return { health: 'broken' };
+  const cacheKey = await linkHealthCacheKey(url);
+
+  try {
+    const cached = await cache.get<LinkHealthResult>(cacheKey, 'json');
+    if (cached?.health) return cached;
+  } catch (error) {
+    console.warn('Citation health cache read failed:', error);
+  }
+
+  let result: LinkHealthResult = { health: 'unknown' };
+  try {
+    let checked = await requestCitation(url, 'HEAD');
+
+    // Some origins reject HEAD or incorrectly return a missing status for it.
+    // Confirm those statuses with a very small GET before excluding the link.
+    if ([404, 405, 410].includes(checked.response.status)) {
+      if (checked.response.body) await checked.response.body.cancel();
+      checked = await requestCitation(checked.finalUrl, 'GET');
+    }
+
+    const status = checked.response.status;
+    if (checked.response.body) await checked.response.body.cancel();
+    result = {
+      health: status === 404 || status === 410 ? 'broken' : 'working',
+      finalUrl: checked.finalUrl
+    };
+  } catch (error) {
+    // A timeout, TLS failure, bot block, or transient network error is not proof
+    // that a human reader cannot open the source. Retain it, but do not cache it
+    // long enough to mask a later definitive result.
+    console.warn(`Citation check inconclusive for ${url}:`, error);
+  }
+
+  try {
+    await cache.put(cacheKey, JSON.stringify(result), {
+      expirationTtl: result.health === 'working' ? 604800 : result.health === 'broken' ? 86400 : 900
+    });
+  } catch (error) {
+    console.warn('Citation health cache write failed:', error);
+  }
+  return result;
+};
+
+const filterReachableSources = async (sources: ReportSource[], cache: KVNamespace): Promise<ReportSource[]> => {
+  const results: Array<ReportSource | null> = new Array(sources.length).fill(null);
+  let cursor = 0;
+
+  const worker = async () => {
+    while (cursor < sources.length) {
+      const index = cursor++;
+      const source = sources[index];
+      const health = await checkCitationHealth(source.uri, cache);
+      if (health.health !== 'broken') results[index] = source;
+    }
+  };
+
+  await Promise.all(Array.from({ length: Math.min(LINK_CHECK_CONCURRENCY, sources.length) }, worker));
+  return results.filter((source): source is ReportSource => source !== null);
+};
+
 app.post("/api/perplexity", async (c) => {
   const apiKey = c.env.PERPLEXITY_API_KEY;
   if (!apiKey) {
@@ -3497,7 +3672,7 @@ app.post("/api/perplexity", async (c) => {
       const data = await response.json();
       const rawText = data.choices[0].message.content;
       
-      const sources = (data.citations || []).map((url: string) => {
+      const candidateSources = (Array.isArray(data.citations) ? data.citations.slice(0, 30) : []).map((url: string) => {
         try {
             const domain = new URL(url).hostname.replace('www.', '');
             // Keep the title as a plain domain so the UI's single-line,
@@ -3533,6 +3708,11 @@ app.post("/api/perplexity", async (c) => {
           }
         })
         .filter((s: any, i: number, a: any[]) => a.findIndex(t => t.uri === s.uri) === i);
+
+      const sources = await filterReachableSources(candidateSources, c.env.REPORTS_KV);
+      if (sources.length !== candidateSources.length) {
+        console.log(`Removed ${candidateSources.length - sources.length} confirmed broken or unsafe citation(s) from ${concern.id}`);
+      }
 
       return c.json({ content: rawText, sources }, 200);
     }
