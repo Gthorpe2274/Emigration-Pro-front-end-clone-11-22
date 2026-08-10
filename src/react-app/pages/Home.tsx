@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { Check, FileText, MapPin, Network, Route, Star } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
@@ -29,6 +29,21 @@ const reportSections = [
   { n: '12', title: 'Sports & Active Recreation', desc: 'Professional sports, fitness facilities, and outdoor recreation options.' },
   { n: '13', title: 'Senior & Retirement Benefits', desc: 'Tax considerations, discounts, healthcare subsidies, and senior programs.' },
   { n: '14', title: 'Children’s Education & Schooling', desc: 'Schools, curricula, tuition, admissions, support services, and university pathways.' },
+];
+
+const relocationHubAssets = [
+  'Immigration-law and visa-service resources',
+  'Residence and citizenship-planning providers',
+  'International banking and money-transfer resources',
+  'International health-insurance options',
+  'Moving, shipping, settling-in, and customs resources',
+  'U.S.-based consulate and visa-application locations',
+  'Destination-focused relocation videos',
+  'Cost-of-living and neighborhood video resources',
+  'Healthcare, immigration, and cultural-orientation videos',
+  'Facebook, Reddit, and Discord expat communities',
+  'Getting-started and reconnaissance-trip guidance',
+  'Two years of Hub access with quarterly updates',
 ];
 
 const testimonials = [
@@ -241,11 +256,11 @@ export default function Home() {
           <div>
             <div className="text-xs font-semibold text-brand-accent-2 uppercase tracking-wide mb-5">The professional report</div>
             <h2 className="font-brand-serif font-medium text-4xl md:text-5xl leading-tight tracking-tight text-white mb-6">
-              Everything you need in one <span className="italic text-brand-accent-2">document</span>.
+              Your complete relocation <span className="italic text-brand-accent-2">planning stack</span>.
             </h2>
             <p className="text-lg leading-relaxed text-[#b8c8e2] max-w-md mb-10">
-              Written for the exact city you&apos;re targeting. Immigration paperwork, cost analysis,
-              healthcare, taxes, education, and a month-by-month timeline.
+              Personalized to you, your family, priorities, budget, destination, and selected city.
+              Generated on demand, with no wait for a generic report to be prepared.
             </p>
             <div className="flex flex-wrap items-center gap-5 mb-6">
               <div className="flex items-baseline gap-3">
@@ -302,19 +317,70 @@ export default function Home() {
             </div>
             <div className="absolute -right-6 -top-6 px-4 py-3.5 bg-brand-bg text-brand-ink border border-brand-border rounded-lg shadow-xl text-sm font-medium flex items-center gap-2">
               <span className="w-1.5 h-1.5 bg-brand-accent rounded-full" />
-              Ships to your inbox in 48h
+              Personalized &amp; ready on demand
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTIONS GRID */}
+      {/* PURCHASE STACK */}
       <section className="bg-brand-surface border-b border-brand-border">
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">What&apos;s included</div>
-            <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink mb-4">Fourteen sections. No filler.</h2>
-            <p className="text-lg leading-relaxed text-brand-muted">Every report covers the same fourteen dimensions, each researched for your specific destination city.</p>
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">Everything included with your purchase</div>
+            <h2 className="font-brand-serif font-medium text-4xl md:text-5xl leading-tight tracking-tight text-brand-ink mb-5">
+              More than a report. A complete plan for your move.
+            </h2>
+            <p className="text-lg leading-relaxed text-brand-muted">
+              One purchase gives you personalized city-level research, fourteen detailed report sections,
+              an action roadmap, and two years of destination resources in your Relocation Hub.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
+            {[
+              {
+                icon: FileText,
+                title: 'Personalized on demand',
+                desc: 'Generated for your family, priorities, budget, destination, and city—without waiting for a generic report.',
+              },
+              {
+                icon: MapPin,
+                title: 'City-level intelligence',
+                desc: 'Local costs, healthcare, schools, transport, connectivity, safety, culture, and daily-life details.',
+              },
+              {
+                icon: Network,
+                title: 'Relocation Hub',
+                desc: 'Professional resources, destination videos, expat communities, and quarterly updates for two years.',
+              },
+              {
+                icon: Route,
+                title: 'Action roadmap',
+                desc: 'Departure steps and a master relocation timeline that turns research into a practical sequence of actions.',
+              },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.title} className="p-6 bg-brand-bg border border-brand-border rounded-xl">
+                  <div className="w-10 h-10 rounded-lg bg-brand-ink text-brand-accent-2 flex items-center justify-center mb-5">
+                    <Icon className="w-5 h-5" aria-hidden="true" />
+                  </div>
+                  <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-2">{item.title}</h3>
+                  <p className="text-sm leading-relaxed text-brand-muted">{item.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+            <div>
+              <div className="text-xs font-semibold text-brand-accent uppercase tracking-wide mb-3">Inside your personalized report</div>
+              <h3 className="font-brand-serif font-medium text-3xl md:text-4xl text-brand-ink">Fourteen researched sections. No filler.</h3>
+            </div>
+            <p className="text-base leading-relaxed text-brand-muted max-w-md">
+              Every dimension is researched for your selected destination city and organized around the decisions you need to make.
+            </p>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-brand-border border border-brand-border rounded-xl overflow-hidden">
@@ -330,14 +396,46 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="text-center mt-12">
-            <Link
-              to="/assessment"
-              className="inline-flex items-center gap-2 px-7 py-4 bg-brand-btn text-brand-btn-ink rounded-lg font-semibold text-base hover:bg-brand-ink-2 transition-colors"
+          <div className="mt-16 grid lg:grid-cols-[0.8fr_1.2fr] gap-8 lg:gap-12 items-start">
+            <div>
+              <div className="text-xs font-semibold text-brand-accent uppercase tracking-wide mb-4">Your personalized Relocation Hub</div>
+              <h3 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight text-brand-ink mb-5">
+                The people, resources, and local knowledge behind your plan.
+              </h3>
+              <p className="text-base leading-relaxed text-brand-muted mb-6">
+                Your Hub extends the report with practical connections curated around your selected country and city.
+                Report purchasers receive two years of access with quarterly updates.
+              </p>
+              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-brand-accent-2 text-brand-accent-ink text-sm font-semibold">
+                <Check className="w-4 h-4" aria-hidden="true" />
+                Included with your report purchase
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-x-8 gap-y-3 p-6 md:p-8 bg-brand-bg border border-brand-border rounded-xl">
+              {relocationHubAssets.map((asset) => (
+                <div key={asset} className="flex items-start gap-3 text-sm leading-relaxed text-brand-ink">
+                  <Check className="w-4 h-4 mt-0.5 shrink-0 text-brand-accent" aria-hidden="true" />
+                  <span>{asset}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-16 p-7 md:p-10 bg-brand-ink text-white rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-7">
+            <div className="max-w-2xl">
+              <div className="text-xs font-semibold text-brand-accent-2 uppercase tracking-wide mb-3">Your move, organized</div>
+              <h3 className="font-brand-serif font-medium text-3xl text-white mb-3">From research to a clear action roadmap.</h3>
+              <p className="text-base leading-relaxed text-[#b8c8e2]">
+                Connect city-level findings to departure steps, a master relocation timeline, and the decisions you should confirm with qualified professionals.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowEmailModal(true)}
+              className="shrink-0 px-7 py-4 bg-brand-accent-2 text-brand-accent-ink rounded-lg font-semibold text-base hover:brightness-95 transition-all"
             >
-              Start with a free assessment
-              <span className="text-lg leading-none">&rarr;</span>
-            </Link>
+              Get your personalized report
+            </button>
           </div>
         </div>
       </section>
