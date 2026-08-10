@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Heart, DollarSign, Users, Globe, CheckCircle } from 'lucide-react';
+import { Shield, Heart, DollarSign, Users, Globe, CheckCircle, Landmark, FileCheck, RefreshCw } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import { useSEO } from '../hooks/useSEO';
@@ -51,10 +51,16 @@ export default function AboutUs() {
                   to school due to gun violence.
                 </p>
                 <p>
-                  Our founder, an attorney and author, has traveled extensively and has been involved
-                  with international emigration and immigration entities and other consultants for over
-                  a decade, but realized that what was missing was a comprehensive solution to provide
-                  those seeking to emigrate from the U.S. was missing.
+                  Emigration Pro was founded by G. Lynn Thorpe, Esq., a graduate of Columbia University
+                  School of Law and an international attorney. For more than a decade, Mr. Thorpe has
+                  been a member of International Living, learning about the many options available to
+                  Americans who are considering a move abroad.
+                </p>
+                <p>
+                  Mr. Thorpe has traveled extensively in search of high-quality international living
+                  opportunities. Through that experience, he recognized the need for a comprehensive,
+                  accessible resource that could help Americans understand and compare their options.
+                  EmigrationPro.com was created to provide that useful, decision-ready information.
                 </p>
                 <p>
                   Through extensive research across dozens of countries, we've identified destinations
@@ -72,6 +78,54 @@ export default function AboutUs() {
                   style={{ filter: 'saturate(0.9)' }}
                 />
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Government Sources & Report Methodology */}
+      <section className="border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
+          <div className="max-w-3xl mb-12">
+            <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">Our Research Process</div>
+            <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink mb-6">
+              Government Sources &amp; Report Methodology
+            </h2>
+            <p className="text-lg leading-relaxed text-brand-muted">
+              Governmental sources are a key part of our report-generation process. We use information
+              published by relevant national, regional, and local government authorities to research
+              immigration pathways, residency requirements, taxes, healthcare, public safety, and other
+              factors that may affect a move abroad.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-brand-surface p-7 rounded-xl border border-brand-border">
+              <Landmark className="w-7 h-7 text-brand-accent mb-5" />
+              <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-3">Official Sources First</h3>
+              <p className="text-sm leading-relaxed text-brand-muted">
+                Whenever available, we prioritize official government websites, agencies, embassies,
+                consulates, statistical offices, and published laws or regulations.
+              </p>
+            </div>
+
+            <div className="bg-brand-surface p-7 rounded-xl border border-brand-border">
+              <FileCheck className="w-7 h-7 text-brand-accent mb-5" />
+              <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-3">Careful Synthesis</h3>
+              <p className="text-sm leading-relaxed text-brand-muted">
+                We organize and explain source material in a practical format so readers can compare
+                destinations and better understand the considerations relevant to them.
+              </p>
+            </div>
+
+            <div className="bg-brand-surface p-7 rounded-xl border border-brand-border">
+              <RefreshCw className="w-7 h-7 text-brand-accent mb-5" />
+              <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-3">Verify Current Rules</h3>
+              <p className="text-sm leading-relaxed text-brand-muted">
+                Laws, programs, fees, and eligibility rules can change. Reports are informational, and
+                readers should confirm current requirements with the responsible authority or a qualified
+                professional before acting.
+              </p>
             </div>
           </div>
         </div>

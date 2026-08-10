@@ -121,13 +121,16 @@ export default function Home() {
               data, where others only provide country-level data.
             </p>
             <div className="flex flex-wrap items-center gap-4 mb-8">
-              <Link
-                to="/assessment"
-                className="inline-flex items-center gap-2 px-7 py-4 bg-brand-btn text-brand-btn-ink rounded-lg font-semibold text-base hover:bg-brand-ink-2 transition-colors"
-              >
-                Start free assessment
-                <span className="text-lg leading-none">&rarr;</span>
-              </Link>
+              <div className="flex flex-col gap-1.5 items-center">
+                <Link
+                  to="/assessment"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-brand-btn text-brand-btn-ink rounded-lg font-semibold text-base hover:bg-brand-ink-2 transition-colors w-full md:w-auto"
+                >
+                  Start free assessment
+                  <span className="text-lg leading-none">&rarr;</span>
+                </Link>
+                <span className="text-[13px] text-brand-muted font-medium">Find the City that suits you best.</span>
+              </div>
               <a
                 href="#report"
                 className="px-6 py-4 text-brand-ink border border-brand-border-strong rounded-lg font-semibold text-base bg-brand-bg hover:bg-brand-surface transition-colors"
@@ -220,12 +223,15 @@ export default function Home() {
               <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-4">Popular destinations</div>
               <h2 className="font-brand-serif font-medium text-4xl leading-tight tracking-tight text-brand-ink max-w-xl">Where Americans are landing, and why.</h2>
             </div>
-            <Link
-              to="/assessment"
-              className="shrink-0 inline-flex items-center gap-2 text-sm font-semibold text-white bg-[#15803d] px-[18px] py-2.5 rounded-lg hover:bg-[#166534] transition-colors self-start"
-            >
-              Get Your Free Assessment &rarr;
-            </Link>
+            <div className="flex flex-col gap-1.5 self-start shrink-0 items-center">
+              <Link
+                to="/assessment"
+                className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-[#15803d] px-[18px] py-2.5 rounded-lg hover:bg-[#166534] transition-colors w-full"
+              >
+                Get Your Free Assessment &rarr;
+              </Link>
+              <span className="text-xs text-brand-muted font-medium">Find the City that suits you best.</span>
+            </div>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
