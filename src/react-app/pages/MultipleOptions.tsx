@@ -7,9 +7,9 @@ import { PAGE_SEO } from '@/shared/page-seo';
 
 const VIDEOS = [
   {
-    id: 'gFWDM0xDROw',
-    title: 'Replace your job',
-    description: 'Understanding the pillars of a sustainable online business model to replace your 9-to-5.',
+    id: 'VzhY_-IYwoU',
+    title: '8 Claude AI Side Hustles That Replace Your Job',
+    description: 'A range of AI-powered side hustle ideas to build multiple income streams.',
   },
 ];
 

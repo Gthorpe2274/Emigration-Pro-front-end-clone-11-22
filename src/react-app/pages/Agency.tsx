@@ -7,8 +7,8 @@ import { PAGE_SEO } from '@/shared/page-seo';
 
 const VIDEOS = [
   {
-    id: 'VzhY_-IYwoU',
-    title: 'Social media machine',
+    id: 'gFWDM0xDROw',
+    title: 'Build a Social Media Machine',
     description: 'Advanced strategies for growing your agency and scaling earning power through social media.',
   },
 ];
