@@ -414,7 +414,7 @@ app.post('/api/admin/login', async (c) => {
   const { username, password } = await c.req.json();
   // The standalone system login supplies both fields. Blog Admin historically
   // used a password-only form, so username remains optional for that client.
-  const passwordIsValid = password === 'admin#123' || password === c.env.ADMIN_PASSWORD;
+  const passwordIsValid = Boolean(c.env.ADMIN_PASSWORD) && password === c.env.ADMIN_PASSWORD;
   if ((username && username !== c.env.ADMIN_USERNAME) || !passwordIsValid) {
     await c.env.REPORTS_KV.put(attemptsKey, String(attempts + 1), { expirationTtl: 900 });
     return c.json({ error: 'Invalid credentials' }, 401);
@@ -873,11 +873,8 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
 });
 
 // CRM - Get all purchasers
-app.get('/api/admin/crm/purchasers', async (c) => {
+app.get('/api/admin/crm/purchasers', adminAuth, async (c) => {
   try {
-    // In a real app, we would verify the admin session/token here
-    // For now, we rely on the frontend password protection (low security)
-
     const { results } = await c.env.DB.prepare(`
       SELECT 
         r.id, r.email, r.session_code, r.assessment_id, r.purchase_confirmed, r.is_active, r.is_archived, r.created_at, r.expires_at,
@@ -905,7 +902,7 @@ app.get('/api/admin/crm/purchasers', async (c) => {
 });
 
 // CRM - Update purchaser
-app.put('/api/admin/crm/purchasers/:id', async (c) => {
+app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
   try {
     const id = c.req.param('id');
     const body = await c.req.json();
@@ -950,7 +947,7 @@ app.put('/api/admin/crm/purchasers/:id', async (c) => {
 });
 
 // CRM - Delete purchaser permanently
-app.delete('/api/admin/crm/purchasers/:id', async (c) => {
+app.delete('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
   try {
     const id = c.req.param('id');
 

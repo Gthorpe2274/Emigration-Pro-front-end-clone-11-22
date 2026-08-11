@@ -10,11 +10,6 @@ export default function AdminLogin() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (password !== 'admin#123') {
-            setError('Incorrect password.');
-            setPassword('');
-            return;
-        }
         try {
             const apiBase = window.location.hostname.includes('netlify.app')
                 ? 'https://emigration-pro.aiservices4biz.workers.dev'

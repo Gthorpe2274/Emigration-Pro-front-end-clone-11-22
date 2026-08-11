@@ -19,27 +19,30 @@ export default function SystemLogin() {
     setError('');
 
     try {
-      // Simulate a brief loading delay for security appearance
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      if (password === 'admin#123') {
-        // Store login status in sessionStorage
-        sessionStorage.setItem('adminAuth', 'true');
-        
-        // Force a small delay to ensure sessionStorage is set
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Check if there's a redirect parameter, otherwise go to CRM
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirectTo = urlParams.get('redirect') || '/admin/crm';
-        navigate(redirectTo, { replace: true });
-      } else {
-        setError('Invalid password. Access denied.');
-        setLoading(false);
+      const apiBase = window.location.hostname.includes('netlify.app')
+        ? 'https://emigration-pro.aiservices4biz.workers.dev'
+        : '';
+      const response = await fetch(`${apiBase}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.token) {
+        throw new Error(data.error || 'Invalid password. Access denied.');
       }
+
+      sessionStorage.setItem('adminToken', data.token);
+      sessionStorage.setItem('blogAdminToken', data.token);
+      sessionStorage.setItem('adminAuth', 'true');
+
+      // Check if there's a redirect parameter, otherwise go to CRM
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectTo = urlParams.get('redirect') || '/admin/crm';
+      navigate(redirectTo, { replace: true });
     } catch (error) {
       console.error('Login error:', error);
-      setError('Login failed. Please try again.');
+      setError(error instanceof Error ? error.message : 'Login failed. Please try again.');
       setLoading(false);
     }
   };

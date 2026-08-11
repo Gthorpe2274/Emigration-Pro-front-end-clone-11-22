@@ -42,11 +42,14 @@ npx wrangler deploy --config wrangler.json
 ```
 
 ## 4. Environment Variables & Secrets
-The following secrets are set in the Cloudflare Worker environment:
+The following secrets must be set in the Cloudflare Worker environment:
 
--   `BLOG_ADMIN_API_KEY`: Password for blog admin actions (set to `admin#123`).
+-   `ADMIN_PASSWORD`: Password checked by `/api/admin/login` (gates Admin Login, Blog Admin, and CRM). **Required** — as of 2026-08-11 there is no hardcoded fallback, so if this is unset, admin login will fail closed for everyone.
+-   `ADMIN_USERNAME`: (Optional) Only enforced if the login client sends a `username` field; the standalone system login does, Blog Admin historically has not.
 -   `GEMINI_API_KEY`: (Optional) For AI features.
 -   `OPENAI_API_KEY`: (Optional) Fallback for AI features.
+
+> Note: an older revision of this doc referenced `BLOG_ADMIN_API_KEY` set to a hardcoded `admin#123` value. That password was hardcoded client-side in multiple pages and, separately, hardcoded server-side as a permanent bypass in the login endpoint regardless of any secret's value. Both were removed as a security fix — verify `ADMIN_PASSWORD` is set with `npx wrangler secret list` before relying on admin login post-deploy.
 
 To update a secret:
 ```bash

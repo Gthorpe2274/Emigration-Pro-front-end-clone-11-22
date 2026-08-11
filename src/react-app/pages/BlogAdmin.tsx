@@ -83,11 +83,6 @@ export default function BlogAdmin() {
   // Handle login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== 'admin#123') {
-      setLoginError('Incorrect password. Please try again.');
-      setPassword('');
-      return;
-    }
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/admin/login`, {
         method: 'POST',

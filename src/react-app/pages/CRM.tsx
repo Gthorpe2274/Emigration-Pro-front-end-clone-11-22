@@ -4,6 +4,14 @@ import { Users, Mail, Key, Calendar, MapPin, Search, Download, Edit, Archive, Tr
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 
+// If running on Netlify, use the Cloudflare Workers API host; otherwise use a relative URL.
+const getApiBaseUrl = () => {
+  if (window.location.hostname.includes('netlify.app')) {
+    return 'https://emigration-pro.aiservices4biz.workers.dev';
+  }
+  return '';
+};
+
 interface Purchaser {
   id: number;
   email: string;
@@ -20,18 +28,17 @@ interface Purchaser {
 }
 
 export default function CRM() {
-  // Authentication state - using same pattern as BlogAdmin
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('adminAuth') === 'true';
-  });
+  // Authentication state - token issued by the server on successful login.
+  const [adminToken, setAdminToken] = useState(() =>
+    sessionStorage.getItem('adminToken') || sessionStorage.getItem('blogAdminToken') || ''
+  );
+  const isAuthenticated = Boolean(adminToken);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
 
   const [purchasers, setPurchasers] = useState<Purchaser[]>([]);
-  const [loading, setLoading] = useState(() => {
-    // Only set loading to true if already authenticated
-    return sessionStorage.getItem('adminAuth') === 'true';
-  });
+  const [loading, setLoading] = useState(() => Boolean(sessionStorage.getItem('adminToken') || sessionStorage.getItem('blogAdminToken')));
   const [searchTerm, setSearchTerm] = useState('');
   const [searchDate, setSearchDate] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive' | 'archived'>('all');
@@ -47,43 +54,61 @@ export default function CRM() {
     purchase_confirmed: 0
   });
 
-  // Handle login
-  const handleLogin = (e: React.FormEvent) => {
+  // Handle login - authenticates against the server; no password is ever compared client-side.
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'admin#123') {
+    setLoginLoading(true);
+    setLoginError('');
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.token) {
+        throw new Error(data.error || 'Incorrect password. Please try again.');
+      }
+      sessionStorage.setItem('adminToken', data.token);
+      sessionStorage.setItem('blogAdminToken', data.token);
       sessionStorage.setItem('adminAuth', 'true');
-      setIsAuthenticated(true);
-      setLoginError('');
-    } else {
-      setLoginError('Incorrect password. Please try again.');
+      setAdminToken(data.token);
       setPassword('');
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : 'Unable to sign in.');
+      setPassword('');
+    } finally {
+      setLoginLoading(false);
     }
   };
 
   // Handle logout
   const handleLogout = () => {
+    sessionStorage.removeItem('adminToken');
+    sessionStorage.removeItem('blogAdminToken');
     sessionStorage.removeItem('adminAuth');
-    setIsAuthenticated(false);
+    setAdminToken('');
     setPassword('');
   };
 
   useEffect(() => {
-    // Always check authentication status on mount
-    const authStatus = sessionStorage.getItem('adminAuth') === 'true';
-    console.log('CRM Auth Check:', authStatus, 'Value:', sessionStorage.getItem('adminAuth'));
-    setIsAuthenticated(authStatus);
-
-    if (authStatus) {
+    if (adminToken) {
       fetchPurchasers();
     } else {
-      // If not authenticated, ensure loading is false so login form can show
       setLoading(false);
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adminToken]);
 
   const fetchPurchasers = async () => {
     try {
-      const response = await fetch('/api/admin/crm/purchasers');
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      if (response.status === 401) {
+        handleLogout();
+        return;
+      }
       const data = await response.json();
 
       if (data.success) {
@@ -112,10 +137,11 @@ export default function CRM() {
     if (!confirm(`Are you sure you want to ${archive ? 'archive' : 'unarchive'} this purchaser?`)) return;
 
     try {
-      const response = await fetch(`/api/admin/crm/purchasers/${purchaser.id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers/${purchaser.id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`
         },
         body: JSON.stringify({
           ...purchaser,
@@ -141,8 +167,9 @@ export default function CRM() {
     if (!confirm('Are you sure you want to PERMANENTLY DELETE this purchaser? This action cannot be undone.')) return;
 
     try {
-      const response = await fetch(`/api/admin/crm/purchasers/${id}`, {
-        method: 'DELETE'
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${adminToken}` }
       });
 
       const data = await response.json();
@@ -164,10 +191,11 @@ export default function CRM() {
     if (!editingPurchaser) return;
 
     try {
-      const response = await fetch(`/api/admin/crm/purchasers/${editingPurchaser.id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers/${editingPurchaser.id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`
         },
         body: JSON.stringify(editForm)
       });
@@ -288,9 +316,10 @@ export default function CRM() {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105"
+              disabled={loginLoading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              Login
+              {loginLoading ? 'Signing in…' : 'Login'}
             </button>
           </form>
 
