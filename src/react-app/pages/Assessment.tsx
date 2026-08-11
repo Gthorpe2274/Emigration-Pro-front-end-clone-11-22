@@ -48,6 +48,8 @@ export default function Assessment() {
     title: PAGE_SEO['/assessment'].title,
     description: PAGE_SEO['/assessment'].description,
     canonicalPath: '/assessment',
+    image: PAGE_SEO['/assessment'].image,
+    imageAlt: PAGE_SEO['/assessment'].imageAlt,
   });
 
   const navigate = useNavigate();

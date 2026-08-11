@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Globe, Zap, Target, Award, Youtube } from 'lucide-react';
+import { ArrowLeft, Globe, Zap, Target, Award } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import { useSEO } from '@/react-app/hooks/useSEO';
@@ -88,9 +88,9 @@ export default function LivingWageBusiness() {
                 description: 'Offer scalable, specialized services to clients worldwide.',
               }
             ].map((category) => (
-              <Link 
+              <Link
                 key={category.id}
-                to={`#${category.id}`} 
+                to={`/${category.id}`}
                 className="group flex flex-col bg-brand-surface rounded-2xl overflow-hidden border border-brand-border hover:border-brand-accent transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
@@ -112,97 +112,6 @@ export default function LivingWageBusiness() {
               </Link>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Category Resources Sections */}
-      <section className="bg-brand-surface border-b border-brand-border">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
-          
-          <div id="multiple-options" className="mb-20 scroll-mt-24">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="inline-flex items-center justify-center w-10 h-10 bg-brand-bg border border-brand-border rounded-xl">
-                <Youtube className="w-5 h-5 text-brand-accent" />
-              </div>
-              <h2 className="font-brand-serif font-medium text-3xl text-brand-ink">Multiple Options</h2>
-            </div>
-            <div className="grid lg:grid-cols-2 gap-8">
-              <div className="bg-brand-bg p-4 rounded-xl border border-brand-border shadow-sm">
-                <div className="aspect-video mb-6 overflow-hidden rounded-lg border border-brand-border bg-brand-surface">
-                  <iframe
-                    className="w-full h-full"
-                    src="https://www.youtube.com/embed/gFWDM0xDROw"
-                    title="Replace your job"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-                <h3 className="font-brand-serif text-xl font-medium text-brand-ink px-2 mb-2">Replace your job</h3>
-                <p className="text-sm leading-relaxed text-brand-muted px-2 pb-2">Understanding the pillars of a sustainable online business model to replace your 9-to-5.</p>
-              </div>
-            </div>
-          </div>
-
-          <div id="youtuber" className="mb-20 scroll-mt-24">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="inline-flex items-center justify-center w-10 h-10 bg-brand-bg border border-brand-border rounded-xl">
-                <Youtube className="w-5 h-5 text-brand-accent" />
-              </div>
-              <h2 className="font-brand-serif font-medium text-3xl text-brand-ink">Youtuber</h2>
-            </div>
-            <div className="bg-brand-bg p-8 rounded-xl border border-brand-border shadow-sm">
-              <p className="text-sm leading-relaxed text-brand-muted">Build an audience and monetize through ads and sponsorships. Resources for this category are coming soon.</p>
-            </div>
-          </div>
-
-          <div id="affiliate" className="mb-20 scroll-mt-24">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="inline-flex items-center justify-center w-10 h-10 bg-brand-bg border border-brand-border rounded-xl">
-                <Globe className="w-5 h-5 text-brand-accent" />
-              </div>
-              <h2 className="font-brand-serif font-medium text-3xl text-brand-ink">Affiliate</h2>
-            </div>
-            <div className="bg-brand-bg p-8 rounded-xl border border-brand-border shadow-sm">
-              <p className="text-sm leading-relaxed text-brand-muted">Earn commissions by promoting products you trust. Resources for this category are coming soon.</p>
-            </div>
-          </div>
-
-          <div id="digital-sales" className="mb-20 scroll-mt-24">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="inline-flex items-center justify-center w-10 h-10 bg-brand-bg border border-brand-border rounded-xl">
-                <Zap className="w-5 h-5 text-brand-accent" />
-              </div>
-              <h2 className="font-brand-serif font-medium text-3xl text-brand-ink">Digital Sales</h2>
-            </div>
-            <div className="bg-brand-bg p-8 rounded-xl border border-brand-border shadow-sm">
-              <p className="text-sm leading-relaxed text-brand-muted">Create and sell digital products, courses, and software. Resources for this category are coming soon.</p>
-            </div>
-          </div>
-
-          <div id="agency" className="scroll-mt-24">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="inline-flex items-center justify-center w-10 h-10 bg-brand-bg border border-brand-border rounded-xl">
-                <Youtube className="w-5 h-5 text-brand-accent" />
-              </div>
-              <h2 className="font-brand-serif font-medium text-3xl text-brand-ink">Agency</h2>
-            </div>
-            <div className="grid lg:grid-cols-2 gap-8">
-              <div className="bg-brand-bg p-4 rounded-xl border border-brand-border shadow-sm">
-                <div className="aspect-video mb-6 overflow-hidden rounded-lg border border-brand-border bg-brand-surface">
-                  <iframe
-                    className="w-full h-full"
-                    src="https://www.youtube.com/embed/VzhY_-IYwoU"
-                    title="Social media machine"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-                <h3 className="font-brand-serif text-xl font-medium text-brand-ink px-2 mb-2">Social media machine</h3>
-                <p className="text-sm leading-relaxed text-brand-muted px-2 pb-2">Advanced strategies for growing your agency and scaling earning power through social media.</p>
-              </div>
-            </div>
-          </div>
-
         </div>
       </section>
 

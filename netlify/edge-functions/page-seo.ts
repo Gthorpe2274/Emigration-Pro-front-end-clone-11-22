@@ -56,6 +56,16 @@ export default async function handler(request: Request, context: Context) {
     html = setMetaContent(html, 'og:title', title);
     html = setMetaContent(html, 'og:description', seo.description);
     html = setMetaContent(html, 'og:url', url);
+    html = setMetaContent(html, 'og:type', 'website');
+    if (seo.image) {
+      const image = `${SITE_ORIGIN}${seo.image}`;
+      html = setMetaContent(html, 'og:image', image);
+      html = setMetaContent(html, 'twitter:image', image);
+    }
+    if (seo.imageAlt) {
+      html = setMetaContent(html, 'og:image:alt', seo.imageAlt);
+      html = html.replace('</head>', `<meta name="twitter:image:alt" content="${esc(seo.imageAlt)}" /></head>`);
+    }
     html = setMetaContent(html, 'twitter:title', title);
     html = setMetaContent(html, 'twitter:description', seo.description);
     html = html.replace(

@@ -10,6 +10,8 @@ export default function AboutUs() {
     title: PAGE_SEO['/about'].title,
     description: PAGE_SEO['/about'].description,
     canonicalPath: '/about',
+    image: PAGE_SEO['/about'].image,
+    imageAlt: PAGE_SEO['/about'].imageAlt,
   });
 
   return (

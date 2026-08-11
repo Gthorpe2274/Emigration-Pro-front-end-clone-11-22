@@ -1,5 +1,6 @@
 import type { Config, Context } from '@netlify/edge-functions';
 import { KEY_PAGES } from '../../src/shared/page-seo.ts';
+import { GLOSSARY_TERMS } from '../../src/shared/glossary-data.ts';
 
 /**
  * Server-side SEO for blog posts.
@@ -55,6 +56,10 @@ function summarize(post: BlogPost): string {
   const plain = toPlainText(post.excerpt?.trim() || post.body);
   if (plain.length <= 160) return plain;
   return `${plain.slice(0, 157).replace(/\s+\S*$/, '')}…`;
+}
+
+function glossaryId(term: string): string {
+  return term.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
 /** Replace a meta tag's content attribute, matched on either name= or property=. */
@@ -132,6 +137,12 @@ export default async function handler(request: Request, context: Context) {
     // The article itself, for crawlers that never run React. Capped so a long post does
     // not bloat the shell; enough for an answer engine to understand and cite the page.
     const articleText = toPlainText(post.body).slice(0, 12000);
+    const searchableArticle = `${post.title} ${post.excerpt || ''} ${articleText}`.toLowerCase();
+    const glossaryLinks = GLOSSARY_TERMS
+      .filter((entry) => searchableArticle.includes(entry.term.toLowerCase()))
+      .slice(0, 6)
+      .map((entry) => `<li><a href="${SITE_ORIGIN}/moving-abroad-glossary#${glossaryId(entry.term)}">${esc(entry.term)}</a></li>`)
+      .join('');
 
     html = html.replace(
       '</head>',
@@ -153,6 +164,7 @@ export default async function handler(request: Request, context: Context) {
       `<article data-seo-prerendered="true"><h1>${esc(post.title)}</h1>` +
         `<p><em>${esc(description)}</em></p>` +
         `<p>${esc(articleText)}</p>` +
+        (glossaryLinks ? `<nav><h2>Terms used in this guide</h2><ul>${glossaryLinks}</ul></nav>` : '') +
         `<nav><h2>Plan your own move</h2><ul>${relatedLinks}` +
         `<li><a href="${SITE_ORIGIN}/blog">More relocation guides</a></li></ul></nav>` +
         `</article>`;

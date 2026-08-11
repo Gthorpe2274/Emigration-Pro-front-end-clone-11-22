@@ -28,6 +28,8 @@ export default function Glossary() {
     title: seo.title,
     description: seo.description,
     canonicalPath: '/moving-abroad-glossary',
+    image: seo.image,
+    imageAlt: seo.imageAlt,
     jsonLd: [
       {
         '@context': 'https://schema.org',

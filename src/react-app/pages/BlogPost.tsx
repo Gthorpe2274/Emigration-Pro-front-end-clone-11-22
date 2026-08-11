@@ -6,6 +6,7 @@ import BlogIndex from '../components/BlogIndex';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
 import { useSEO } from '../hooks/useSEO';
 import { KEY_PAGES } from '@/shared/page-seo';
+import { GLOSSARY_TERMS } from '@/shared/glossary-data';
 import { applyBlogImageAlt, getBlogImageAlt } from '../utils/blogImageAlt';
 
 interface BlogPostType {
@@ -36,6 +37,10 @@ function summarize(excerpt: string | undefined, body: string): string {
   if (plain.length <= 160) return plain;
   // Cut on a word boundary so the description doesn't end mid-word.
   return `${plain.slice(0, 157).replace(/\s+\S*$/, '')}…`;
+}
+
+function glossaryId(term: string): string {
+  return term.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
 export default function BlogPost() {
@@ -173,6 +178,10 @@ export default function BlogPost() {
   }
 
   const imageAlt = getBlogImageAlt(post.title, post.slug);
+  const searchablePost = `${post.title} ${post.excerpt || ''} ${post.body}`.toLowerCase();
+  const relevantGlossaryTerms = GLOSSARY_TERMS.filter((entry) =>
+    searchablePost.includes(entry.term.toLowerCase())
+  ).slice(0, 6);
 
   return (
     <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
@@ -277,6 +286,21 @@ export default function BlogPost() {
                     </>
                   );
                 })()}
+
+                {relevantGlossaryTerms.length > 0 && (
+                  <nav aria-label="Glossary definitions mentioned in this article" className="mt-12 p-6 bg-brand-bg border border-brand-border rounded-xl">
+                    <h2 className="font-brand-serif font-medium text-2xl text-brand-ink mb-4">Terms used in this guide</h2>
+                    <ul className="flex flex-wrap gap-3">
+                      {relevantGlossaryTerms.map((entry) => (
+                        <li key={entry.term}>
+                          <Link className="inline-block px-4 py-2 bg-brand-surface border border-brand-border rounded-lg text-brand-accent hover:border-brand-accent" to={`/moving-abroad-glossary#${glossaryId(entry.term)}`}>
+                            {entry.term}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                )}
 
                 {/*
                   Real in-content links to the conversion pages. The CTA below this

@@ -11,6 +11,8 @@ interface SEOProps {
   canonicalPath?: string;
   /** Absolute URL, or a site-relative path starting with '/'. */
   image?: string;
+  /** Accessible description for social preview images. */
+  imageAlt?: string;
   /** og:type — 'website' for most pages, 'article' for blog posts. */
   type?: 'website' | 'article';
   /** Keeps a page out of search results. Use on admin and per-customer pages. */
@@ -57,6 +59,7 @@ export function useSEO({
   description,
   canonicalPath,
   image,
+  imageAlt,
   type = 'website',
   noindex = false,
   jsonLd,
@@ -83,7 +86,9 @@ export function useSEO({
     setMeta('property', 'og:type', type);
     setMeta('property', 'og:site_name', SITE_NAME);
     setMeta('property', 'og:image', imageUrl);
+    if (imageAlt) setMeta('property', 'og:image:alt', imageAlt);
     setMeta('name', 'twitter:image', imageUrl);
+    if (imageAlt) setMeta('name', 'twitter:image:alt', imageAlt);
     setMeta('name', 'twitter:card', 'summary_large_image');
     setMeta(
       'name',
@@ -112,5 +117,5 @@ export function useSEO({
     return () => {
       script?.remove();
     };
-  }, [title, description, canonicalPath, image, type, noindex, serializedJsonLd, appendSiteName]);
+  }, [title, description, canonicalPath, image, imageAlt, type, noindex, serializedJsonLd, appendSiteName]);
 }

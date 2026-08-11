@@ -72,6 +72,8 @@ export default function Home() {
     title: PAGE_SEO['/'].title,
     description: PAGE_SEO['/'].description,
     canonicalPath: '/',
+    image: PAGE_SEO['/'].image,
+    imageAlt: PAGE_SEO['/'].imageAlt,
     appendSiteName: !PAGE_SEO['/'].standaloneTitle,
     // Deliberately not FAQPage: Google requires FAQ markup to mirror Q&A text that is
     // actually visible on the page, and this page is not laid out as Q&A.

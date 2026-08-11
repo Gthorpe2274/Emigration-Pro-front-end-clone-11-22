@@ -133,6 +133,8 @@ export default function BestCountries() {
     title: PAGE_SEO['/best-countries'].title,
     description: PAGE_SEO['/best-countries'].description,
     canonicalPath: '/best-countries',
+    image: PAGE_SEO['/best-countries'].image,
+    imageAlt: PAGE_SEO['/best-countries'].imageAlt,
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'ItemList',

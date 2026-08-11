@@ -26,6 +26,11 @@ import BlogAdmin from './pages/BlogAdmin';
 import Blog from './pages/Blog';
 import EarnAbroad from './pages/EarnAbroad';
 import LivingWageBusiness from './pages/LivingWageBusiness';
+import DigitalSales from './pages/DigitalSales';
+import MultipleOptions from './pages/MultipleOptions';
+import Youtuber from './pages/Youtuber';
+import Affiliate from './pages/Affiliate';
+import Agency from './pages/Agency';
 import FileConverter from './pages/FileConverter';
 import AdminReportGen from './pages/AdminReportGen';
 import CheckoutReport from './pages/CheckoutReport';
@@ -67,6 +72,11 @@ function App() {
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/earn-abroad" element={<EarnAbroad />} />
         <Route path="/living-wage-business" element={<LivingWageBusiness />} />
+        <Route path="/digital-sales" element={<DigitalSales />} />
+        <Route path="/multiple-options" element={<MultipleOptions />} />
+        <Route path="/youtuber" element={<Youtuber />} />
+        <Route path="/affiliate" element={<Affiliate />} />
+        <Route path="/agency" element={<Agency />} />
         <Route path="/file-converter" element={<NoIndex title="File Converter"><FileConverter /></NoIndex>} />
       </Routes>
     </Router>

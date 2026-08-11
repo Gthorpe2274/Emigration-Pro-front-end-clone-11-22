@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import { useSEO } from '@/react-app/hooks/useSEO';
+import { PAGE_SEO } from '@/shared/page-seo';
 
 export function SampleReport() {
   const location = useLocation();
@@ -12,6 +13,8 @@ export function SampleReport() {
     description:
       'Explore a sample Emigration Pro relocation report for Bangkok, including visas, employment, healthcare, costs, safety, infrastructure, education, and relocation planning.',
     canonicalPath: '/sample-report',
+    image: PAGE_SEO['/sample-report'].image,
+    imageAlt: PAGE_SEO['/sample-report'].imageAlt,
   });
 
   return (

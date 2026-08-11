@@ -26,6 +26,9 @@ export interface PageSEO {
   links?: { href: string; label: string }[];
   /** Set when the title is already complete and should not get " | Emigration Pro". */
   standaloneTitle?: boolean;
+  /** Site-relative OpenGraph/Twitter card used by both React and the edge renderer. */
+  image?: string;
+  imageAlt?: string;
 }
 
 /**
@@ -65,6 +68,8 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   '/': {
     title: 'Emigration Pro — Plan Your Move Abroad from the U.S.',
     standaloneTitle: true,
+    image: '/og/home.jpg',
+    imageAlt: 'A serious plan for leaving the U.S. — Emigration Pro',
     description:
       'Plan your move abroad from the U.S. Take the free country-match assessment, then get a personalized report on visas, cost of living, healthcare and taxes.',
     heading: 'Plan your move abroad from the United States',
@@ -75,6 +80,8 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     ],
   },
   '/assessment': {
+    image: '/og/assessment.jpg',
+    imageAlt: 'Find countries that fit your life — Emigration Pro country-match assessment',
     title: 'Free Country-Match Assessment',
     description:
       'Answer a structured questionnaire about your budget, profession, family and priorities to see which countries realistically fit your move abroad from the U.S.',
@@ -85,6 +92,8 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     ],
   },
   '/best-countries': {
+    image: '/og/best-countries.jpg',
+    imageAlt: 'Popular countries for American expats — Emigration Pro',
     title: 'Best Countries for American Expats',
     description:
       'Portugal, Spain, Mexico, Costa Rica, Germany and Canada compared for Americans moving abroad — residency routes, cost of living, healthcare and safety.',
@@ -95,6 +104,8 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     ],
   },
   '/sample-report': {
+    image: '/og/sample-report.jpg',
+    imageAlt: 'Sample relocation report for Bangkok — Emigration Pro',
     title: 'Sample Relocation Report — Bangkok, Thailand',
     description:
       'Explore a 14-section Emigration Pro relocation report for Bangkok covering visas, employment, healthcare, costs, safety, infrastructure and education.',
@@ -124,6 +135,56 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       'Aimed at people who need income to travel with them, rather than a side project — including how much runway to expect before the income is dependable.',
     ],
   },
+  '/multiple-options': {
+    title: 'Multiple Options — Living Wage Online Business',
+    description:
+      'Explore various online business models and hybrid approaches to income while relocating abroad.',
+    heading: 'Multiple Options',
+    summary: [
+      'Curated video resources on combining or hybridizing online business models rather than committing to a single income path.',
+      'Part of the Living Wage Online Business guide, covering one of several income-producing business models for people relocating abroad.',
+    ],
+  },
+  '/youtuber': {
+    title: 'Youtuber — Living Wage Online Business',
+    description:
+      'Build an audience and monetize through ads and sponsorships as an online income model while relocating abroad.',
+    heading: 'Youtuber',
+    summary: [
+      'Curated video resources on building an audience and monetizing through ads and sponsorships.',
+      'Part of the Living Wage Online Business guide, covering one of several income-producing business models for people relocating abroad.',
+    ],
+  },
+  '/affiliate': {
+    title: 'Affiliate — Living Wage Online Business',
+    description:
+      'Earn commissions by promoting products you trust as an online income model while relocating abroad.',
+    heading: 'Affiliate',
+    summary: [
+      'Curated video resources on earning commissions by promoting products you trust.',
+      'Part of the Living Wage Online Business guide, covering one of several income-producing business models for people relocating abroad.',
+    ],
+  },
+  '/agency': {
+    title: 'Agency — Living Wage Online Business',
+    description:
+      'Offer scalable, specialized services to clients worldwide as an online income model while relocating abroad.',
+    heading: 'Agency',
+    summary: [
+      'Curated video resources on offering scalable, specialized services to clients worldwide.',
+      'Part of the Living Wage Online Business guide, covering one of several income-producing business models for people relocating abroad.',
+    ],
+  },
+  '/digital-sales': {
+    title: 'Digital Sales — Living Wage Online Business',
+    description:
+      'Create and sell digital products, courses, and software. Curated videos on building and scaling an Amazon KDP and digital product business.',
+    heading: 'Digital Sales',
+    summary: [
+      'Curated video resources on creating and selling digital products, courses, and software — including Amazon KDP publishing and marketing strategy.',
+      'Part of the Living Wage Online Business guide, covering one of several income-producing business models for people relocating abroad.',
+    ],
+  },
   '/blog': {
     title: 'Relocation Guides & Visa News for American Expats',
     description:
@@ -134,6 +195,8 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     ],
   },
   '/about': {
+    image: '/og/about.jpg',
+    imageAlt: 'About Emigration Pro and its relocation research methodology',
     title: 'About Emigration Pro',
     description:
       'Who runs Emigration Pro, how the relocation research is produced, and what the service does and does not do.',
@@ -145,6 +208,8 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     ],
   },
   '/moving-abroad-glossary': {
+    image: '/og/glossary.jpg',
+    imageAlt: 'Moving Abroad Glossary — Emigration Pro',
     title: 'Moving Abroad Glossary for Americans',
     description:
       'Understand 25 essential moving-abroad terms covering visas, residency, documents, U.S. taxes, healthcare and international relocation.',
