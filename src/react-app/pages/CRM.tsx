@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Mail, Key, Calendar, MapPin, Search, Download, Edit } from 'lucide-react';
+import { Users, Mail, Key, Calendar, MapPin, Search, Download, Edit, Archive, Trash2, RotateCcw } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 
@@ -11,6 +11,7 @@ interface Purchaser {
   assessment_id: number;
   purchase_confirmed: number;
   is_active: number;
+  is_archived: number;
   created_at: string;
   expires_at: string;
   preferred_country: string;
@@ -33,7 +34,7 @@ export default function CRM() {
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [searchDate, setSearchDate] = useState('');
-  const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
+  const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive' | 'archived'>('all');
 
   // Edit modal states
   const [showEditModal, setShowEditModal] = useState(false);
@@ -42,6 +43,7 @@ export default function CRM() {
     email: '',
     session_code: '',
     is_active: 1,
+    is_archived: 0,
     purchase_confirmed: 0
   });
 
@@ -100,9 +102,61 @@ export default function CRM() {
       email: purchaser.email,
       session_code: purchaser.session_code,
       is_active: purchaser.is_active,
+      is_archived: purchaser.is_archived,
       purchase_confirmed: purchaser.purchase_confirmed
     });
     setShowEditModal(true);
+  };
+
+  const handleArchivePurchaser = async (purchaser: Purchaser, archive: boolean) => {
+    if (!confirm(`Are you sure you want to ${archive ? 'archive' : 'unarchive'} this purchaser?`)) return;
+
+    try {
+      const response = await fetch(`/api/admin/crm/purchasers/${purchaser.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...purchaser,
+          is_archived: archive ? 1 : 0
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`Purchaser ${archive ? 'archived' : 'unarchived'} successfully!`);
+        fetchPurchasers();
+      } else {
+        alert('Error: ' + (data.error || 'Failed to update purchaser'));
+      }
+    } catch (error) {
+      console.error('Error archiving purchaser:', error);
+      alert('Failed to archive purchaser');
+    }
+  };
+
+  const handleDeletePurchaser = async (id: number) => {
+    if (!confirm('Are you sure you want to PERMANENTLY DELETE this purchaser? This action cannot be undone.')) return;
+
+    try {
+      const response = await fetch(`/api/admin/crm/purchasers/${id}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Purchaser deleted permanently!');
+        fetchPurchasers();
+      } else {
+        alert('Error: ' + (data.error || 'Failed to delete purchaser'));
+      }
+    } catch (error) {
+      console.error('Error deleting purchaser:', error);
+      alert('Failed to delete purchaser');
+    }
   };
 
   const handleUpdatePurchaser = async (e: React.FormEvent) => {
@@ -141,11 +195,20 @@ export default function CRM() {
       purchaser.session_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       purchaser.preferred_country?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // Filter by active status
-    const matchesFilter =
-      filterActive === 'all' ||
-      (filterActive === 'active' && purchaser.is_active === 1) ||
-      (filterActive === 'inactive' && purchaser.is_active === 0);
+    // Filter by active/archived status
+    let matchesFilter = true;
+    if (filterActive === 'active') {
+      matchesFilter = purchaser.is_active === 1 && purchaser.is_archived === 0;
+    } else if (filterActive === 'inactive') {
+      matchesFilter = purchaser.is_active === 0 && purchaser.is_archived === 0;
+    } else if (filterActive === 'archived') {
+      matchesFilter = purchaser.is_archived === 1;
+    } else {
+      // 'all' - show everything except archived by default?
+      // Usually "All" means all active/inactive but not archived.
+      // Let's make 'all' show everything NOT archived.
+      matchesFilter = purchaser.is_archived === 0;
+    }
 
     // Filter by date if date search is provided
     let matchesDate = true;
@@ -288,7 +351,7 @@ export default function CRM() {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <div className="text-sm text-gray-600 mb-1">Total Purchasers</div>
                 <div className="text-2xl font-bold text-gray-900">{purchasers.length}</div>
@@ -296,11 +359,17 @@ export default function CRM() {
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <div className="text-sm text-gray-600 mb-1">Active Accounts</div>
                 <div className="text-2xl font-bold text-green-600">
-                  {purchasers.filter(p => p.is_active === 1).length}
+                  {purchasers.filter(p => p.is_active === 1 && p.is_archived === 0).length}
                 </div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-                <div className="text-sm text-gray-600 mb-1">Confirmed Purchases</div>
+                <div className="text-sm text-gray-600 mb-1">Archived</div>
+                <div className="text-2xl font-bold text-gray-500">
+                  {purchasers.filter(p => p.is_archived === 1).length}
+                </div>
+              </div>
+              <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
+                <div className="text-sm text-gray-600 mb-1">Confirmed</div>
                 <div className="text-2xl font-bold text-blue-600">
                   {purchasers.filter(p => p.purchase_confirmed === 1).length}
                 </div>
@@ -319,13 +388,13 @@ export default function CRM() {
 
             {/* Search and Filter */}
             <div className="space-y-4 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Email/Session Code Search */}
-                <div className="relative">
+                <div className="relative col-span-1 md:col-span-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="text"
-                    placeholder="Search by email or session code..."
+                    placeholder="Search..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -337,27 +406,17 @@ export default function CRM() {
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="date"
-                    placeholder="Filter by date..."
                     value={searchDate}
                     onChange={(e) => setSearchDate(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  {searchDate && (
-                    <button
-                      onClick={() => setSearchDate('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      title="Clear date filter"
-                    >
-                      ×
-                    </button>
-                  )}
                 </div>
 
                 {/* Status Filter */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 col-span-1 md:col-span-2">
                   <button
                     onClick={() => setFilterActive('all')}
-                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${filterActive === 'all'
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filterActive === 'all'
                       ? 'bg-blue-600 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-100'
                       }`}
@@ -366,7 +425,7 @@ export default function CRM() {
                   </button>
                   <button
                     onClick={() => setFilterActive('active')}
-                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${filterActive === 'active'
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filterActive === 'active'
                       ? 'bg-green-600 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-100'
                       }`}
@@ -375,12 +434,21 @@ export default function CRM() {
                   </button>
                   <button
                     onClick={() => setFilterActive('inactive')}
-                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${filterActive === 'inactive'
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filterActive === 'inactive'
                       ? 'bg-red-600 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-100'
                       }`}
                   >
                     Inactive
+                  </button>
+                  <button
+                    onClick={() => setFilterActive('archived')}
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filterActive === 'archived'
+                      ? 'bg-gray-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                      }`}
+                  >
+                    Archived
                   </button>
                 </div>
               </div>
@@ -483,14 +551,34 @@ export default function CRM() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() => handleEdit(purchaser)}
-                          className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
-                          title="Edit purchaser"
-                        >
-                          <Edit className="w-4 h-4" />
-                          <span className="text-sm">Edit</span>
-                        </button>
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={() => handleEdit(purchaser)}
+                            className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
+                            title="Edit purchaser"
+                          >
+                            <Edit className="w-4 h-4" />
+                            <span className="text-sm">Edit</span>
+                          </button>
+                          
+                          <button
+                            onClick={() => handleArchivePurchaser(purchaser, purchaser.is_archived === 0)}
+                            className={`flex items-center space-x-1 ${purchaser.is_archived === 1 ? 'text-green-600 hover:text-green-800' : 'text-gray-600 hover:text-gray-800'} transition-colors`}
+                            title={purchaser.is_archived === 1 ? "Unarchive" : "Archive"}
+                          >
+                            {purchaser.is_archived === 1 ? <RotateCcw className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
+                            <span className="text-sm">{purchaser.is_archived === 1 ? 'Restore' : 'Archive'}</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleDeletePurchaser(purchaser.id)}
+                            className="flex items-center space-x-1 text-red-600 hover:text-red-800 transition-colors"
+                            title="Delete permanently"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span className="text-sm">Delete</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -562,6 +650,16 @@ export default function CRM() {
                     className="mr-2 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <span className="text-sm font-medium text-gray-700">Active</span>
+                </label>
+
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={editForm.is_archived === 1}
+                    onChange={(e) => setEditForm({ ...editForm, is_archived: e.target.checked ? 1 : 0 })}
+                    className="mr-2 w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Archived</span>
                 </label>
 
                 <label className="flex items-center">

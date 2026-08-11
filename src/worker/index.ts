@@ -880,7 +880,7 @@ app.get('/api/admin/crm/purchasers', async (c) => {
 
     const { results } = await c.env.DB.prepare(`
       SELECT 
-        r.id, r.email, r.session_code, r.assessment_id, r.purchase_confirmed, r.is_active, r.created_at, r.expires_at,
+        r.id, r.email, r.session_code, r.assessment_id, r.purchase_confirmed, r.is_active, r.is_archived, r.created_at, r.expires_at,
         a.preferred_country, a.preferred_city, a.overall_score
       FROM relocation_hub_access r
       LEFT JOIN assessments a ON r.assessment_id = a.id
@@ -909,7 +909,7 @@ app.put('/api/admin/crm/purchasers/:id', async (c) => {
   try {
     const id = c.req.param('id');
     const body = await c.req.json();
-    const { email, session_code, is_active, purchase_confirmed } = body;
+    const { email, session_code, is_active, is_archived, purchase_confirmed } = body;
 
     if (!email || !session_code) {
       return c.json({
@@ -924,12 +924,14 @@ app.put('/api/admin/crm/purchasers/:id', async (c) => {
       SET email = ?,
           session_code = ?,
           is_active = ?,
+          is_archived = ?,
           purchase_confirmed = ?
       WHERE id = ?
     `).bind(
       email.toLowerCase(),
       session_code,
       is_active ? 1 : 0,
+      is_archived ? 1 : 0,
       purchase_confirmed ? 1 : 0,
       id
     ).run();
@@ -943,6 +945,27 @@ app.put('/api/admin/crm/purchasers/:id', async (c) => {
     return c.json({
       success: false,
       error: 'Failed to update purchaser'
+    }, 500);
+  }
+});
+
+// CRM - Delete purchaser permanently
+app.delete('/api/admin/crm/purchasers/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+
+    // Delete the purchaser record
+    await c.env.DB.prepare('DELETE FROM relocation_hub_access WHERE id = ?').bind(id).run();
+
+    return c.json({
+      success: true,
+      message: 'Purchaser deleted permanently'
+    });
+  } catch (error) {
+    console.error('Error deleting purchaser:', error);
+    return c.json({
+      success: false,
+      error: 'Failed to delete purchaser'
     }, 500);
   }
 });
