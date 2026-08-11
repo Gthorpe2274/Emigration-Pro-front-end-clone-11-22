@@ -21,7 +21,7 @@ export function SampleReport() {
     <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
       <Navigation />
 
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14">
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-10 md:py-14 print:hidden">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between mb-8">
           <div>
             <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-3">
