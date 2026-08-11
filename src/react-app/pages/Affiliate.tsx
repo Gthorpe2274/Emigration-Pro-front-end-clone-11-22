@@ -5,7 +5,24 @@ import Footer from '@/react-app/components/Footer';
 import { useSEO } from '@/react-app/hooks/useSEO';
 import { PAGE_SEO } from '@/shared/page-seo';
 
-const VIDEOS: { id: string; title: string; description?: string }[] = [];
+const VIDEOS: { id: string; title: string; description?: string }[] = [
+  {
+    id: 'vF4eyUC8tLc',
+    title: 'How To Do Affiliate Marketing In 2026 With AI (For Beginners)',
+  },
+  {
+    id: 'j3myFy6bBPQ',
+    title: 'How to Start Affiliate Marketing with AI in 2026 (Beginners Guide)',
+  },
+  {
+    id: '42UsykZzCRQ',
+    title: 'Watch AI Agents Build my Affiliate Marketing Business in 14 Minutes! | Complete Tutorial | Genspark',
+  },
+  {
+    id: 'rhuYy9LP72M',
+    title: 'I Tried Shopify Dropshipping For 7 Days (Realistic Results)',
+  },
+];
 
 export default function Affiliate() {
   useSEO({

@@ -11,6 +11,10 @@ const VIDEOS = [
     title: 'Build a Social Media Machine',
     description: 'Advanced strategies for growing your agency and scaling earning power through social media.',
   },
+  {
+    id: 't_8L-TKMq2s',
+    title: 'AI AGENCY FULL COURSE 20 HOURS (2026)',
+  },
 ];
 
 export default function Agency() {
@@ -75,7 +79,9 @@ export default function Agency() {
                 <h3 className="font-brand-serif text-xl font-medium text-brand-ink px-2 mb-2">
                   {video.title}
                 </h3>
-                <p className="text-sm leading-relaxed text-brand-muted px-2 pb-2">{video.description}</p>
+                {video.description && (
+                  <p className="text-sm leading-relaxed text-brand-muted px-2 pb-2">{video.description}</p>
+                )}
               </div>
             ))}
           </div>
