@@ -118,10 +118,8 @@ export default function Home() {
               A serious plan for<br />
               <span className="italic text-brand-ink-2">leaving the U.S.</span>
             </h1>
-            <p className="text-lg leading-relaxed text-brand-muted max-w-xl mb-10">
-              Emigration Pro&apos;s personalized relocation report researches one destination city
-              across 14 categories, including visa eligibility, monthly living costs, healthcare
-              access, safety, infrastructure, education, and U.S. departure considerations.
+            <p className="text-lg leading-relaxed text-brand-accent font-bold max-w-xl mb-10">
+              Here you will find the best places for you to move to and support yourself when there.
             </p>
             <div className="flex flex-wrap items-center gap-4 mb-8">
               <div className="flex flex-col gap-1.5 items-center">

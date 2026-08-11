@@ -65,9 +65,16 @@ export default function DigitalSales() {
           <h1 className="font-brand-serif font-medium text-5xl md:text-6xl leading-[1.05] tracking-tight text-brand-ink mb-6">
             Digital Sales
           </h1>
-          <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto">
+          <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto mb-10">
             Create and sell digital products, courses, and software. Curated videos on building and scaling an Amazon KDP and digital product business.
           </p>
+          <div className="max-w-3xl mx-auto aspect-[21/9] rounded-2xl overflow-hidden border border-brand-border">
+            <img
+              src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&q=80&w=1200"
+              alt="Digital Sales"
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       </section>
 

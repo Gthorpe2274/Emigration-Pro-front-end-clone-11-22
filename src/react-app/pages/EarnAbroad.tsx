@@ -35,7 +35,7 @@ export default function EarnAbroad() {
             </p>
             <Link
               to="/living-wage-business"
-              className="inline-flex items-center gap-2 px-7 py-4 bg-brand-btn text-brand-btn-ink rounded-lg font-semibold text-base hover:bg-brand-ink-2 transition-colors"
+              className="inline-flex items-center gap-2 px-7 py-4 bg-brand-accent-2 text-brand-accent-ink rounded-lg font-semibold text-base hover:brightness-95 transition-all"
             >
               Earn Now
               <span className="text-lg leading-none">&rarr;</span>

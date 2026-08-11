@@ -36,9 +36,16 @@ export default function Youtuber() {
           <h1 className="font-brand-serif font-medium text-5xl md:text-6xl leading-[1.05] tracking-tight text-brand-ink mb-6">
             Youtuber
           </h1>
-          <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto">
+          <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto mb-10">
             Build an audience and monetize through ads and sponsorships.
           </p>
+          <div className="max-w-3xl mx-auto aspect-[21/9] rounded-2xl overflow-hidden border border-brand-border">
+            <img
+              src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=1200"
+              alt="Youtuber"
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       </section>
 

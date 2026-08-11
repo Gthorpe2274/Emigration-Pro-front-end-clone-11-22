@@ -42,9 +42,16 @@ export default function MultipleOptions() {
           <h1 className="font-brand-serif font-medium text-5xl md:text-6xl leading-[1.05] tracking-tight text-brand-ink mb-6">
             Multiple Options
           </h1>
-          <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto">
+          <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto mb-10">
             Explore various business models and hybrid approaches to income.
           </p>
+          <div className="max-w-3xl mx-auto aspect-[21/9] rounded-2xl overflow-hidden border border-brand-border">
+            <img
+              src="https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?auto=format&fit=crop&q=80&w=1200"
+              alt="Multiple Options"
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       </section>
 

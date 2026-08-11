@@ -46,9 +46,16 @@ export default function Agency() {
           <h1 className="font-brand-serif font-medium text-5xl md:text-6xl leading-[1.05] tracking-tight text-brand-ink mb-6">
             Agency
           </h1>
-          <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto">
+          <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto mb-10">
             Offer scalable, specialized services to clients worldwide.
           </p>
+          <div className="max-w-3xl mx-auto aspect-[21/9] rounded-2xl overflow-hidden border border-brand-border">
+            <img
+              src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=1200"
+              alt="Agency"
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       </section>
 
