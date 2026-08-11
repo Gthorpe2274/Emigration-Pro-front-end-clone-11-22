@@ -131,7 +131,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 py-12 px-4 md:px-8">
+<body class="bg-slate-50 text-slate-900 py-12 px-4 md:px-8" style="user-select: none; -webkit-user-select: none;">
     <div class="report-card max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
         <!-- Header Branding (Optional, matching app header) -->
         <div class="sample-cover bg-slate-900 text-white p-8 text-center">
@@ -522,19 +522,24 @@
         </div>
     </div>
 
-    <!-- Floating Print Button for UX -->
+    <!-- Floating back-to-top button for UX -->
     <div class="fixed bottom-8 right-8 no-print flex gap-3">
-        <button onclick="window.print()" class="flex items-center gap-2 bg-indigo-600 text-white font-bold py-3 px-6 rounded-full shadow-2xl hover:bg-indigo-700 transition-all hover:scale-105 active:scale-95">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2-2v4h10z" />
-            </svg>
-            Print Report
-        </button>
         <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="p-3 bg-white text-slate-600 rounded-full shadow-lg border border-slate-200 hover:bg-slate-50 transition-colors" title="Back to top">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
             </svg>
         </button>
     </div>
+    <script>
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        document.addEventListener('copy', (e) => e.preventDefault());
+        document.addEventListener('cut', (e) => e.preventDefault());
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if ((e.ctrlKey || e.metaKey) && (key === 'p' || key === 'c' || key === 'x')) {
+                e.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>

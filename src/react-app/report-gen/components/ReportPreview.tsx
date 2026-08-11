@@ -194,8 +194,19 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ reportData, userInput, on
                             ))}
                         </ul>
                     </nav>
+                    <p className="mt-6 pt-6 border-t border-slate-200 text-sm text-slate-600">
+                        For more general information visit our{' '}
+                        <a
+                            href="https://emigrationpro.com/blog"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-indigo-600 hover:text-indigo-700 font-bold underline"
+                        >
+                            Blog
+                        </a>
+                    </p>
                 </div>
-                
+
                 {sortedReportData.map((section, index) => (
                     <ReportSection 
                         key={section.id} 
