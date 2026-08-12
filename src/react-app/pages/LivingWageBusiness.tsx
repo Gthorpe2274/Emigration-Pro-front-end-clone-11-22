@@ -36,8 +36,12 @@ export default function LivingWageBusiness() {
             Building a <span className="italic text-brand-ink-2">Living Wage</span>
             <br />Online Business
           </h1>
-          <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto">
+          <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto mb-6">
             A comprehensive guide to creating a sustainable, scalable income that supports your life anywhere in the world.
+          </p>
+          <p className="max-w-2xl mx-auto text-xs leading-relaxed text-brand-muted">
+            <strong className="font-semibold text-brand-ink-2">Video disclaimer:</strong>{' '}
+            Videos linked through this guide are provided for general informational purposes only. EmigrationPro.com does not accept compensation for listing these videos and does not endorse, verify, or guarantee the information, claims, opportunities, or results they present. Viewers should use their own judgment, conduct independent research, and seek qualified professional advice when appropriate before making financial, business, legal, tax, or relocation decisions.
           </p>
         </div>
       </section>

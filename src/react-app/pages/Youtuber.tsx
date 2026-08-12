@@ -5,7 +5,15 @@ import Footer from '@/react-app/components/Footer';
 import { useSEO } from '@/react-app/hooks/useSEO';
 import { PAGE_SEO } from '@/shared/page-seo';
 
-const VIDEOS: { id: string; title: string; description?: string }[] = [];
+const VIDEOS: { id: string; title: string; description?: string }[] = [
+  { id: 'mvs1zdReXGI', title: 'YouTuber resource 1' },
+  { id: 'VjpY2cETzy4', title: 'YouTuber resource 2' },
+  { id: 'sGKXSLmZBz8', title: 'YouTuber resource 3' },
+  { id: 'j-Ail27Fbms', title: 'YouTuber resource 4' },
+  { id: 'EiXCGhoA7jo', title: 'YouTuber resource 5' },
+  { id: 'qjKyrqzptQU', title: 'YouTuber resource 6' },
+  { id: 'V7clo28EnAE', title: 'YouTuber resource 7' },
+];
 
 export default function Youtuber() {
   useSEO({
