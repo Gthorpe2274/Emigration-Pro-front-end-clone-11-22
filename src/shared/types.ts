@@ -52,6 +52,7 @@ export const AssessmentResultSchema = z.object({
   ease_of_immigration_importance: z.number(),
   local_acceptance_importance: z.number(),
   criteriaScores: z.record(z.string(), z.number()).optional(),
+  score_reasons: z.array(z.string()).optional(),
   budget_compatibility: z.string().optional(),
   created_at: z.string(),
   updated_at: z.string(),

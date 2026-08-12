@@ -198,6 +198,23 @@ export default function Results() {
               <div className="flex items-center justify-center space-x-2 text-brand-ink-2">
                 <span className="font-medium">{getStarRating(assessment.overall_score)} stars • {assessment.overall_score}/100 Compatibility Score</span>
               </div>
+
+              {assessment.overall_score < 100 && (
+                <div className="mt-6 max-w-2xl mx-auto rounded-xl border border-amber-200 bg-amber-50 p-5 text-left">
+                  <h4 className="font-semibold text-amber-900 mb-2">Why your score is below 100</h4>
+                  {assessment.score_reasons?.length ? (
+                    <ul className="list-disc space-y-2 pl-5 text-amber-900">
+                      {assessment.score_reasons.map((reason, index) => (
+                        <li key={`${index}-${reason}`}>{reason}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-amber-900">
+                      One or more destination factors do not fully match the preferences and priorities you selected.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

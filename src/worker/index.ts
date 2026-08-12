@@ -526,7 +526,7 @@ function analyzeBudgetCompatibility(monthlyBudget: number, country: string, city
 }
 
 // Assessment scoring algorithm
-function calculateScore(assessment: any): { score: number; matchLevel: string; budgetCompatibility: string; criteriaScores: Record<string, number> } | { error: boolean; message: string; details: string; climateConflict: any } {
+function calculateScore(assessment: any): { score: number; matchLevel: string; budgetCompatibility: string; criteriaScores: Record<string, number>; scoreReasons: string[] } | { error: boolean; message: string; details: string; climateConflict: any } {
   // Country scoring data
   const countryScores: { [key: string]: any } = {
     // Europe (South/Med)
@@ -701,6 +701,13 @@ function calculateScore(assessment: any): { score: number; matchLevel: string; b
   let totalImportanceWeight = 0;
 
   const criteriaScores: Record<string, number> = {};
+  const scoreReasons: string[] = [];
+  const factorLabels: Record<string, string> = {
+    immigration_policies: 'Immigration policies', healthcare: 'Healthcare quality',
+    safety: 'Safety and security', internet: 'High-speed internet',
+    emigration_process: 'USA emigration process', ease_of_immigration: 'Ease of immigration',
+    local_acceptance: 'Local acceptance'
+  };
 
   factors.forEach(factor => {
     const importance = assessment[`${factor}_importance`];
@@ -720,6 +727,9 @@ function calculateScore(assessment: any): { score: number; matchLevel: string; b
 
     // Store individual criteria score (0-100)
     criteriaScores[factor] = (countryScore / 4) * 100;
+    if (countryScore < 4) {
+      scoreReasons.push(`${factorLabels[factor]} is rated ${countryScore}/4 for ${assessment.preferred_country}, below the top compatibility rating.`);
+    }
   });
 
   // Add climate scoring
@@ -728,6 +738,7 @@ function calculateScore(assessment: any): { score: number; matchLevel: string; b
     climateScore = 5;
   } else if (climateMatchType === 'partial') {
     climateScore = 3;
+    scoreReasons.push(`Your ${assessment.climate_preference} climate preference is only a partial match for ${assessment.preferred_country}'s ${countryData.climate_type} climate.`);
   }
 
   const climateImportanceWeight = 8;
@@ -753,6 +764,12 @@ function calculateScore(assessment: any): { score: number; matchLevel: string; b
     const maxTotalRuralPenalty = 45;
     totalRuralPenalty = Math.min(totalRuralPenalty, maxTotalRuralPenalty);
     finalScore -= totalRuralPenalty;
+    if (totalRuralPenalty > 0) {
+      const accessAreas = assessment.internet_importance >= 3 && assessment.healthcare_importance >= 3
+        ? 'internet access and healthcare access'
+        : assessment.internet_importance >= 3 ? 'internet access' : 'healthcare access';
+      scoreReasons.push(`A rural location may make ${accessAreas} harder to match at the importance level you selected.`);
+    }
   }
 
   finalScore = Math.round(Math.max(5, Math.min(100, finalScore)));
@@ -770,7 +787,7 @@ function calculateScore(assessment: any): { score: number; matchLevel: string; b
     assessment.preferred_city
   );
 
-  return { score: finalScore, matchLevel, budgetCompatibility, criteriaScores };
+  return { score: finalScore, matchLevel, budgetCompatibility, criteriaScores, scoreReasons };
 }
 
 // Create assessment endpoint
@@ -1340,9 +1357,14 @@ app.get("/api/assessments/:id", async (c) => {
       }
     }
 
+    const scoreResult = calculateScore(result);
+    const scoreDetails = 'error' in scoreResult
+      ? {}
+      : { criteriaScores: scoreResult.criteriaScores, score_reasons: scoreResult.scoreReasons };
+
     return c.json({
       success: true,
-      assessment: result
+      assessment: { ...result, ...scoreDetails }
     });
   } catch (error) {
     console.error("Error fetching assessment:", error);
