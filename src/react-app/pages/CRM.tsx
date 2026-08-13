@@ -27,6 +27,20 @@ interface Purchaser {
   overall_score: number;
 }
 
+const toFlag = (value: unknown): number => {
+  if (value === true || value === 1 || value === '1' || value === 'true') return 1;
+  return 0;
+};
+
+const normalizePurchaser = (value: Record<string, unknown>): Purchaser => ({
+  ...value,
+  id: Number(value.id),
+  assessment_id: Number(value.assessment_id),
+  purchase_confirmed: toFlag(value.purchase_confirmed),
+  is_active: toFlag(value.is_active),
+  is_archived: toFlag(value.is_archived),
+} as Purchaser);
+
 export default function CRM() {
   // Authentication state - token issued by the server on successful login.
   const [adminToken, setAdminToken] = useState(() =>
@@ -117,7 +131,7 @@ export default function CRM() {
       if (!response.ok || !data.success) {
         throw new Error(data.error || 'Failed to load CRM data');
       }
-      setPurchasers(Array.isArray(data.purchasers) ? data.purchasers : []);
+      setPurchasers(Array.isArray(data.purchasers) ? data.purchasers.map(normalizePurchaser) : []);
     } catch (error) {
       console.error('Error fetching purchasers:', error);
       setLoadError(error instanceof Error ? error.message : 'Failed to load CRM data');
@@ -156,9 +170,11 @@ export default function CRM() {
 
       const data = await response.json();
 
-      if (data.success) {
+      if (response.ok && data.success) {
         alert(`Purchaser ${archive ? 'archived' : 'unarchived'} successfully!`);
-        fetchPurchasers();
+        setPurchasers(current => current.map(item =>
+          item.id === purchaser.id ? { ...item, is_archived: archive ? 1 : 0 } : item
+        ));
       } else {
         alert('Error: ' + (data.error || 'Failed to update purchaser'));
       }
@@ -179,9 +195,9 @@ export default function CRM() {
 
       const data = await response.json();
 
-      if (data.success) {
+      if (response.ok && data.success) {
         alert('Purchaser deleted permanently!');
-        fetchPurchasers();
+        setPurchasers(current => current.filter(purchaser => purchaser.id !== id));
       } else {
         alert('Error: ' + (data.error || 'Failed to delete purchaser'));
       }
@@ -207,7 +223,7 @@ export default function CRM() {
 
       const data = await response.json();
 
-      if (data.success) {
+      if (response.ok && data.success) {
         alert('Purchaser updated successfully!');
         setShowEditModal(false);
         setEditingPurchaser(null);

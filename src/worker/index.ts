@@ -925,7 +925,10 @@ app.get('/api/admin/crm/purchasers', adminAuth, async (c) => {
 // CRM - Update purchaser
 app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
   try {
-    const id = c.req.param('id');
+    const id = Number(c.req.param('id'));
+    if (!Number.isInteger(id) || id <= 0) {
+      return c.json({ success: false, error: 'Invalid purchaser ID' }, 400);
+    }
     const body = await c.req.json();
     const { email, session_code, is_active, is_archived, purchase_confirmed } = body;
 
@@ -937,7 +940,7 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
     }
 
     // Update the purchaser record
-    await c.env.DB.prepare(`
+    const result = await c.env.DB.prepare(`
       UPDATE relocation_hub_access
       SET email = ?,
           session_code = ?,
@@ -953,6 +956,10 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
       purchase_confirmed ? 1 : 0,
       id
     ).run();
+
+    if (result.meta.changes === 0) {
+      return c.json({ success: false, error: 'Purchaser not found' }, 404);
+    }
 
     return c.json({
       success: true,
@@ -970,10 +977,17 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
 // CRM - Delete purchaser permanently
 app.delete('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
   try {
-    const id = c.req.param('id');
+    const id = Number(c.req.param('id'));
+    if (!Number.isInteger(id) || id <= 0) {
+      return c.json({ success: false, error: 'Invalid purchaser ID' }, 400);
+    }
 
     // Delete the purchaser record
-    await c.env.DB.prepare('DELETE FROM relocation_hub_access WHERE id = ?').bind(id).run();
+    const result = await c.env.DB.prepare('DELETE FROM relocation_hub_access WHERE id = ?').bind(id).run();
+
+    if (result.meta.changes === 0) {
+      return c.json({ success: false, error: 'Purchaser not found' }, 404);
+    }
 
     return c.json({
       success: true,
