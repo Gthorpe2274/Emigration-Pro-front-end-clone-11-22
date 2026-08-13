@@ -235,75 +235,14 @@ export default function RelocationHub() {
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
-          {/* Hub Header */}
+          {/* New Header */}
           <div className="text-center mb-12">
-            <div className="inline-flex items-center bg-brand-surface text-brand-ink-2 px-4 py-2 rounded-full text-lg font-medium mb-4">
-              <Users className="w-4 h-4 mr-2" />
-              {isPermanentAccess ? 'Your 2-Year Relocation Hub' : 'Your Relocation Hub'}
-            </div>
-            <h2 className="text-4xl font-bold text-brand-ink mb-4">
-              {assessment.preferred_country} Relocation Hub
+            <h2 className="text-3xl font-bold text-brand-ink mb-4">
+              This Is Your Personal Relocation Hub Page.
             </h2>
-            <p className="text-xl text-brand-muted mb-4">
-              Resources and insights for US citizens planning to relocate to {assessment.preferred_country}
-              {assessment.preferred_city && ` - ${assessment.preferred_city}`}
+            <p className="text-xl text-brand-muted">
+              Below is a list of: <span className="font-bold text-brand-ink-2">1.</span> Critical Service Providers <span className="font-bold text-brand-ink-2">2.</span> Helpful Videos <span className="font-bold text-brand-ink-2">3.</span> Support Communities
             </p>
-
-            {/* Temporary vs Permanent Access Notice */}
-            {!isPermanentAccess ? (
-              <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-6 max-w-3xl mx-auto mb-4">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    <svg className="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 text-left">
-                    <h3 className="text-2xl font-semibold text-yellow-900 mb-2">⏱️ Temporary Access Notice</h3>
-                    <p className="text-lg text-yellow-800 mb-3">
-                      This relocation hub will <strong>remain active only until you close this browser tab</strong>.
-                      All content and resources shown here are temporary.
-                    </p>
-                    <h4 className="text-2xl font-bold text-brand-ink mb-3 mt-4">Want 2 yrs. access, with quarterly updates?</h4>
-                    <div className="bg-green-100 border border-green-300 rounded-lg p-4 mb-4">
-                      <p className="text-xl text-green-900 font-medium mb-2">
-                        🎁 <strong>FREE BONUS with Full Report Purchase!</strong>
-                      </p>
-                      <p className="text-lg text-green-800">
-                        Purchase your <strong>Full Emigration Pro Report</strong> and receive <strong>2 years access</strong> to
-                        this relocation hub page! Access it anytime using your email and session code.
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={handleGetPermanentAccess}
-                      className="w-full bg-brand-btn text-brand-btn-ink py-3 px-6 rounded-lg font-semibold text-lg hover:bg-brand-ink-2 hover:shadow-lg transition-all duration-200"
-                    >
-                      Get Your Full Report & 2 Years Access
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6 max-w-3xl mx-auto mb-4">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <h3 className="text-lg font-semibold text-green-900">✅ 2 Years Access Activated</h3>
-                </div>
-                <p className="text-base text-green-800">
-                  You have 2 years access to this relocation hub. You can return anytime using your email and session code.
-                </p>
-              </div>
-            )}
-
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-w-2xl mx-auto">
-              <p className="text-lg text-green-800">
-                <strong>Note:</strong> This relocation hub provides peer insights and general tips.
-                For professional emigration guidance, consider consulting with qualified immigration professionals.
-              </p>
-            </div>
           </div>
 
           {/* Complete Emigration Report Section */}
@@ -928,6 +867,77 @@ export default function RelocationHub() {
                   <span className="text-lg text-brand-muted">Consider a reconnaissance trip first</span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Hub Header (Moved to bottom) */}
+          <div className="text-center mb-12 mt-16 pt-12 border-t border-brand-border">
+            <div className="inline-flex items-center bg-brand-surface text-brand-ink-2 px-4 py-2 rounded-full text-lg font-medium mb-4 shadow-sm border border-brand-border">
+              <Users className="w-4 h-4 mr-2" />
+              {isPermanentAccess ? 'Your 2-Year Relocation Hub' : 'Your Relocation Hub'}
+            </div>
+            <h2 className="text-4xl font-bold text-brand-ink mb-4">
+              {assessment.preferred_country} Relocation Hub
+            </h2>
+            <p className="text-xl text-brand-muted mb-6">
+              Resources and insights for US citizens planning to relocate to {assessment.preferred_country}
+              {assessment.preferred_city && ` - ${assessment.preferred_city}`}
+            </p>
+
+            {/* Temporary vs Permanent Access Notice */}
+            {!isPermanentAccess ? (
+              <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-6 max-w-3xl mx-auto mb-6 shadow-md">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0">
+                    <svg className="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="text-2xl font-semibold text-yellow-900 mb-2">⏱️ Temporary Access Notice</h3>
+                    <p className="text-lg text-yellow-800 mb-3">
+                      This relocation hub will <strong>remain active only until you close this browser tab</strong>.
+                      All content and resources shown here are temporary.
+                    </p>
+                    <h4 className="text-2xl font-bold text-brand-ink mb-3 mt-4">Want 2 yrs. access, with quarterly updates?</h4>
+                    <div className="bg-green-100 border border-green-300 rounded-lg p-4 mb-4">
+                      <p className="text-xl text-green-900 font-medium mb-2">
+                        🎁 <strong>FREE BONUS with Full Report Purchase!</strong>
+                      </p>
+                      <p className="text-lg text-green-800">
+                        Purchase your <strong>Full Emigration Pro Report</strong> and receive <strong>2 years access</strong> to
+                        this relocation hub page! Access it anytime using your email and session code.
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={handleGetPermanentAccess}
+                      className="w-full bg-brand-btn text-brand-btn-ink py-3 px-6 rounded-lg font-semibold text-lg hover:bg-brand-ink-2 hover:shadow-lg transition-all duration-200"
+                    >
+                      Get Your Full Report & 2 Years Access
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6 max-w-3xl mx-auto mb-6 shadow-md">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-green-900">✅ 2 Years Access Activated</h3>
+                </div>
+                <p className="text-base text-green-800">
+                  You have 2 years access to this relocation hub. You can return anytime using your email and session code.
+                </p>
+              </div>
+            )}
+
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-w-2xl mx-auto">
+              <p className="text-lg text-green-800">
+                <strong>Note:</strong> This relocation hub provides peer insights and general tips.
+                For professional emigration guidance, consider consulting with qualified immigration professionals.
+              </p>
             </div>
           </div>
 
