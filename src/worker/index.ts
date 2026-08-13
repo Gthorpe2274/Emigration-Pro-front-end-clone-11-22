@@ -3559,10 +3559,6 @@ const filterReachableSources = async (sources: ReportSource[], cache: KVNamespac
 
 app.post("/api/perplexity", async (c) => {
   const apiKey = c.env.PERPLEXITY_API_KEY;
-  if (!apiKey) {
-    return c.json({ error: 'PERPLEXITY_API_KEY not configured in environment' }, 500);
-  }
-
   const { action, payload } = await c.req.json();
   const modelName = 'sonar';
 
@@ -3598,36 +3594,92 @@ app.post("/api/perplexity", async (c) => {
         Tone: Institutional, Premium.
       `;
 
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: modelName,
-          messages: [
-            { role: 'system', content: 'You are a senior relocation expert.' },
-            { role: 'user', content: prompt }
-          ],
-          temperature: 0.2,
-          max_tokens: 1000,
-          search_domain_filter: PERPLEXITY_EXCLUDED_SEARCH_DOMAINS.map(d => `-${d}`)
-        })
-      });
+      let content = '';
+      let perplexityFailure = apiKey ? '' : 'PERPLEXITY_API_KEY is not configured';
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        return c.json({ error: `Perplexity API Error: ${response.status}`, details: errorText }, response.status);
+      if (apiKey) {
+        const response = await fetch('https://api.perplexity.ai/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: modelName,
+            messages: [
+              { role: 'system', content: 'You are a senior relocation expert.' },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.2,
+            max_tokens: 1000,
+            search_domain_filter: PERPLEXITY_EXCLUDED_SEARCH_DOMAINS.map(d => `-${d}`)
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json() as any;
+          content = data?.choices?.[0]?.message?.content || '';
+        } else {
+          const errorText = await response.text();
+          perplexityFailure = `Perplexity API Error: ${response.status} ${errorText}`;
+          console.error('Summary generation provider failed; attempting Gemini fallback:', perplexityFailure);
+        }
       }
 
-      const data = await response.json();
-      const content = data.choices[0].message.content;
+      // The preview is a sales-path feature and should not go offline because
+      // one research-provider credential expires. Full paid sections still use
+      // Perplexity, while this short preview can safely fall back to Gemini.
+      if (!content && c.env.GEMINI_API_KEY) {
+        const geminiResponse = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${c.env.GEMINI_API_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: `You are a senior relocation expert.\n\n${prompt}` }] }],
+              generationConfig: { temperature: 0.2, maxOutputTokens: 1000 }
+            })
+          }
+        );
+
+        if (geminiResponse.ok) {
+          const data = await geminiResponse.json() as any;
+          content = data?.candidates?.[0]?.content?.parts
+            ?.map((part: { text?: string }) => part.text || '')
+            .join('') || '';
+        } else {
+          const errorText = await geminiResponse.text();
+          console.error(`Gemini summary fallback failed (${geminiResponse.status}):`, errorText);
+        }
+      }
+
+      // Last-resort preview assembled from verified assessment fields. This
+      // keeps the assessment funnel usable during provider authentication or
+      // availability incidents without inventing country facts or statistics.
+      if (!content) {
+        const familyContext = input.familyProfile.childrenCount > 0
+          ? `Your plan also needs to account for ${input.familyProfile.childrenCount} relocating ${input.familyProfile.childrenCount === 1 ? 'child' : 'children'}, including education and day-to-day support needs.`
+          : 'Because no relocating children were listed, the strategy can focus directly on your own housing, healthcare, financial, and professional transition.';
+
+        content = `Your relocation strategy for **${input.destinationCity}, ${input.destinationCountry}** will be built around your work as **${input.profession}**, your **${input.lifestyle}** lifestyle, and a monthly budget of **USD ${input.monthlyBudget.toLocaleString('en-US')}**. Rather than giving you a generic country overview, the full report connects these details to practical decisions about immigration, healthcare access, financial preparation, housing, safety, and your relocation timeline.
+
+${familyContext}
+
+The report will prioritize the factors you rated most highly and distinguish immediate actions from items that need confirmation with official agencies or qualified professionals. It will also address your preference for a **${input.locationPreference}** setting and **${input.climatePreference}** climate so recommendations stay aligned with the way you intend to live.
+
+- A destination-specific action plan
+- Budget and financial-transition checkpoints
+- Healthcare, safety, infrastructure, and daily-life considerations
+- Immigration and relocation steps to verify before acting`;
+      }
 
       return c.json({ content: sanitizeMarkdown(content), title: 'Executive Relocation Preview' }, 200);
     }
 
     if (action === 'generateSection') {
+      if (!apiKey) {
+        return c.json({ error: 'PERPLEXITY_API_KEY not configured in environment' }, 500);
+      }
       const { input, concern } = payload;
       const inputResult = ReportUserInputSchema.safeParse(input);
       if (!inputResult.success) {

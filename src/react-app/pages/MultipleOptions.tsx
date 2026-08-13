@@ -11,6 +11,11 @@ const VIDEOS = [
     title: '8 Claude AI Side Hustles That Replace Your Job',
     description: 'A range of AI-powered side hustle ideas to build multiple income streams.',
   },
+  {
+    id: 'GmatBYbb74U',
+    title: 'Multiple Income Options Resource',
+    description: 'Explore another approach to building flexible and diversified income streams.',
+  },
 ];
 
 export default function MultipleOptions() {
