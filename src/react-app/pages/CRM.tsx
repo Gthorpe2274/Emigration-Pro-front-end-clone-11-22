@@ -39,8 +39,10 @@ export default function CRM() {
 
   const [purchasers, setPurchasers] = useState<Purchaser[]>([]);
   const [loading, setLoading] = useState(() => Boolean(sessionStorage.getItem('adminToken') || sessionStorage.getItem('blogAdminToken')));
+  const [loadError, setLoadError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchDate, setSearchDate] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive' | 'archived'>('all');
 
   // Edit modal states
@@ -101,6 +103,8 @@ export default function CRM() {
   }, [adminToken]);
 
   const fetchPurchasers = async () => {
+    setLoading(true);
+    setLoadError('');
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers`, {
         headers: { Authorization: `Bearer ${adminToken}` }
@@ -110,12 +114,13 @@ export default function CRM() {
         return;
       }
       const data = await response.json();
-
-      if (data.success) {
-        setPurchasers(data.purchasers);
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to load CRM data');
       }
+      setPurchasers(Array.isArray(data.purchasers) ? data.purchasers : []);
     } catch (error) {
       console.error('Error fetching purchasers:', error);
+      setLoadError(error instanceof Error ? error.message : 'Failed to load CRM data');
     } finally {
       setLoading(false);
     }
@@ -219,8 +224,8 @@ export default function CRM() {
   const filteredPurchasers = purchasers.filter(purchaser => {
     // Search by email or session code
     const matchesSearch =
-      purchaser.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      purchaser.session_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (purchaser.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (purchaser.session_code || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       purchaser.preferred_country?.toLowerCase().includes(searchTerm.toLowerCase());
 
     // Filter by active/archived status
@@ -232,24 +237,13 @@ export default function CRM() {
     } else if (filterActive === 'archived') {
       matchesFilter = purchaser.is_archived === 1;
     } else {
-      // 'all' - show everything except archived by default?
-      // Usually "All" means all active/inactive but not archived.
-      // Let's make 'all' show everything NOT archived.
-      matchesFilter = purchaser.is_archived === 0;
+      // "All" is the unfiltered CRM list, including archived customers.
+      matchesFilter = true;
     }
 
-    // Filter by date if date search is provided
-    let matchesDate = true;
-    if (searchDate) {
-      const searchDateObj = new Date(searchDate);
-      const purchaserDate = new Date(purchaser.created_at);
-
-      // Compare dates (year, month, day only - ignore time)
-      matchesDate =
-        searchDateObj.getFullYear() === purchaserDate.getFullYear() &&
-        searchDateObj.getMonth() === purchaserDate.getMonth() &&
-        searchDateObj.getDate() === purchaserDate.getDate();
-    }
+    // Dates are optional. Blank bounds include the entire history.
+    const createdDate = purchaser.created_at?.slice(0, 10) || '';
+    const matchesDate = (!dateFrom || createdDate >= dateFrom) && (!dateTo || createdDate <= dateTo);
 
     return matchesSearch && matchesFilter && matchesDate;
   });
@@ -417,7 +411,7 @@ export default function CRM() {
 
             {/* Search and Filter */}
             <div className="space-y-4 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 {/* Email/Session Code Search */}
                 <div className="relative col-span-1 md:col-span-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -430,13 +424,27 @@ export default function CRM() {
                   />
                 </div>
 
-                {/* Date Search */}
+                {/* Optional date range */}
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     type="date"
-                    value={searchDate}
-                    onChange={(e) => setSearchDate(e.target.value)}
+                    aria-label="Created from (optional)"
+                    title="Created from (optional)"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="date"
+                    aria-label="Created through (optional)"
+                    title="Created through (optional)"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -483,11 +491,12 @@ export default function CRM() {
               </div>
 
               {/* Clear all filters button */}
-              {(searchTerm || searchDate || filterActive !== 'all') && (
+              {(searchTerm || dateFrom || dateTo || filterActive !== 'all') && (
                 <button
                   onClick={() => {
                     setSearchTerm('');
-                    setSearchDate('');
+                    setDateFrom('');
+                    setDateTo('');
                     setFilterActive('all');
                   }}
                   className="text-sm text-blue-600 hover:text-blue-700 underline"
@@ -499,6 +508,14 @@ export default function CRM() {
           </div>
 
           {/* Table */}
+          {loadError && (
+            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800 flex items-center justify-between gap-4">
+              <span>{loadError}</span>
+              <button onClick={fetchPurchasers} className="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">
+                Retry
+              </button>
+            </div>
+          )}
           <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">

@@ -894,7 +894,11 @@ app.get('/api/admin/crm/purchasers', adminAuth, async (c) => {
   try {
     const { results } = await c.env.DB.prepare(`
       SELECT 
-        r.id, r.email, r.session_code, r.assessment_id, r.purchase_confirmed, r.is_active, r.is_archived, r.created_at, r.expires_at,
+        r.id, r.email, r.session_code, r.assessment_id,
+        COALESCE(r.purchase_confirmed, 0) AS purchase_confirmed,
+        COALESCE(r.is_active, 0) AS is_active,
+        COALESCE(r.is_archived, 0) AS is_archived,
+        r.created_at, r.expires_at,
         a.preferred_country, a.preferred_city, a.overall_score
       FROM relocation_hub_access r
       LEFT JOIN assessments a ON r.assessment_id = a.id
