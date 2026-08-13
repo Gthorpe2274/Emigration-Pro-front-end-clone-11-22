@@ -114,6 +114,7 @@ CREATE TABLE relocation_hub_access (
   session_code TEXT NOT NULL UNIQUE,
   is_active BOOLEAN DEFAULT 1,
   purchase_confirmed BOOLEAN DEFAULT 1,
+  is_archived BOOLEAN DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   expires_at TIMESTAMP
