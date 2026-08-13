@@ -281,40 +281,6 @@ export const formatFinanceResponseAsHtml = (content: string): string => {
   }
 };
 
-export const generateReportSummary = async (userInput: UserInput): Promise<{ content: string; title: string }> => {
-  if (!userInput.destinationCountry || !userInput.destinationCity || !userInput.profession || !userInput.age) {
-    throw new Error('Customer assessment data is incomplete; report generation was stopped.');
-  }
-  try {
-    const response = await fetch('/api/perplexity', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'generateSummary',
-        payload: userInput
-      })
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      console.error('Backend error raw response:', text);
-      let errorMessage = 'Failed to generate summary via backend';
-      try {
-        const errorData = JSON.parse(text);
-        errorMessage = errorData.error || errorData.details || errorMessage;
-      } catch (e) {
-        errorMessage = `Server Error (${response.status}): ${text.substring(0, 100)}...`;
-      }
-      throw new Error(errorMessage);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Summary Generation Error:", error);
-    throw new Error(`Preview generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-};
-
 export const generateReportSection = async (userInput: UserInput, concern: Concern): Promise<{ content: string; sources: { title: string; uri: string; isVideo?: boolean }[] }> => {
   if (!userInput.destinationCountry || !userInput.destinationCity || !userInput.profession || !userInput.age) {
     throw new Error('Customer assessment data is incomplete; report generation was stopped.');

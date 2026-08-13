@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { UserInput, ReportSectionData } from '../report-gen/types';
-import { generateReportSummary, generateReportSection } from '../report-gen/services/aiService';
+import { generateReportSection } from '../report-gen/services/aiService';
 import { CONCERNS } from '../report-gen/constants';
 import ReportGenerator from '../report-gen/components/ReportGenerator';
-import ReportSummaryPreview from '../report-gen/components/ReportSummaryPreview';
+import ReportSalesLanding from '../report-gen/components/ReportSalesLanding';
 import ReportPreview from '../report-gen/components/ReportPreview';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 
 enum AppStep {
   INITIALIZING,
-  GENERATING_SUMMARY,
-  PREVIEW_SUMMARY,
+  SALES,
   GENERATING_FULL,
   PREVIEW_FULL,
   ERROR
@@ -78,7 +77,6 @@ export default function CheckoutReport() {
   const [step, setStep] = useState<AppStep>(AppStep.INITIALIZING);
   const [userInput, setUserInput] = useState<UserInput | null>(null);
   const [selectedConcerns, setSelectedConcerns] = useState<string[]>([]);
-  const [summaryData, setSummaryData] = useState<ReportSectionData | null>(null);
   const [reportData, setReportData] = useState<ReportSectionData[]>([]);
   const [loadingMessage, setLoadingMessage] = useState('Initializing your report...');
   const [error, setError] = useState<string | null>(null);
@@ -199,7 +197,7 @@ export default function CheckoutReport() {
           activateHubAccess(assessmentIdParam, emailParam);
           startFullReport(prepopulated, uniqueConcerns, assessmentIdParam);
         } else {
-          startSummaryGeneration(prepopulated, uniqueConcerns);
+          setStep(AppStep.SALES);
         }
       })
       .catch(err => {
@@ -333,37 +331,6 @@ export default function CheckoutReport() {
     }
   };
 
-  const startSummaryGeneration = async (input: UserInput, concerns: string[]) => {
-    setStep(AppStep.GENERATING_SUMMARY);
-    setError(null);
-    setSummaryData(null);
-
-    // Save to local storage for Stripe success redirect if needed
-    localStorage.setItem('userInput', JSON.stringify(input));
-    localStorage.setItem('selectedConcerns', JSON.stringify(concerns));
-    localStorage.setItem('assessmentId', searchParams.get('assessment_id') || '');
-    localStorage.setItem('userEmail', searchParams.get('email') || '');
-
-    try {
-        setLoadingMessage('Conducting Initial Global Intelligence Sweep...');
-        const summary = await generateReportSummary(input);
-        setSummaryData({
-            id: 'summary-exec',
-            title: summary.title,
-            content: summary.content,
-            sources: []
-        });
-        setStep(AppStep.PREVIEW_SUMMARY);
-    } catch (err) {
-        console.error(err);
-        const errorMessage = err instanceof Error ? err.message : 'Failed to generate preview summary.';
-        setError(errorMessage);
-        setStep(AppStep.ERROR);
-    } finally {
-        setLoadingMessage('');
-    }
-  };
-
   const handleBackToAssessment = () => {
     navigate('/assessment');
   };
@@ -409,15 +376,6 @@ export default function CheckoutReport() {
           </div>
         )}
 
-        {step === AppStep.GENERATING_SUMMARY && (
-          <ReportGenerator
-            title="Consulting Global Datasets..."
-            loadingMessage={loadingMessage}
-            completedSections={0}
-            totalSections={1}
-          />
-        )}
-
         {step === AppStep.GENERATING_FULL && (
           <ReportGenerator
             title="Building Your Full Relocation Report"
@@ -437,11 +395,11 @@ export default function CheckoutReport() {
           />
         )}
 
-        {step === AppStep.PREVIEW_SUMMARY && summaryData && (
-          <ReportSummaryPreview 
-            summaryData={summaryData} 
+        {step === AppStep.SALES && userInput && (
+          <ReportSalesLanding
+            destinationCity={userInput.destinationCity}
+            destinationCountry={userInput.destinationCountry}
             onBack={handleBackToAssessment} 
-            isAdmin={false}
             customerEmail={searchParams.get('email') || sessionStorage.getItem('userEmail') || undefined}
           />
         )}
