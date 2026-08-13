@@ -895,10 +895,10 @@ app.get('/api/admin/crm/purchasers', adminAuth, async (c) => {
     const { results } = await c.env.DB.prepare(`
       SELECT 
         r.id, r.email, r.session_code, r.assessment_id,
-        COALESCE(r.purchase_confirmed, 0) AS purchase_confirmed,
+        CASE WHEN r.stripe_confirmed_at IS NOT NULL THEN 1 ELSE 0 END AS purchase_confirmed,
         COALESCE(r.is_active, 0) AS is_active,
         COALESCE(r.is_archived, 0) AS is_archived,
-        r.created_at, r.expires_at,
+        r.created_at, r.expires_at, r.stripe_confirmed_at,
         a.preferred_country, a.preferred_city, a.overall_score
       FROM relocation_hub_access r
       LEFT JOIN assessments a ON r.assessment_id = a.id
@@ -974,8 +974,9 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
   }
 });
 
-// CRM - Delete purchaser permanently
-app.delete('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
+// CRM - Delete purchaser permanently. POST is the primary action because some
+// hosting proxies reject DELETE requests; DELETE remains for API compatibility.
+const deletePurchaser = async (c: any) => {
   try {
     const id = Number(c.req.param('id'));
     if (!Number.isInteger(id) || id <= 0) {
@@ -1000,7 +1001,10 @@ app.delete('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
       error: 'Failed to delete purchaser'
     }, 500);
   }
-});
+};
+
+app.post('/api/admin/crm/purchasers/:id/delete', adminAuth, deletePurchaser);
+app.delete('/api/admin/crm/purchasers/:id', adminAuth, deletePurchaser);
 
 // Blog Endpoints
 
@@ -1470,7 +1474,7 @@ app.get("/api/checkout-return", async (c) => {
     }
 
     return c.redirect(
-      `${SITE}/checkout-report?payment_success=true&assessment_id=${assessmentId}&email=${encodeURIComponent(email)}`,
+      `${SITE}/checkout-report?payment_success=true&assessment_id=${assessmentId}&email=${encodeURIComponent(email)}&session_id=${encodeURIComponent(sessionId)}`,
       302
     );
   } catch (error) {
@@ -2243,19 +2247,37 @@ app.post("/api/admin/cleanup", async (c) => {
 const PermanentAccessSchema = z.object({
   assessment_id: z.number(),
   email: z.string().email(),
-  purchase_confirmed: z.boolean().default(true)
+  stripe_session_id: z.string().startsWith('cs_')
 });
 
 app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccessSchema), async (c) => {
   try {
-    const { assessment_id, email, purchase_confirmed } = c.req.valid("json");
+    const { assessment_id, email, stripe_session_id } = c.req.valid("json");
     const normalizedEmail = email.toLowerCase();
+
+    // Never trust the browser to declare a purchase. Verify the Checkout
+    // Session directly with Stripe and require its customer email to match.
+    if (!c.env.STRIPE_SECRET_KEY) {
+      return c.json({ error: 'Stripe verification is not configured' }, 503);
+    }
+    const stripeResponse = await fetch(
+      `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(stripe_session_id)}`,
+      { headers: { Authorization: `Bearer ${c.env.STRIPE_SECRET_KEY}` } }
+    );
+    if (!stripeResponse.ok) {
+      return c.json({ error: 'Unable to verify Stripe checkout' }, 400);
+    }
+    const stripeSession = await stripeResponse.json() as any;
+    const stripeEmail = String(stripeSession.customer_details?.email || stripeSession.customer_email || '').toLowerCase();
+    if (stripeSession.payment_status !== 'paid' || stripeEmail !== normalizedEmail) {
+      return c.json({ error: 'Stripe payment confirmation did not match this customer' }, 403);
+    }
 
     // Log relocation hub access creation/update for monitoring
     console.log('Creating/updating relocation hub access:', {
       assessment_id,
       email: normalizedEmail,
-      purchase_confirmed,
+      stripe_session_id,
       timestamp: new Date().toISOString()
     });
 
@@ -2279,12 +2301,15 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
         UPDATE relocation_hub_access
         SET is_active = ?,
             purchase_confirmed = ?,
+            stripe_session_id = ?,
+            stripe_confirmed_at = CURRENT_TIMESTAMP,
             expires_at = ?,
             updated_at = CURRENT_TIMESTAMP
         WHERE email = ? AND assessment_id = ?
       `).bind(
         1, // is_active (activate it - purchase confirmed)
-        purchase_confirmed ? 1 : 0,
+        1,
+        stripe_session_id,
         expires_at.toISOString(),
         normalizedEmail,
         assessment_id
@@ -2332,14 +2357,16 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
       // Create permanent access record
       await c.env.DB.prepare(`
         INSERT INTO relocation_hub_access (
-          assessment_id, email, session_code, is_active, purchase_confirmed, expires_at
-        ) VALUES (?, ?, ?, ?, ?, ?)
+          assessment_id, email, session_code, is_active, purchase_confirmed,
+          stripe_session_id, stripe_confirmed_at, expires_at
+        ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
       `).bind(
         assessment_id,
         normalizedEmail,
         sessionCode,
         1, // is_active (active because purchase is confirmed)
-        purchase_confirmed ? 1 : 0,
+        1,
+        stripe_session_id,
         expires_at.toISOString()
       ).run();
 
@@ -2353,7 +2380,7 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
 
     // Extend assessment retention period to 2 years if purchase is confirmed
     // This ensures assessment data remains available for the full 2-year relocation hub access period
-    if (purchase_confirmed) {
+    {
       // Get current retention expiry date for the assessment
       const currentAssessment = await c.env.DB.prepare(
         "SELECT retention_expires_at FROM assessments WHERE id = ?"
@@ -2384,7 +2411,7 @@ app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccess
     // webhook's idempotency check could never match it.
 
     // Send email with relocation hub access information (only if purchase is confirmed)
-    if (purchase_confirmed) {
+    {
       const emailResult = await sendRelocationHubAccessEmail(
         normalizedEmail,
         sessionCode,

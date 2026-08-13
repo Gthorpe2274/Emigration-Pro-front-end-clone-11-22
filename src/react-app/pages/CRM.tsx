@@ -25,6 +25,7 @@ interface Purchaser {
   preferred_country: string;
   preferred_city: string | null;
   overall_score: number;
+  stripe_confirmed_at: string | null;
 }
 
 const toFlag = (value: unknown): number => {
@@ -188,8 +189,8 @@ export default function CRM() {
     if (!confirm('Are you sure you want to PERMANENTLY DELETE this purchaser? This action cannot be undone.')) return;
 
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers/${id}`, {
-        method: 'DELETE',
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers/${id}/delete`, {
+        method: 'POST',
         headers: { Authorization: `Bearer ${adminToken}` }
       });
 
@@ -392,11 +393,11 @@ export default function CRM() {
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-                <div className="text-sm text-gray-600 mb-1">Total Purchasers</div>
+                <div className="text-sm text-gray-600 mb-1">CRM Contacts</div>
                 <div className="text-2xl font-bold text-gray-900">{purchasers.length}</div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-                <div className="text-sm text-gray-600 mb-1">Active Accounts</div>
+                <div className="text-sm text-gray-600 mb-1">Active CRM Records</div>
                 <div className="text-2xl font-bold text-green-600">
                   {purchasers.filter(p => p.is_active === 1 && p.is_archived === 0).length}
                 </div>
@@ -408,16 +409,17 @@ export default function CRM() {
                 </div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-                <div className="text-sm text-gray-600 mb-1">Confirmed</div>
+                <div className="text-sm text-gray-600 mb-1">Total Sales</div>
                 <div className="text-2xl font-bold text-blue-600">
-                  {purchasers.filter(p => p.purchase_confirmed === 1).length}
+                  {purchasers.filter(p => Boolean(p.stripe_confirmed_at)).length}
                 </div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
-                <div className="text-sm text-gray-600 mb-1">This Month</div>
+                <div className="text-sm text-gray-600 mb-1">Sales This Month</div>
                 <div className="text-2xl font-bold text-purple-600">
                   {purchasers.filter(p => {
-                    const created = new Date(p.created_at);
+                    if (!p.stripe_confirmed_at) return false;
+                    const created = new Date(p.stripe_confirmed_at);
                     const now = new Date();
                     return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
                   }).length}

@@ -193,8 +193,8 @@ export default function CheckoutReport() {
 
           setIsAdminAccess(true);
           startFullReport(prepopulated, uniqueConcerns, assessmentIdParam, true);
-        } else if (searchParams.get('payment_success') === 'true') {
-          activateHubAccess(assessmentIdParam, emailParam);
+        } else if (searchParams.get('payment_success') === 'true' && searchParams.get('session_id')) {
+          activateHubAccess(assessmentIdParam, emailParam, searchParams.get('session_id')!);
           startFullReport(prepopulated, uniqueConcerns, assessmentIdParam);
         } else {
           setStep(AppStep.SALES);
@@ -208,14 +208,14 @@ export default function CheckoutReport() {
   }, [searchParams]);
 
   /** Unlock the permanent relocation hub for a confirmed purchase. */
-  const activateHubAccess = (assessmentId: string, email: string) => {
+  const activateHubAccess = (assessmentId: string, email: string, stripeSessionId: string) => {
     fetch('/api/relocation-hub/create-access', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         assessment_id: parseInt(assessmentId, 10),
         email,
-        purchase_confirmed: true
+        stripe_session_id: stripeSessionId
       })
     }).catch(err => console.error('Failed to activate hub access:', err));
   };

@@ -113,8 +113,10 @@ CREATE TABLE relocation_hub_access (
   email TEXT NOT NULL,
   session_code TEXT NOT NULL UNIQUE,
   is_active BOOLEAN DEFAULT 1,
-  purchase_confirmed BOOLEAN DEFAULT 1,
+  purchase_confirmed BOOLEAN DEFAULT 0,
   is_archived BOOLEAN DEFAULT 0,
+  stripe_session_id TEXT,
+  stripe_confirmed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   expires_at TIMESTAMP
@@ -123,6 +125,7 @@ CREATE TABLE relocation_hub_access (
 CREATE INDEX idx_relocation_hub_email ON relocation_hub_access(email);
 CREATE INDEX idx_relocation_hub_session_code ON relocation_hub_access(session_code);
 CREATE INDEX idx_relocation_hub_assessment ON relocation_hub_access(assessment_id);
+CREATE UNIQUE INDEX idx_relocation_hub_stripe_session ON relocation_hub_access(stripe_session_id) WHERE stripe_session_id IS NOT NULL;
 
 CREATE TABLE email_leads (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
