@@ -4,12 +4,13 @@ import { Users, Mail, Key, Calendar, MapPin, Search, Download, Edit, Archive, Tr
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 
-// If running on Netlify, use the Cloudflare Workers API host; otherwise use a relative URL.
+// Production CRM data lives in Cloudflare D1 behind this Worker. Call it
+// directly so custom domains do not send non-GET methods through a site proxy.
 const getApiBaseUrl = () => {
-  if (window.location.hostname.includes('netlify.app')) {
-    return 'https://emigration-pro.aiservices4biz.workers.dev';
-  }
-  return '';
+  const hostname = window.location.hostname;
+  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+  const isWorker = hostname.endsWith('.workers.dev');
+  return isLocal || isWorker ? '' : 'https://emigration-pro.aiservices4biz.workers.dev';
 };
 
 interface Purchaser {
