@@ -189,15 +189,9 @@ export default function CRM() {
     if (!confirm(`Permanently delete ${purchaser.email}? This action cannot be undone.`)) return;
 
     try {
-      // Use the same PUT route as archive/restore, which is known to pass
-      // through every hosting proxy used by the CRM.
       const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers/${purchaser.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${adminToken}`
-        },
-        body: JSON.stringify({ action: 'delete' })
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${adminToken}` }
       });
 
       const data = await response.json().catch(() => ({ success: false, error: `Delete request failed (${response.status})` }));
