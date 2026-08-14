@@ -922,6 +922,36 @@ app.get('/api/admin/crm/purchasers', adminAuth, async (c) => {
   }
 });
 
+// CRM - Apply one action to multiple selected purchasers.
+app.post('/api/admin/crm/purchasers/bulk', adminAuth, async (c) => {
+  try {
+    const body = await c.req.json();
+    const action = body.action as unknown;
+    const ids = Array.isArray(body.ids)
+      ? Array.from(new Set(body.ids.map(Number))).filter(id => Number.isInteger(id) && id > 0)
+      : [];
+
+    if (!['archive', 'restore', 'delete'].includes(String(action))) {
+      return c.json({ success: false, error: 'Invalid bulk action' }, 400);
+    }
+    if (ids.length === 0 || ids.length > 500) {
+      return c.json({ success: false, error: 'Select between 1 and 500 customers' }, 400);
+    }
+
+    const statements = ids.map(id => action === 'delete'
+      ? c.env.DB.prepare('DELETE FROM relocation_hub_access WHERE id = ?').bind(id)
+      : c.env.DB.prepare('UPDATE relocation_hub_access SET is_archived = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+          .bind(action === 'archive' ? 1 : 0, id));
+    const results = await c.env.DB.batch(statements);
+    const affected = results.reduce((total, result) => total + (result.meta.changes || 0), 0);
+
+    return c.json({ success: true, affected });
+  } catch (error) {
+    console.error('Error applying CRM bulk action:', error);
+    return c.json({ success: false, error: 'Failed to apply bulk action' }, 500);
+  }
+});
+
 // CRM - Update purchaser
 app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
   try {

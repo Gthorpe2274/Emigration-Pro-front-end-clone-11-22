@@ -60,6 +60,8 @@ export default function CRM() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive' | 'archived'>('all');
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(() => new Set());
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   // Edit modal states
   const [showEditModal, setShowEditModal] = useState(false);
@@ -273,6 +275,65 @@ export default function CRM() {
 
     return matchesSearch && matchesFilter && matchesDate;
   });
+
+  const filteredIds = filteredPurchasers.map(purchaser => purchaser.id);
+  const allFilteredSelected = filteredIds.length > 0 && filteredIds.every(id => selectedIds.has(id));
+
+  const toggleSelected = (id: number) => {
+    setSelectedIds(current => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAllFiltered = () => {
+    setSelectedIds(current => {
+      const next = new Set(current);
+      if (allFilteredSelected) filteredIds.forEach(id => next.delete(id));
+      else filteredIds.forEach(id => next.add(id));
+      return next;
+    });
+  };
+
+  const handleBulkAction = async (action: 'archive' | 'restore' | 'delete') => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    const description = action === 'delete' ? 'permanently delete' : action;
+    const warning = action === 'delete' ? ' This action cannot be undone.' : '';
+    if (!confirm(`${description.charAt(0).toUpperCase() + description.slice(1)} ${ids.length} selected customer${ids.length === 1 ? '' : 's'}?${warning}`)) return;
+
+    setBulkLoading(true);
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers/bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({ action, ids })
+      });
+      const data = await response.json().catch(() => ({ success: false, error: `Bulk action failed (${response.status})` }));
+      if (!response.ok || !data.success) throw new Error(data.error || 'Bulk action failed');
+
+      if (action === 'delete') {
+        setPurchasers(current => current.filter(purchaser => !selectedIds.has(purchaser.id)));
+      } else {
+        const archived = action === 'archive' ? 1 : 0;
+        setPurchasers(current => current.map(purchaser =>
+          selectedIds.has(purchaser.id) ? { ...purchaser, is_archived: archived } : purchaser
+        ));
+      }
+      setSelectedIds(new Set());
+      alert(`${data.affected} customer${data.affected === 1 ? '' : 's'} ${action === 'delete' ? 'deleted' : action === 'archive' ? 'archived' : 'restored'} successfully.`);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Bulk action failed');
+    } finally {
+      setBulkLoading(false);
+    }
+  };
 
   const exportToCSV = () => {
     const headers = ['Email', 'Session Code', 'Country', 'City', 'Score', 'Active', 'Purchased', 'Created', 'Expires'];
@@ -543,18 +604,46 @@ export default function CRM() {
               </button>
             </div>
           )}
+          {selectedIds.size > 0 && (
+            <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
+              <span className="mr-auto font-semibold text-blue-900">
+                {selectedIds.size} customer{selectedIds.size === 1 ? '' : 's'} selected
+              </span>
+              <button disabled={bulkLoading} onClick={() => handleBulkAction('archive')} className="flex items-center gap-2 rounded-lg bg-gray-700 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50">
+                <Archive className="h-4 w-4" /> Archive
+              </button>
+              <button disabled={bulkLoading} onClick={() => handleBulkAction('restore')} className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50">
+                <RotateCcw className="h-4 w-4" /> Restore
+              </button>
+              <button disabled={bulkLoading} onClick={() => handleBulkAction('delete')} className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50">
+                <Trash2 className="h-4 w-4" /> Delete permanently
+              </button>
+              <button disabled={bulkLoading} onClick={() => setSelectedIds(new Set())} className="px-2 py-2 text-sm font-medium text-blue-700 hover:text-blue-900 disabled:opacity-50">
+                Clear selection
+              </button>
+            </div>
+          )}
           <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full table-fixed">
                 <thead className="bg-gray-50/50">
                   <tr>
-                    <th className="w-[19%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
+                    <th className="w-[4%] px-3 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={allFilteredSelected}
+                        onChange={toggleSelectAllFiltered}
+                        aria-label={`Select all ${filteredPurchasers.length} filtered customers`}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
                     </th>
                     <th className="w-[18%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="w-[17%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Session Code
                     </th>
-                    <th className="w-[15%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[14%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Destination
                     </th>
                     <th className="w-[7%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -566,7 +655,7 @@ export default function CRM() {
                     <th className="w-[12%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Created
                     </th>
-                    <th className="w-[19%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[18%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -574,6 +663,15 @@ export default function CRM() {
                 <tbody className="divide-y divide-gray-200">
                   {filteredPurchasers.map((purchaser) => (
                     <tr key={purchaser.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-3 py-4">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(purchaser.id)}
+                          onChange={() => toggleSelected(purchaser.id)}
+                          aria-label={`Select ${purchaser.email}`}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                      </td>
                       <td className="px-3 py-4 min-w-0">
                         <div className="flex items-center">
                           <Mail className="w-4 h-4 text-gray-400 mr-2" />
