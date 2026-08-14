@@ -513,13 +513,13 @@ export default function CRM() {
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <div className="text-sm text-gray-600 mb-1">Total Sales</div>
-                <div className="text-2xl font-bold text-blue-600" title={salesStatsError || 'Paid Stripe Checkout Sessions'}>
+                <div className="text-2xl font-bold text-blue-600" title={salesStatsError || 'Successful live Stripe payments for the report price'}>
                   {salesStats ? salesStats.totalSales : '—'}
                 </div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <div className="text-sm text-gray-600 mb-1">Sales This Month</div>
-                <div className="text-2xl font-bold text-purple-600" title={salesStatsError || `Paid Stripe sessions this month (${salesStats?.asOf || 'loading'})`}>
+                <div className="text-2xl font-bold text-purple-600" title={salesStatsError || `Successful live Stripe report payments this month (${salesStats?.asOf || 'loading'})`}>
                   {salesStats ? salesStats.salesThisMonth : '—'}
                 </div>
               </div>
