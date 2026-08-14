@@ -29,6 +29,12 @@ interface Purchaser {
   stripe_confirmed_at: string | null;
 }
 
+interface SalesStats {
+  totalSales: number;
+  salesThisMonth: number;
+  asOf: string;
+}
+
 const toFlag = (value: unknown): number => {
   if (value === true || value === 1 || value === '1' || value === 'true') return 1;
   return 0;
@@ -56,6 +62,8 @@ export default function CRM() {
   const [purchasers, setPurchasers] = useState<Purchaser[]>([]);
   const [loading, setLoading] = useState(() => Boolean(sessionStorage.getItem('adminToken') || sessionStorage.getItem('blogAdminToken')));
   const [loadError, setLoadError] = useState('');
+  const [salesStats, setSalesStats] = useState<SalesStats | null>(null);
+  const [salesStatsError, setSalesStatsError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -114,6 +122,7 @@ export default function CRM() {
   useEffect(() => {
     if (adminToken) {
       fetchPurchasers();
+      fetchSalesStats();
     } else {
       setLoading(false);
     }
@@ -141,6 +150,30 @@ export default function CRM() {
       setLoadError(error instanceof Error ? error.message : 'Failed to load CRM data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSalesStats = async () => {
+    setSalesStatsError('');
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/sales-stats`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      if (response.status === 401) {
+        handleLogout();
+        return;
+      }
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error(data.error || 'Failed to load Stripe sales totals');
+      setSalesStats({
+        totalSales: Number(data.totalSales),
+        salesThisMonth: Number(data.salesThisMonth),
+        asOf: String(data.asOf)
+      });
+    } catch (error) {
+      console.error('Error fetching Stripe sales totals:', error);
+      setSalesStats(null);
+      setSalesStatsError(error instanceof Error ? error.message : 'Failed to load Stripe sales totals');
     }
   };
 
@@ -480,19 +513,14 @@ export default function CRM() {
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <div className="text-sm text-gray-600 mb-1">Total Sales</div>
-                <div className="text-2xl font-bold text-blue-600">
-                  {purchasers.filter(p => Boolean(p.stripe_confirmed_at)).length}
+                <div className="text-2xl font-bold text-blue-600" title={salesStatsError || 'Paid Stripe Checkout Sessions'}>
+                  {salesStats ? salesStats.totalSales : '—'}
                 </div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <div className="text-sm text-gray-600 mb-1">Sales This Month</div>
-                <div className="text-2xl font-bold text-purple-600">
-                  {purchasers.filter(p => {
-                    if (!p.stripe_confirmed_at) return false;
-                    const created = new Date(p.stripe_confirmed_at);
-                    const now = new Date();
-                    return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
-                  }).length}
+                <div className="text-2xl font-bold text-purple-600" title={salesStatsError || `Paid Stripe sessions this month (${salesStats?.asOf || 'loading'})`}>
+                  {salesStats ? salesStats.salesThisMonth : '—'}
                 </div>
               </div>
             </div>

@@ -177,6 +177,78 @@ const app = new Hono<{ Bindings: Env }>();
 const SITE_ORIGIN = 'https://emigrationpro.com';
 const INDEXNOW_KEY = '72c62d03371f45b7a2177112fafe5a53';
 const INDEXNOW_KEY_LOCATION = `${SITE_ORIGIN}/${INDEXNOW_KEY}.txt`;
+const CRM_SALES_STATS_CACHE_KEY = 'crm:stripe-sales-stats:v1';
+const CRM_TIME_ZONE = 'America/New_York';
+
+type StripeCheckoutSession = {
+  id: string;
+  created: number;
+  payment_status: string;
+};
+
+type StripeCheckoutSessionList = {
+  data: StripeCheckoutSession[];
+  has_more: boolean;
+};
+
+type CrmSalesStats = {
+  totalSales: number;
+  salesThisMonth: number;
+  asOf: string;
+  source: 'stripe';
+};
+
+const monthKey = (date: Date) => new Intl.DateTimeFormat('en-CA', {
+  timeZone: CRM_TIME_ZONE,
+  year: 'numeric',
+  month: '2-digit'
+}).format(date);
+
+async function fetchStripeSalesStats(env: Env): Promise<CrmSalesStats> {
+  const cached = await env.REPORTS_KV.get(CRM_SALES_STATS_CACHE_KEY, 'json') as CrmSalesStats | null;
+  if (cached) return cached;
+  if (!env.STRIPE_SECRET_KEY) throw new Error('Stripe is not configured');
+
+  const currentMonth = monthKey(new Date());
+  let totalSales = 0;
+  let salesThisMonth = 0;
+  let startingAfter = '';
+
+  // Stripe returns at most 100 Checkout Sessions per page. Walk every page so
+  // historical paid sessions are included, not only records created after the
+  // CRM's Stripe confirmation columns were introduced.
+  for (let page = 0; page < 1000; page += 1) {
+    const params = new URLSearchParams({ limit: '100', status: 'complete' });
+    if (startingAfter) params.set('starting_after', startingAfter);
+    const response = await fetch(`https://api.stripe.com/v1/checkout/sessions?${params}`, {
+      headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` }
+    });
+    if (!response.ok) {
+      const detail = await response.text();
+      console.error('Stripe sales stats request failed:', response.status, detail);
+      throw new Error('Unable to load Stripe sales totals');
+    }
+
+    const result = await response.json() as StripeCheckoutSessionList;
+    for (const session of result.data) {
+      if (session.payment_status !== 'paid') continue;
+      totalSales += 1;
+      if (monthKey(new Date(session.created * 1000)) === currentMonth) salesThisMonth += 1;
+    }
+
+    if (!result.has_more || result.data.length === 0) break;
+    startingAfter = result.data[result.data.length - 1].id;
+  }
+
+  const stats: CrmSalesStats = {
+    totalSales,
+    salesThisMonth,
+    asOf: new Date().toISOString(),
+    source: 'stripe'
+  };
+  await env.REPORTS_KV.put(CRM_SALES_STATS_CACHE_KEY, JSON.stringify(stats), { expirationTtl: 300 });
+  return stats;
+}
 
 function normalizePublicSlug(value: string): string {
   return value
@@ -919,6 +991,19 @@ app.get('/api/admin/crm/purchasers', adminAuth, async (c) => {
       success: false,
       error: 'Failed to fetch CRM data'
     }, 500);
+  }
+});
+
+// CRM sales totals come from paid Stripe Checkout Sessions. CRM contacts are
+// captured before checkout and therefore must never be treated as sales.
+app.get('/api/admin/crm/sales-stats', adminAuth, async (c) => {
+  try {
+    const stats = await fetchStripeSalesStats(c.env);
+    c.header('Cache-Control', 'no-store');
+    return c.json({ success: true, ...stats });
+  } catch (error) {
+    console.error('Error fetching CRM sales stats:', error);
+    return c.json({ success: false, error: 'Failed to load Stripe sales totals' }, 502);
   }
 });
 
