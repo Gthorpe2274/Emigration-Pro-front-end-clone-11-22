@@ -185,20 +185,26 @@ export default function CRM() {
     }
   };
 
-  const handleDeletePurchaser = async (id: number) => {
-    if (!confirm('Are you sure you want to PERMANENTLY DELETE this purchaser? This action cannot be undone.')) return;
+  const handleDeletePurchaser = async (purchaser: Purchaser) => {
+    if (!confirm(`Permanently delete ${purchaser.email}? This action cannot be undone.`)) return;
 
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers/${id}/delete`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${adminToken}` }
+      // Use the same PUT route as archive/restore, which is known to pass
+      // through every hosting proxy used by the CRM.
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers/${purchaser.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`
+        },
+        body: JSON.stringify({ action: 'delete' })
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({ success: false, error: `Delete request failed (${response.status})` }));
 
       if (response.ok && data.success) {
         alert('Purchaser deleted permanently!');
-        setPurchasers(current => current.filter(purchaser => purchaser.id !== id));
+        setPurchasers(current => current.filter(item => item.id !== purchaser.id));
       } else {
         alert('Error: ' + (data.error || 'Failed to delete purchaser'));
       }
@@ -238,12 +244,20 @@ export default function CRM() {
     }
   };
 
+  const normalizedSearch = searchTerm.trim().toLocaleLowerCase();
   const filteredPurchasers = purchasers.filter(purchaser => {
-    // Search by email or session code
-    const matchesSearch =
-      (purchaser.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (purchaser.session_code || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      purchaser.preferred_country?.toLowerCase().includes(searchTerm.toLowerCase());
+    // Search every customer field visible in the table.
+    const searchText = [
+      purchaser.email,
+      purchaser.session_code,
+      purchaser.preferred_country,
+      purchaser.preferred_city,
+      purchaser.overall_score,
+      purchaser.is_archived === 1 ? 'archived restore' : purchaser.is_active === 1 ? 'active' : 'inactive',
+      purchaser.purchase_confirmed === 1 ? 'confirmed sale' : '',
+      purchaser.created_at ? new Date(purchaser.created_at).toLocaleDateString() : ''
+    ].map(value => String(value ?? '')).join(' ').toLocaleLowerCase();
+    const matchesSearch = !normalizedSearch || searchText.includes(normalizedSearch);
 
     // Filter by active/archived status
     let matchesFilter = true;
@@ -360,7 +374,7 @@ export default function CRM() {
       <Navigation />
 
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full mx-auto">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
@@ -536,28 +550,28 @@ export default function CRM() {
           )}
           <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-white/20 shadow-lg overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full table-fixed">
                 <thead className="bg-gray-50/50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[19%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[18%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Session Code
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[15%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Destination
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[7%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Score
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[10%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[12%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Created
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="w-[19%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -565,19 +579,19 @@ export default function CRM() {
                 <tbody className="divide-y divide-gray-200">
                   {filteredPurchasers.map((purchaser) => (
                     <tr key={purchaser.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-4 min-w-0">
                         <div className="flex items-center">
                           <Mail className="w-4 h-4 text-gray-400 mr-2" />
-                          <span className="text-sm font-medium text-gray-900">{purchaser.email}</span>
+                          <span className="truncate text-sm font-medium text-gray-900" title={purchaser.email}>{purchaser.email}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-4 min-w-0">
                         <div className="flex items-center">
                           <Key className="w-4 h-4 text-gray-400 mr-2" />
-                          <span className="text-sm text-gray-900 font-mono">{purchaser.session_code}</span>
+                          <span className="truncate text-sm text-gray-900 font-mono" title={purchaser.session_code}>{purchaser.session_code}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-4 min-w-0">
                         <div className="flex items-center">
                           <MapPin className="w-4 h-4 text-gray-400 mr-2" />
                           <div className="text-sm">
@@ -588,10 +602,10 @@ export default function CRM() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-4 whitespace-nowrap">
                         <span className="text-sm font-medium text-gray-900">{purchaser.overall_score || 'N/A'}</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-4 whitespace-nowrap">
                         <div className="flex flex-col gap-1">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${purchaser.is_active === 1
                             ? 'bg-green-100 text-green-800'
@@ -606,7 +620,7 @@ export default function CRM() {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <Calendar className="w-4 h-4 text-gray-400 mr-2" />
                           <div className="text-sm text-gray-900">
@@ -614,15 +628,15 @@ export default function CRM() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-3">
+                      <td className="px-3 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleEdit(purchaser)}
                             className="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
                             title="Edit purchaser"
                           >
                             <Edit className="w-4 h-4" />
-                            <span className="text-sm">Edit</span>
+                            <span className="hidden 2xl:inline text-sm">Edit</span>
                           </button>
                           
                           <button
@@ -631,16 +645,16 @@ export default function CRM() {
                             title={purchaser.is_archived === 1 ? "Unarchive" : "Archive"}
                           >
                             {purchaser.is_archived === 1 ? <RotateCcw className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
-                            <span className="text-sm">{purchaser.is_archived === 1 ? 'Restore' : 'Archive'}</span>
+                            <span className="hidden 2xl:inline text-sm">{purchaser.is_archived === 1 ? 'Restore' : 'Archive'}</span>
                           </button>
 
                           <button
-                            onClick={() => handleDeletePurchaser(purchaser.id)}
+                            onClick={() => handleDeletePurchaser(purchaser)}
                             className="flex items-center space-x-1 text-red-600 hover:text-red-800 transition-colors"
                             title="Delete permanently"
                           >
                             <Trash2 className="w-4 h-4" />
-                            <span className="text-sm">Delete</span>
+                            <span className="hidden 2xl:inline text-sm">Delete</span>
                           </button>
                         </div>
                       </td>

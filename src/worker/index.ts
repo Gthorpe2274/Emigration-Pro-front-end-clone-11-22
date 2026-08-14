@@ -930,6 +930,13 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
       return c.json({ success: false, error: 'Invalid purchaser ID' }, 400);
     }
     const body = await c.req.json();
+    if (body.action === 'delete') {
+      const result = await c.env.DB.prepare('DELETE FROM relocation_hub_access WHERE id = ?').bind(id).run();
+      if (result.meta.changes === 0) {
+        return c.json({ success: false, error: 'Purchaser not found' }, 404);
+      }
+      return c.json({ success: true, message: 'Purchaser deleted permanently' });
+    }
     const { email, session_code, is_active, is_archived, purchase_confirmed } = body;
 
     if (!email || !session_code) {
