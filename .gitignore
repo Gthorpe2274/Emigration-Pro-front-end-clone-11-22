@@ -10,3 +10,6 @@ worker-configuration.d.ts
 # Secrets - do not commit
 secrets.json
 youtube_key.txt
+
+# Local design rollback snapshots / previews
+.design-backups/
