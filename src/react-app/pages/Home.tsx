@@ -145,8 +145,9 @@ export default function Home() {
               <img src="/images/hero-1.png" alt="How to leave the US" className="w-full h-full object-cover" style={{ filter: 'saturate(0.9)' }} />
             </div>
             <div className="hidden sm:block absolute -left-8 bottom-12 w-64 p-5 bg-brand-bg border border-brand-border rounded-lg shadow-xl">
-              <div className="font-brand-serif text-3xl font-medium text-brand-ink leading-none">14</div>
-              <div className="text-sm text-brand-muted mt-1.5 leading-snug">Comprehensive sections in every personalized report</div>
+              <div className="font-brand-serif text-xl font-medium text-brand-ink leading-snug">
+                Pick your City, Assess its Compatibility, Get your Plan
+              </div>
             </div>
             <div className="hidden sm:flex absolute -right-5 top-10 items-center gap-2.5 px-4 py-3.5 bg-brand-btn text-brand-btn-ink rounded-lg shadow-xl">
               <span className="w-2 h-2 bg-brand-accent-2 rounded-full" />
