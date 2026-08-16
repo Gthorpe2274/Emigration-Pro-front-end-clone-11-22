@@ -1,6 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Play, ExternalLink, Users, Video } from 'lucide-react';
+import {
+  Play,
+  ExternalLink,
+  Users,
+  ChevronDown,
+  Scale,
+  Landmark,
+  Banknote,
+  HeartPulse,
+  Truck,
+  Building2,
+  Ship,
+  ArrowLeft,
+  ArrowRight,
+  Clock,
+  ShieldCheck,
+  type LucideIcon,
+} from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
@@ -14,6 +31,153 @@ interface YoutubeVideo {
   description: string;
   url: string;
 }
+
+type Provider = {
+  name: string;
+  category: string;
+  Icon: LucideIcon;
+  summary: string;
+  services: string;
+  url: string;
+};
+
+const providers: Provider[] = [
+  {
+    name: 'Fragomen',
+    category: 'Immigration law',
+    Icon: Scale,
+    summary: 'Global immigration law firm specializing in US citizen relocations and visa applications.',
+    services: 'Visa applications · Legal documentation · Residency planning',
+    url: 'https://www.fragomen.com/',
+  },
+  {
+    name: 'Henley & Partners',
+    category: 'Residence & citizenship',
+    Icon: Landmark,
+    summary: 'The global leader in residence and citizenship by investment, helping you acquire alternative residence or citizenship.',
+    services: 'Citizenship by investment · Residence planning · Global mobility',
+    url: 'https://www.henleyglobal.com/',
+  },
+  {
+    name: 'Wise',
+    category: 'Banking & transfers',
+    Icon: Banknote,
+    summary: 'International banking solutions for expatriates with multi-currency accounts and low-fee transfers.',
+    services: 'Multi-currency accounts · International transfers · Expat banking',
+    url: 'https://www.wise.com/',
+  },
+  {
+    name: 'Cigna Global',
+    category: 'Health insurance',
+    Icon: HeartPulse,
+    summary: 'Leading international health insurance provider offering comprehensive coverage for expatriates.',
+    services: 'Global coverage · Emergency services · Local provider networks',
+    url: 'https://www.cigna.com/individuals-families/shop-plans/health-insurance-plans/',
+  },
+  {
+    name: 'SIRVA',
+    category: 'Moving & shipping',
+    Icon: Truck,
+    summary: 'Global relocation company providing comprehensive moving and settling-in services worldwide.',
+    services: 'International moving · Packing · Shipping · Destination services',
+    url: 'https://www.sirva.com/',
+  },
+];
+
+const consulates: { country: string; offices: { label: string; url: string }[] }[] = [
+  {
+    country: 'Portugal',
+    offices: [
+      { label: 'Portuguese Consulate New York', url: 'https://www.consulateportugalus.org/' },
+      { label: 'Portuguese Consulate San Francisco', url: 'https://www.sanfrancisco.embaixadaportugal.mne.gov.pt/' },
+      { label: 'Portuguese Consulate Boston', url: 'https://boston.embaixadaportugal.mne.gov.pt/' },
+    ],
+  },
+  {
+    country: 'Spain',
+    offices: [
+      { label: 'Spanish Consulate New York', url: 'https://www.exteriores.gob.es/Consulados/NUEVAYORK/en/Pages/inicio.aspx' },
+      { label: 'Spanish Consulate Miami', url: 'https://www.exteriores.gob.es/Consulados/MIAMI/en/Pages/inicio.aspx' },
+      { label: 'Spanish Consulate Los Angeles', url: 'https://www.exteriores.gob.es/Consulados/LOSANGELES/en/Pages/inicio.aspx' },
+      { label: 'Spanish Consulate San Francisco', url: 'https://www.exteriores.gob.es/Consulados/SANFRANCISCO/en/Pages/inicio.aspx' },
+    ],
+  },
+  {
+    country: 'Mexico',
+    offices: [
+      { label: 'Mexican Consulate New York', url: 'https://consulmex.sre.gob.mx/nuevayork/' },
+      { label: 'Mexican Consulate Los Angeles', url: 'https://consulmex.sre.gob.mx/losangeles/' },
+      { label: 'Mexican Consulate Miami', url: 'https://consulmex.sre.gob.mx/miami/' },
+      { label: 'Mexican Consulate Chicago', url: 'https://consulmex.sre.gob.mx/chicago/' },
+    ],
+  },
+  {
+    country: 'Costa Rica',
+    offices: [
+      { label: 'Costa Rican Consulate Washington DC', url: 'https://www.costarica-embassy.org/' },
+      { label: 'Costa Rican Consulate New York', url: 'https://www.costarica-embassy.org/index.php?q=node/21' },
+      { label: 'Costa Rican Consulate Los Angeles', url: 'https://www.costarica-embassy.org/index.php?q=node/21' },
+    ],
+  },
+  {
+    country: 'Canada',
+    offices: [
+      { label: 'Canadian Consulate New York', url: 'https://www.canada.ca/en/immigration-refugees-citizenship.html' },
+      { label: 'Canadian Consulate Los Angeles', url: 'https://www.canada.ca/en/immigration-refugees-citizenship.html' },
+      { label: 'Canadian Consulate Miami', url: 'https://www.canada.ca/en/immigration-refugees-citizenship.html' },
+    ],
+  },
+  {
+    country: 'Germany',
+    offices: [
+      { label: 'German Consulate New York', url: 'https://www.germany.info/us-en' },
+      { label: 'German Consulate San Francisco', url: 'https://www.germany.info/us-en/embassy-consulates/sanfrancisco' },
+      { label: 'German Consulate Los Angeles', url: 'https://www.germany.info/us-en/embassy-consulates/losangeles' },
+      { label: 'German Consulate Miami', url: 'https://www.germany.info/us-en/embassy-consulates/miami' },
+    ],
+  },
+];
+
+const customsBrokers: { region: string; offices: { label: string; url: string }[] }[] = [
+  {
+    region: 'West Coast',
+    offices: [
+      { label: 'A & A Customs Brokers Ltd. (Blaine, WA)', url: 'https://www.aacb.com/' },
+      { label: 'Priority Import-Export Services (Los Angeles, CA)', url: 'https://priorityimport.com/' },
+      { label: 'Coppersmith Global Logistics (Los Angeles/SF)', url: 'https://www.coppersmith.com/' },
+      { label: "Omega CHB Int'l Inc. (Los Angeles, CA)", url: 'https://omegachb.com/' },
+      { label: 'Packair (Customs Broker Los Angeles)', url: 'https://www.packair.com/customs-broker-los-angeles/' },
+    ],
+  },
+  {
+    region: 'East Coast',
+    offices: [
+      { label: 'All Cleared Customs Brokerage (New York, NY)', url: 'https://www.accb.nyc/' },
+      { label: 'New York Customs Brokers Inc.', url: 'https://www.nycb.com/' },
+      { label: 'A Customs Brokerage, Inc. (Miami, FL)', url: 'https://acb-us.com/' },
+      { label: 'LMB Customs Brokers, LLC (Miami, FL)', url: 'https://lmbcustomsbrokers.com/' },
+      { label: 'U.S. Consolidated Customs Brokers (Miami, FL)', url: 'https://www.us-ccb.com/' },
+    ],
+  },
+];
+
+const gettingStartedTips = [
+  'Research visa requirements thoroughly',
+  'Connect with local expat communities',
+  'Consult with qualified professionals',
+  'Plan your finances carefully',
+  'Consider a reconnaissance trip first',
+];
+
+const Eyebrow = ({ children, tone = 'muted' }: { children: React.ReactNode; tone?: 'muted' | 'accent' }) => (
+  <div
+    className={`text-xs font-semibold uppercase tracking-wide mb-4 ${
+      tone === 'accent' ? 'text-brand-accent-2' : 'text-brand-muted'
+    }`}
+  >
+    {children}
+  </div>
+);
 
 export default function RelocationHub() {
   const { id } = useParams();
@@ -199,14 +363,12 @@ export default function RelocationHub() {
     return baseVideos;
   };
 
-
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-brand-surface font-brand-sans text-brand-ink flex items-center justify-center">
+      <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-brand-muted">Loading your relocation hub...</p>
+          <div className="animate-spin w-10 h-10 border-2 border-brand-accent border-t-transparent rounded-full mx-auto mb-5" />
+          <p className="text-brand-muted">Loading your relocation hub…</p>
         </div>
       </div>
     );
@@ -214,17 +376,30 @@ export default function RelocationHub() {
 
   if (!assessment) {
     return (
-      <div className="min-h-screen bg-brand-surface font-brand-sans text-brand-ink flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-brand-ink mb-4">Assessment Not Found</h2>
-          <Link to="/" className="text-brand-ink-2 hover:text-brand-accent">Return to Home</Link>
+      <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <h2 className="font-brand-serif font-medium text-3xl tracking-tight text-brand-ink mb-3">
+            Assessment not found
+          </h2>
+          <p className="text-brand-muted mb-7">
+            We couldn't locate this assessment. It may have expired or the link may be incomplete.
+          </p>
+          <Link
+            to="/assessment"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-brand-btn text-brand-btn-ink rounded-lg font-semibold hover:bg-brand-ink-2 transition-colors"
+          >
+            Take a new assessment
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     );
   }
 
+  const destination = `${assessment.preferred_country}${assessment.preferred_city ? ` · ${assessment.preferred_city}` : ''}`;
+
   return (
-    <div className="min-h-screen bg-brand-surface font-brand-sans text-brand-ink">
+    <div className="min-h-screen bg-brand-bg font-brand-sans text-brand-ink">
       <Navigation />
       <EmailCaptureModal
         isOpen={showEmailModal}
@@ -233,725 +408,500 @@ export default function RelocationHub() {
         assessmentId={assessment?.id}
       />
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto">
-          {/* New Header */}
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-brand-ink mb-4">
-              This Is Your Personal Relocation Hub Page for {assessment.preferred_country}
-            </h2>
-            <p className="text-xl text-brand-muted">
-              Below is a list of: <span className="font-bold text-brand-ink-2">1.</span> Critical Service Providers <span className="font-bold text-brand-ink-2">2.</span> Helpful Videos <span className="font-bold text-brand-ink-2">3.</span> Support Communities
-            </p>
+      {/* ── HUB HEADER ────────────────────────────────────────────── */}
+      <section className="bg-brand-surface border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-bg border border-brand-border rounded-full text-xs font-semibold text-brand-ink-2 uppercase tracking-wide mb-7">
+            <span className={`w-1.5 h-1.5 rounded-full ${isPermanentAccess ? 'bg-brand-accent' : 'bg-amber-500'}`} />
+            {isPermanentAccess ? 'Two-year access active' : 'Temporary session'}
           </div>
 
-          {/* Complete Emigration Report Section */}
-          <div className="bg-brand-surface p-8 rounded-2xl border border-brand-border mb-8 shadow-lg">
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-6">
-                <div className="w-16 h-16 bg-brand-ink rounded-full flex items-center justify-center shadow-lg">
-                  <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
-                    <path d="M14 2v6h6" />
-                    <path d="M16 13H8" />
-                    <path d="M16 17H8" />
-                    <path d="M10 9H8" />
-                  </svg>
-                </div>
-                <h2 className="text-4xl font-bold text-brand-ink ml-4">Complete Emigration Report</h2>
-              </div>
-
-              <p className="text-xl text-brand-muted mb-8 max-w-3xl mx-auto leading-relaxed">
-                Get a comprehensive, detailed step-by-step Emigration Report based on current immigration data and requirements that guides you through your migration to a new country and city.
+          <div className="grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-16 items-center mb-12">
+            <div>
+              <h1 className="font-brand-serif font-medium text-4xl md:text-5xl leading-[1.08] tracking-tight text-brand-ink mb-5">
+                Your Relocation Hub for<br />
+                <span className="italic text-brand-ink-2">{destination}</span>
+              </h1>
+              <p className="text-lg leading-relaxed text-brand-muted max-w-lg">
+                Resources and insights for US citizens planning to relocate to {assessment.preferred_country}.
+                Everything below is curated around your assessment.
               </p>
+            </div>
 
-              {/* Report Preview Section */}
-              <div className="bg-brand-bg rounded-2xl p-8 max-w-3xl mx-auto mb-10 border border-brand-border shadow-sm text-left">
-                <h4 className="text-lg font-bold text-brand-ink-2 mb-4 uppercase tracking-wide flex items-center">
-                  <span className="mr-2">📝</span>
-                  Your Report Will Cover The Below Subjects
-                </h4>
-
-                {loadingPreview ? (
-                  <div className="flex items-center justify-center py-6">
-                    <div className="animate-spin w-8 h-8 border-3 border-brand-accent border-t-transparent rounded-full mr-3"></div>
-                    <span className="text-brand-muted text-lg">Generating your personalized summary...</span>
-                  </div>
-                ) : previewError ? (
-                  <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-                    <p className="text-red-700 font-bold text-lg">Error: {previewError}</p>
-                    <button
-                      onClick={() => window.location.reload()}
-                      className="text-brand-ink-2 underline mt-3 font-semibold hover:text-brand-accent"
-                    >
-                      Try again
-                    </button>
-                  </div>
-                ) : previewSummary ? (
-                  <div className="space-y-4">
-                    <div className="p-4 bg-brand-surface rounded-xl border border-brand-border">
-                      <p className="text-brand-ink text-lg leading-relaxed italic">
-                        "{previewSummary}"
-                      </p>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-
-              <div className="inline-block mb-6">
-                <div className="bg-brand-accent-2 text-brand-accent-ink px-8 py-3 rounded-full shadow-lg mb-4">
-                  <span className="text-lg font-bold uppercase tracking-wide">Limited Time Sale</span>
-                  <span className="ml-4 text-lg line-through opacity-80">$99.99</span>
-                  <span className="ml-2 text-2xl font-bold">now $69.99</span>
-                </div>
-              </div>
-
-              <div>
-                <button
-                  onClick={() => setShowEmailModal(true)}
-                  className="inline-flex items-center bg-brand-btn hover:bg-brand-ink-2 text-brand-btn-ink px-10 py-4 rounded-full text-xl font-bold shadow-xl hover:shadow-2xl transition-all duration-200"
-                >
-                  <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" />
-                    <path d="M14 2v6h6" />
-                    <path d="M16 13H8" />
-                    <path d="M16 17H8" />
-                    <path d="M10 9H8" />
-                  </svg>
-                  Get Your Report
-                </button>
-              </div>
+            <div className="rounded-xl overflow-hidden border border-brand-border bg-brand-bg">
+              <img
+                src="/images/hub-arrival.jpg"
+                alt="A couple arriving at their new home abroad, keys in hand"
+                width={1200}
+                height={654}
+                className="w-full h-full object-cover aspect-[16/9]"
+                style={{ filter: 'saturate(0.9)' }}
+              />
             </div>
           </div>
 
-          {/* Professional Services */}
-          <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border mb-8">
-            <div className="flex items-center space-x-3 mb-6">
-              <ExternalLink className="w-8 h-8 text-brand-ink-2" />
-              <h3 className="text-2xl font-bold text-brand-ink">Professional Relocation Services</h3>
-            </div>
-            <p className="text-brand-muted mb-8">
-              Connect with verified professional service providers to handle the complex aspects of your relocation to {assessment.preferred_country}.
+          <div className="grid sm:grid-cols-3 gap-px bg-brand-border border border-brand-border rounded-xl overflow-hidden max-w-3xl">
+            <a href="#services" className="bg-brand-bg p-6 no-underline hover:bg-brand-surface transition-colors">
+              <div className="font-brand-serif text-2xl font-medium text-brand-ink leading-none mb-3">01</div>
+              <div className="text-sm font-semibold text-brand-ink mb-1">Service providers</div>
+              <div className="text-xs text-brand-muted">Legal, banking, insurance, moving</div>
+            </a>
+            <a href="#videos" className="bg-brand-bg p-6 no-underline hover:bg-brand-surface transition-colors">
+              <div className="font-brand-serif text-2xl font-medium text-brand-ink leading-none mb-3">02</div>
+              <div className="text-sm font-semibold text-brand-ink mb-1">Video insights</div>
+              <div className="text-xs text-brand-muted">First-hand expat experience</div>
+            </a>
+            <a href="#communities" className="bg-brand-bg p-6 no-underline hover:bg-brand-surface transition-colors">
+              <div className="font-brand-serif text-2xl font-medium text-brand-ink leading-none mb-3">03</div>
+              <div className="text-sm font-semibold text-brand-ink mb-1">Communities</div>
+              <div className="text-xs text-brand-muted">Groups already on the ground</div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── REPORT OFFER ──────────────────────────────────────────── */}
+      <section className="bg-brand-ink text-white">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          <div>
+            <Eyebrow tone="accent">The professional report</Eyebrow>
+            <h2 className="font-brand-serif font-medium text-4xl md:text-5xl leading-tight tracking-tight text-white mb-6">
+              The complete plan for <span className="italic text-brand-accent-2">{assessment.preferred_city || assessment.preferred_country}</span>.
+            </h2>
+            <p className="text-lg leading-relaxed text-[#b8c8e2] max-w-md mb-9">
+              A comprehensive, step-by-step Emigration Report built on current immigration data and
+              requirements — personalized to your profile, budget, and chosen city. Generated on demand,
+              with no waiting.
             </p>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {/* Immigration Law Services */}
-              <a
-                href="https://www.fragomen.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <ExternalLink className="w-4 h-4 text-brand-ink-2" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-brand-ink">Fragomen</h4>
-                      <div className="flex items-center space-x-1">
-                        <div className="flex text-yellow-400">
-                          {'★'.repeat(5)}
-                        </div>
-                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Professional Services</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-sm text-brand-ink-2 mb-2">Emigration Law & Legal Services</p>
-                <p className="text-sm text-brand-muted mb-3">
-                  Global immigration law firm specializing in US citizen relocations and visa applications.
-                </p>
-                <div className="text-xs text-gray-500 mb-4">
-                  <p><strong>Services:</strong> Visa Applications, Legal Documentation, Residency Planning</p>
-                </div>
-                <div className="text-sm text-brand-ink-2 font-medium">Visit Website →</div>
-              </a>
-
-              {/* Henley & Partners */}
-              <a
-                href="https://www.henleyglobal.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <ExternalLink className="w-4 h-4 text-brand-ink-2" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-brand-ink">Henley & Partners</h4>
-                      <div className="flex items-center space-x-1">
-                        <div className="flex text-yellow-400">
-                          {'★'.repeat(5)}
-                        </div>
-                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Residence & Citizenship</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-sm text-brand-ink-2 mb-2">Citizenship Planning</p>
-                <p className="text-sm text-brand-muted mb-3">
-                  The global leader in residence and citizenship by investment, helping you acquire alternative residence or citizenship.
-                </p>
-                <div className="text-xs text-gray-500 mb-4">
-                  <p><strong>Services:</strong> Citizenship by Investment, Residence Planning, Global Mobility</p>
-                </div>
-                <div className="text-sm text-brand-ink-2 font-medium">Visit Website →</div>
-              </a>
-
-              {/* Banking & Finance */}
-              <a
-                href="https://www.wise.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <ExternalLink className="w-4 h-4 text-purple-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-brand-ink">Wise</h4>
-                      <div className="flex items-center space-x-1">
-                        <div className="flex text-yellow-400">
-                          {'★'.repeat(5)}
-                        </div>
-                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Financial Services</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-sm text-purple-600 mb-2">Banking & Financial Services</p>
-                <p className="text-sm text-brand-muted mb-3">
-                  International banking solutions for expatriates with multi-currency accounts and low-fee transfers.
-                </p>
-                <div className="text-xs text-gray-500 mb-4">
-                  <p><strong>Services:</strong> Multi-currency Accounts, International Transfers, Expat Banking</p>
-                </div>
-                <div className="text-sm text-purple-600 font-medium">Visit Website →</div>
-              </a>
-
-              {/* Health Insurance */}
-              <a
-                href="https://www.cigna.com/individuals-families/shop-plans/health-insurance-plans/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                      <ExternalLink className="w-4 h-4 text-red-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-brand-ink">Cigna Global</h4>
-                      <div className="flex items-center space-x-1">
-                        <div className="flex text-yellow-400">
-                          {'★'.repeat(5)}
-                        </div>
-                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Insurance Services</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-sm text-red-600 mb-2">Healthcare & Insurance</p>
-                <p className="text-sm text-brand-muted mb-3">
-                  Leading international health insurance provider offering comprehensive coverage for expatriates.
-                </p>
-                <div className="text-xs text-gray-500 mb-4">
-                  <p><strong>Services:</strong> Global Coverage, Emergency Services, Local Provider Networks</p>
-                </div>
-                <div className="text-sm text-red-600 font-medium">Visit Website →</div>
-              </a>
-
-              {/* Moving & Relocation Services */}
-              <a
-                href="https://www.sirva.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <ExternalLink className="w-4 h-4 text-orange-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-brand-ink">SIRVA</h4>
-                      <div className="flex items-center space-x-1">
-                        <div className="flex text-yellow-400">
-                          {'★'.repeat(5)}
-                        </div>
-                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Relocation Services</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-sm text-orange-600 mb-2">Moving & Relocation Services</p>
-                <p className="text-sm text-brand-muted mb-3">
-                  Global relocation company providing comprehensive moving and settling-in services worldwide.
-                </p>
-                <div className="text-xs text-gray-500 mb-4">
-                  <p><strong>Services:</strong> International Moving, Packing, Shipping, Destination Services</p>
-                </div>
-                <div className="text-sm text-orange-600 font-medium">Visit Website →</div>
-              </a>
-
-              {/* US Visa Application Locations - Dropdown */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                      <ExternalLink className="w-4 h-4 text-green-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-brand-ink">US Visa Application Locations</h4>
-                      <div className="flex items-center space-x-1">
-                        <div className="flex text-yellow-400">
-                          {'★'.repeat(5)}
-                        </div>
-                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Visa Services</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-sm text-green-600 mb-2">Foreign Consulates in the USA</p>
-                <p className="text-sm text-brand-muted mb-3">
-                  Consulates and embassies in the US where American citizens can apply for visas to emigrate.
-                </p>
-                <div className="text-xs text-gray-500 mb-4">
-                  <p><strong>Services:</strong> Visa Applications, Residency Permits, Immigration Consultations</p>
-                </div>
-
-                <button
-                  onClick={() => setVisaLocationsDropdownOpen(!visaLocationsDropdownOpen)}
-                  className="w-full flex items-center justify-between text-sm text-green-600 font-medium hover:text-green-700 bg-green-50 px-4 py-2 rounded-lg transition-colors"
-                >
-                  <span>View Consulates by Country</span>
-                  <svg
-                    className={`w-5 h-5 transition-transform ${visaLocationsDropdownOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {visaLocationsDropdownOpen && (
-                  <div className="mt-4 space-y-4">
-                    {/* Portugal */}
-                    <div>
-                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Portugal Consulates in USA</h5>
-                      <div className="space-y-2">
-                        <a href="https://www.consulateportugalus.org/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Portuguese Consulate New York
-                        </a>
-                        <a href="https://www.sanfrancisco.embaixadaportugal.mne.gov.pt/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Portuguese Consulate San Francisco
-                        </a>
-                        <a href="https://boston.embaixadaportugal.mne.gov.pt/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Portuguese Consulate Boston
-                        </a>
-                      </div>
-                    </div>
-
-                    {/* Spain */}
-                    <div>
-                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Spain Consulates in USA</h5>
-                      <div className="space-y-2">
-                        <a href="https://www.exteriores.gob.es/Consulados/NUEVAYORK/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Spanish Consulate New York
-                        </a>
-                        <a href="https://www.exteriores.gob.es/Consulados/MIAMI/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Spanish Consulate Miami
-                        </a>
-                        <a href="https://www.exteriores.gob.es/Consulados/LOSANGELES/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Spanish Consulate Los Angeles
-                        </a>
-                        <a href="https://www.exteriores.gob.es/Consulados/SANFRANCISCO/en/Pages/inicio.aspx" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Spanish Consulate San Francisco
-                        </a>
-                      </div>
-                    </div>
-
-                    {/* Mexico */}
-                    <div>
-                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Mexico Consulates in USA</h5>
-                      <div className="space-y-2">
-                        <a href="https://consulmex.sre.gob.mx/nuevayork/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Mexican Consulate New York
-                        </a>
-                        <a href="https://consulmex.sre.gob.mx/losangeles/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Mexican Consulate Los Angeles
-                        </a>
-                        <a href="https://consulmex.sre.gob.mx/miami/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Mexican Consulate Miami
-                        </a>
-                        <a href="https://consulmex.sre.gob.mx/chicago/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Mexican Consulate Chicago
-                        </a>
-                      </div>
-                    </div>
-
-                    {/* Costa Rica */}
-                    <div>
-                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Costa Rica Consulates in USA</h5>
-                      <div className="space-y-2">
-                        <a href="https://www.costarica-embassy.org/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Costa Rican Consulate Washington DC
-                        </a>
-                        <a href="https://www.costarica-embassy.org/index.php?q=node/21" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Costa Rican Consulate New York
-                        </a>
-                        <a href="https://www.costarica-embassy.org/index.php?q=node/21" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Costa Rican Consulate Los Angeles
-                        </a>
-                      </div>
-                    </div>
-
-                    {/* Canada */}
-                    <div>
-                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Canada Consulates in USA</h5>
-                      <div className="space-y-2">
-                        <a href="https://www.canada.ca/en/immigration-refugees-citizenship.html" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Canadian Consulate New York
-                        </a>
-                        <a href="https://www.canada.ca/en/immigration-refugees-citizenship.html" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Canadian Consulate Los Angeles
-                        </a>
-                        <a href="https://www.canada.ca/en/immigration-refugees-citizenship.html" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Canadian Consulate Miami
-                        </a>
-                      </div>
-                    </div>
-
-                    {/* Germany */}
-                    <div>
-                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">Germany Consulates in USA</h5>
-                      <div className="space-y-2">
-                        <a href="https://www.germany.info/us-en" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          German Consulate New York
-                        </a>
-                        <a href="https://www.germany.info/us-en/embassy-consulates/sanfrancisco" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          German Consulate San Francisco
-                        </a>
-                        <a href="https://www.germany.info/us-en/embassy-consulates/losangeles" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          German Consulate Los Angeles
-                        </a>
-                        <a href="https://www.germany.info/us-en/embassy-consulates/miami" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          German Consulate Miami
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                )}
+            <div className="flex flex-wrap items-center gap-5 mb-7">
+              <div className="flex items-baseline gap-3">
+                <span className="font-brand-serif text-5xl font-medium text-white leading-none">
+                  $69<span className="text-2xl">.99</span>
+                </span>
+                <span className="text-2xl font-medium text-[#94a6c4] line-through decoration-red-500">$99.99</span>
               </div>
+              <span className="text-xs font-semibold uppercase tracking-wide px-2.5 py-1.5 bg-brand-accent-2 text-brand-accent-ink rounded">
+                Limited time offer
+              </span>
+            </div>
 
-              {/* Customs Services - Dropdown */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                      <ExternalLink className="w-4 h-4 text-indigo-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-brand-ink">Customs Brokers</h4>
-                      <div className="flex items-center space-x-1">
-                        <div className="flex text-yellow-400">
-                          {'★'.repeat(5)}
-                        </div>
-                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">Customs Services</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-sm text-indigo-600 mb-2">Customs & Import Services</p>
-                <p className="text-sm text-brand-muted mb-3">
-                  Professional customs brokerage services for smooth international shipment clearance.
-                </p>
-                <div className="text-xs text-gray-500 mb-4">
-                  <p><strong>Services:</strong> Customs Clearance, Import Documentation, Duty Payment, Compliance</p>
-                </div>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => setShowEmailModal(true)}
+                className="px-7 py-4 bg-brand-accent-2 text-brand-accent-ink rounded-lg font-semibold text-base hover:brightness-95 transition-all"
+              >
+                Get your report
+              </button>
+              <Link
+                to="/sample-report"
+                className="px-6 py-4 text-white border border-[#2b4879] rounded-lg font-semibold text-base hover:bg-white/5 transition-colors"
+              >
+                View sample
+              </Link>
+            </div>
+          </div>
 
-                <button
-                  onClick={() => setCustomsDropdownOpen(!customsDropdownOpen)}
-                  className="w-full flex items-center justify-between text-sm text-indigo-600 font-medium hover:text-indigo-700 bg-indigo-50 px-4 py-2 rounded-lg transition-colors"
-                >
-                  <span>View Customs Brokers by Region</span>
-                  <svg
-                    className={`w-5 h-5 transition-transform ${customsDropdownOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-
-                {customsDropdownOpen && (
-                  <div className="mt-4 space-y-4">
-                    {/* West Coast */}
-                    <div>
-                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">West Coast</h5>
-                      <div className="space-y-2">
-                        <a href="https://www.aacb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          A & A Customs Brokers Ltd. (Blaine, WA)
-                        </a>
-                        <a href="https://priorityimport.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Priority Import‑Export Services (Los Angeles, CA)
-                        </a>
-                        <a href="https://www.coppersmith.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Coppersmith Global Logistics (Los Angeles/SF)
-                        </a>
-                        <a href="https://omegachb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Omega CHB Int'l Inc. (Los Angeles, CA)
-                        </a>
-                        <a href="https://www.packair.com/customs-broker-los-angeles/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          Packair (Customs Broker Los Angeles)
-                        </a>
-                      </div>
-                    </div>
-
-                    {/* East Coast */}
-                    <div>
-                      <h5 className="font-semibold text-brand-ink mb-2 text-sm">East Coast</h5>
-                      <div className="space-y-2">
-                        <a href="https://www.accb.nyc/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          All Cleared Customs Brokerage (New York, NY)
-                        </a>
-                        <a href="https://www.nycb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          New York Customs Brokers Inc.
-                        </a>
-                        <a href="https://acb-us.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          A Customs Brokerage, Inc. (Miami, FL)
-                        </a>
-                        <a href="https://lmbcustomsbrokers.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          LMB Customs Brokers, LLC (Miami, FL)
-                        </a>
-                        <a href="https://www.us-ccb.com/" target="_blank" rel="noopener noreferrer" className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline">
-                          U.S. Consolidated Customs Brokers (Miami, FL)
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                )}
+          <div className="bg-brand-surface rounded-xl p-7 md:p-8 text-brand-ink border border-brand-border">
+            <div className="flex items-center justify-between mb-6 pb-5 border-b border-brand-border-strong">
+              <div>
+                <div className="font-brand-serif text-xl font-medium">{destination}</div>
+                <div className="text-xs text-brand-muted mt-1">Personalized report · 14 sections</div>
+              </div>
+              <div className="text-xs font-bold uppercase tracking-wide text-brand-accent-ink bg-brand-accent-2 px-2 py-1 rounded">
+                Preview
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h4 className="font-semibold text-brand-ink-2 mb-3">✅ Professional Guidance Recommended</h4>
-              <p className="text-brand-ink-2 text-sm mb-4">
-                While this hub provides general information, professional services can provide personalized guidance
+            <div className="text-xs font-semibold uppercase tracking-wide text-brand-muted mb-4">
+              What your report will cover
+            </div>
+
+            {loadingPreview ? (
+              <div className="flex items-center py-6">
+                <div className="animate-spin w-5 h-5 border-2 border-brand-accent border-t-transparent rounded-full mr-3" />
+                <span className="text-brand-muted text-sm">Generating your personalized summary…</span>
+              </div>
+            ) : previewError ? (
+              <div className="bg-brand-bg border border-brand-border rounded-lg p-5">
+                <p className="text-brand-ink font-medium text-sm mb-2">
+                  We couldn't generate your preview just now.
+                </p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="text-sm font-semibold text-brand-ink-2 underline underline-offset-2 hover:text-brand-accent"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : previewSummary ? (
+              <blockquote className="border-l-2 border-brand-accent pl-5 text-[17px] leading-relaxed text-brand-ink">
+                {previewSummary}
+              </blockquote>
+            ) : null}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PROFESSIONAL SERVICES ─────────────────────────────────── */}
+      <section id="services" className="border-b border-brand-border scroll-mt-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
+          <div className="grid md:grid-cols-2 gap-8 items-end mb-12">
+            <div>
+              <Eyebrow>01 · Service providers</Eyebrow>
+              <h2 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight tracking-tight text-brand-ink">
+                Professional relocation services.
+              </h2>
+            </div>
+            <p className="text-lg leading-relaxed text-brand-muted max-w-md">
+              Established providers for the parts of a move that benefit from specialist help —
+              immigration law, banking, insurance, shipping, and customs.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+            {providers.map((p) => (
+              <a
+                key={p.name}
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group p-6 bg-brand-surface border border-brand-border rounded-xl no-underline flex flex-col hover:border-brand-accent transition-colors"
+              >
+                <div className="flex items-start justify-between mb-5">
+                  <p.Icon className="w-5 h-5 text-brand-ink-2" />
+                  <span className="text-xs font-semibold uppercase tracking-wide text-brand-muted">
+                    {p.category}
+                  </span>
+                </div>
+                <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-2">{p.name}</h3>
+                <p className="text-sm leading-relaxed text-brand-muted mb-4">{p.summary}</p>
+                <div className="text-xs text-brand-muted leading-relaxed mb-5">{p.services}</div>
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-ink-2 mt-auto pt-4 border-t border-dashed border-brand-border group-hover:text-brand-accent transition-colors">
+                  Visit website
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </span>
+              </a>
+            ))}
+
+            {/* Consulates — expandable */}
+            <div className="p-6 bg-brand-surface border border-brand-border rounded-xl flex flex-col">
+              <div className="flex items-start justify-between mb-5">
+                <Building2 className="w-5 h-5 text-brand-ink-2" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-brand-muted">Visa applications</span>
+              </div>
+              <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-2">US visa application locations</h3>
+              <p className="text-sm leading-relaxed text-brand-muted mb-4">
+                Consulates and embassies in the US where American citizens can apply for visas to emigrate.
+              </p>
+              <div className="text-xs text-brand-muted leading-relaxed mb-5">
+                Visa applications · Residency permits · Immigration consultations
+              </div>
+
+              <button
+                onClick={() => setVisaLocationsDropdownOpen(!visaLocationsDropdownOpen)}
+                className="w-full flex items-center justify-between gap-2 text-sm font-semibold text-brand-ink-2 mt-auto pt-4 border-t border-dashed border-brand-border hover:text-brand-accent transition-colors"
+                aria-expanded={visaLocationsDropdownOpen}
+              >
+                <span>Consulates by country</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${visaLocationsDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {visaLocationsDropdownOpen && (
+                <div className="mt-5 space-y-5">
+                  {consulates.map((group) => (
+                    <div key={group.country}>
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-brand-muted mb-2.5">
+                        {group.country}
+                      </h4>
+                      <div className="space-y-1.5">
+                        {group.offices.map((office) => (
+                          <a
+                            key={office.label}
+                            href={office.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline"
+                          >
+                            {office.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Customs brokers — expandable */}
+            <div className="p-6 bg-brand-surface border border-brand-border rounded-xl flex flex-col">
+              <div className="flex items-start justify-between mb-5">
+                <Ship className="w-5 h-5 text-brand-ink-2" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-brand-muted">Customs</span>
+              </div>
+              <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-2">Customs brokers</h3>
+              <p className="text-sm leading-relaxed text-brand-muted mb-4">
+                Professional customs brokerage services for smooth international shipment clearance.
+              </p>
+              <div className="text-xs text-brand-muted leading-relaxed mb-5">
+                Customs clearance · Import documentation · Duty payment · Compliance
+              </div>
+
+              <button
+                onClick={() => setCustomsDropdownOpen(!customsDropdownOpen)}
+                className="w-full flex items-center justify-between gap-2 text-sm font-semibold text-brand-ink-2 mt-auto pt-4 border-t border-dashed border-brand-border hover:text-brand-accent transition-colors"
+                aria-expanded={customsDropdownOpen}
+              >
+                <span>Brokers by region</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${customsDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {customsDropdownOpen && (
+                <div className="mt-5 space-y-5">
+                  {customsBrokers.map((group) => (
+                    <div key={group.region}>
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-brand-muted mb-2.5">
+                        {group.region}
+                      </h4>
+                      <div className="space-y-1.5">
+                        {group.offices.map((office) => (
+                          <a
+                            key={office.label}
+                            href={office.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block text-sm text-brand-ink-2 hover:text-brand-accent hover:underline"
+                          >
+                            {office.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-start gap-4 p-6 bg-brand-surface border border-brand-border rounded-xl">
+            <ShieldCheck className="w-5 h-5 text-brand-accent shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-brand-ink mb-1.5">Professional guidance recommended</h3>
+              <p className="text-sm leading-relaxed text-brand-muted max-w-3xl">
+                This hub provides general information. Professional services can give personalized guidance
                 for your specific situation and help navigate complex legal and financial requirements.
               </p>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Community Insights */}
-          <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border mb-8">
-            <div className="flex items-center space-x-3 mb-6">
-              <Video className="w-8 h-8 text-brand-ink-2" />
-              <h3 className="text-2xl font-bold text-brand-ink">Relocation Video Resources</h3>
+      {/* ── VIDEO RESOURCES ───────────────────────────────────────── */}
+      <section id="videos" className="bg-brand-surface border-b border-brand-border scroll-mt-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
+          <div className="grid md:grid-cols-2 gap-8 items-end mb-10">
+            <div>
+              <Eyebrow>02 · Video insights</Eyebrow>
+              <h2 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight tracking-tight text-brand-ink">
+                Real stories from people<br />who already moved.
+              </h2>
             </div>
-            <p className="text-brand-muted mb-4">
-              Watch real stories and personal experiences from Americans who have made the move to {assessment.preferred_country}.
-              These community-shared videos provide personal perspectives and general tips.
+            <p className="text-lg leading-relaxed text-brand-muted max-w-md">
+              Community-shared videos from Americans who relocated to {assessment.preferred_country},
+              covering the visa process, costs, healthcare, and daily life.
             </p>
-
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
-              <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Important: Content Limitations</h4>
-              <p className="text-lg text-yellow-700 mb-3">
-                While these videos provide valuable personal insights, they represent individual experiences that may not
-                apply to your specific situation. Professional emigration requires personalized guidance.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videos.map((video) => (
-                <div key={video.id} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                  <div className="relative">
-                    <img
-                      src={video.thumbnail}
-                      alt={video.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <Play className="w-12 h-12 text-white" />
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h4 className="font-semibold text-brand-ink mb-2 line-clamp-2">
-                      {video.title}
-                    </h4>
-                    <p className="text-lg text-brand-ink-2 mb-3">{video.channel}</p>
-                    <p className="text-lg text-brand-muted mb-4 line-clamp-3">
-                      {video.description}
-                    </p>
-                    <a
-                      href={video.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-brand-ink-2 hover:text-brand-accent font-medium text-lg"
-                    >
-                      Watch on YouTube
-                      <ExternalLink className="w-4 h-4 ml-1" />
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
-          {/* Additional Resources */}
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Expat Communities */}
-            <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border">
-              <h3 className="text-xl font-bold text-brand-ink mb-4">Online Community Networks</h3>
-              <div className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Users className="w-4 h-4 text-brand-ink-2" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-brand-ink">Facebook Groups</h4>
-                    <p className="text-lg text-brand-muted">Join active expat community groups for daily tips and support</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <Users className="w-4 h-4 text-green-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-brand-ink">Reddit Communities</h4>
-                    <p className="text-lg text-brand-muted">r/{assessment.preferred_country.toLowerCase().replace(' ', '')} and expat-focused subreddits</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <Users className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-brand-ink">Discord Servers</h4>
-                    <p className="text-lg text-brand-muted">Real-time chat with current residents and newcomers</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Tips */}
-            <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border">
-              <h3 className="text-xl font-bold text-brand-ink mb-4">General Tips for Getting Started</h3>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-brand-ink-2 rounded-full"></div>
-                  <span className="text-lg text-brand-muted">Research visa requirements thoroughly</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-brand-ink-2 rounded-full"></div>
-                  <span className="text-lg text-brand-muted">Connect with local expat communities</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-brand-ink-2 rounded-full"></div>
-                  <span className="text-lg text-brand-muted">Consult with qualified professionals</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-brand-ink-2 rounded-full"></div>
-                  <span className="text-lg text-brand-muted">Plan your finances carefully</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-brand-ink-2 rounded-full"></div>
-                  <span className="text-lg text-brand-muted">Consider a reconnaissance trip first</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Hub Header (Moved to bottom) */}
-          <div className="text-center mb-12 mt-16 pt-12 border-t border-brand-border">
-            <div className="inline-flex items-center bg-brand-surface text-brand-ink-2 px-4 py-2 rounded-full text-lg font-medium mb-4 shadow-sm border border-brand-border">
-              <Users className="w-4 h-4 mr-2" />
-              {isPermanentAccess ? 'Your 2-Year Relocation Hub' : 'Your Relocation Hub'}
-            </div>
-            <h2 className="text-4xl font-bold text-brand-ink mb-4">
-              {assessment.preferred_country} Relocation Hub
-            </h2>
-            <p className="text-xl text-brand-muted mb-6">
-              Resources and insights for US citizens planning to relocate to {assessment.preferred_country}
-              {assessment.preferred_city && ` - ${assessment.preferred_city}`}
-            </p>
-
-            {/* Temporary vs Permanent Access Notice */}
-            {!isPermanentAccess ? (
-              <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-6 max-w-3xl mx-auto mb-6 shadow-md">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    <svg className="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 text-left">
-                    <h3 className="text-2xl font-semibold text-yellow-900 mb-2">⏱️ Temporary Access Notice</h3>
-                    <p className="text-lg text-yellow-800 mb-3">
-                      This relocation hub will <strong>remain active only until you close this browser tab</strong>.
-                      All content and resources shown here are temporary.
-                    </p>
-                    <h4 className="text-2xl font-bold text-brand-ink mb-3 mt-4">Want 2 yrs. access, with quarterly updates?</h4>
-                    <div className="bg-green-100 border border-green-300 rounded-lg p-4 mb-4">
-                      <p className="text-xl text-green-900 font-medium mb-2">
-                        🎁 <strong>FREE BONUS with Full Report Purchase!</strong>
-                      </p>
-                      <p className="text-lg text-green-800">
-                        Purchase your <strong>Full Emigration Pro Report</strong> and receive <strong>2 years access</strong> to
-                        this relocation hub page! Access it anytime using your email and session code.
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={handleGetPermanentAccess}
-                      className="w-full bg-brand-btn text-brand-btn-ink py-3 px-6 rounded-lg font-semibold text-lg hover:bg-brand-ink-2 hover:shadow-lg transition-all duration-200"
-                    >
-                      Get Your Full Report & 2 Years Access
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-green-50 border-2 border-green-300 rounded-lg p-6 max-w-3xl mx-auto mb-6 shadow-md">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <h3 className="text-lg font-semibold text-green-900">✅ 2 Years Access Activated</h3>
-                </div>
-                <p className="text-base text-green-800">
-                  You have 2 years access to this relocation hub. You can return anytime using your email and session code.
-                </p>
-              </div>
-            )}
-
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 max-w-2xl mx-auto">
-              <p className="text-lg text-green-800">
-                <strong>Note:</strong> This relocation hub provides peer insights and general tips.
-                For professional emigration guidance, consider consulting with qualified immigration professionals.
+          <div className="flex items-start gap-4 p-6 bg-brand-bg border border-brand-border rounded-xl mb-10">
+            <Clock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-brand-ink mb-1.5">These are individual experiences</h3>
+              <p className="text-sm leading-relaxed text-brand-muted max-w-3xl">
+                These videos offer valuable personal insight, but they reflect one person's circumstances
+                and may not apply to yours. Treat them as context, not as guidance.
               </p>
             </div>
           </div>
 
-          {/* Navigation Back */}
-          <div className="mt-12 text-center">
-            <Link
-              to={`/results/${id}`}
-              className="inline-flex items-center text-brand-ink-2 hover:text-brand-accent font-medium text-lg"
-            >
-              ← Back to Assessment Results
-            </Link>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {videos.map((video) => (
+              <a
+                key={video.id}
+                href={video.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group bg-brand-bg border border-brand-border rounded-xl overflow-hidden no-underline flex flex-col hover:border-brand-accent transition-colors"
+              >
+                <div className="relative aspect-video bg-brand-surface-2 overflow-hidden">
+                  <img
+                    src={video.thumbnail}
+                    alt={video.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-brand-ink/0 group-hover:bg-brand-ink/40 flex items-center justify-center transition-colors">
+                    <Play className="w-10 h-10 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </div>
+                <div className="p-6 flex flex-col flex-1">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-brand-muted mb-2.5">
+                    {video.channel}
+                  </div>
+                  <h3 className="font-brand-serif text-lg font-medium text-brand-ink leading-snug mb-2.5 line-clamp-2">
+                    {video.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-brand-muted line-clamp-3 mb-5">
+                    {video.description}
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-ink-2 mt-auto pt-4 border-t border-dashed border-brand-border group-hover:text-brand-accent transition-colors">
+                    Watch on YouTube
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </a>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* ── COMMUNITIES & GETTING STARTED ─────────────────────────── */}
+      <section id="communities" className="border-b border-brand-border scroll-mt-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
+          <Eyebrow>03 · Communities</Eyebrow>
+          <h2 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight tracking-tight text-brand-ink mb-10 max-w-2xl">
+            People already on the ground.
+          </h2>
+
+          <div className="grid lg:grid-cols-2 gap-6">
+            <div className="p-7 md:p-8 bg-brand-surface border border-brand-border rounded-xl">
+              <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-6">
+                Online community networks
+              </h3>
+              <div className="divide-y divide-brand-border">
+                {[
+                  { title: 'Facebook groups', desc: 'Active expat community groups for daily tips and support.' },
+                  { title: 'Reddit communities', desc: `r/${assessment.preferred_country.toLowerCase().replace(' ', '')} and expat-focused subreddits.` },
+                  { title: 'Discord servers', desc: 'Real-time chat with current residents and newcomers.' },
+                ].map((c) => (
+                  <div key={c.title} className="flex items-start gap-4 py-4 first:pt-0 last:pb-0">
+                    <Users className="w-[18px] h-[18px] text-brand-ink-2 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-brand-ink mb-1">{c.title}</h4>
+                      <p className="text-sm leading-relaxed text-brand-muted">{c.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="p-7 md:p-8 bg-brand-surface border border-brand-border rounded-xl">
+              <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-6">
+                Getting started
+              </h3>
+              <ol className="divide-y divide-brand-border">
+                {gettingStartedTips.map((tip, i) => (
+                  <li key={tip} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+                    <span className="font-brand-serif text-sm font-medium text-brand-muted w-5 shrink-0">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <span className="text-brand-ink">{tip}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── ACCESS STATUS ─────────────────────────────────────────── */}
+      <section className="bg-brand-surface border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
+          {!isPermanentAccess ? (
+            <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+              <div>
+                <Eyebrow>Access</Eyebrow>
+                <h2 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight tracking-tight text-brand-ink mb-5">
+                  This page disappears when you close the tab.
+                </h2>
+                <p className="text-lg leading-relaxed text-brand-muted max-w-md mb-6">
+                  Everything shown here is temporary. Purchase your full Emigration Report and this
+                  Hub stays available for two years, with quarterly updates — reachable anytime with
+                  your email and session code.
+                </p>
+                <div className="flex flex-col gap-1.5 items-start">
+                  <button
+                    onClick={handleGetPermanentAccess}
+                    className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-brand-btn text-brand-btn-ink rounded-lg font-semibold text-base hover:bg-brand-ink-2 transition-colors"
+                  >
+                    Get your report and two-year access
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                  <span className="text-[13px] text-brand-muted font-medium">
+                    Two-year Hub access is included with every report.
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-brand-bg border border-brand-border rounded-xl p-7 md:p-8">
+                <div className="flex items-center gap-2.5 mb-6 pb-5 border-b border-brand-border-strong">
+                  <Clock className="w-5 h-5 text-amber-600" />
+                  <span className="font-brand-serif text-xl font-medium text-brand-ink">Current session</span>
+                </div>
+                <dl className="divide-y divide-brand-border">
+                  <div className="flex items-center justify-between py-3.5 first:pt-0">
+                    <dt className="text-sm text-brand-muted">Access</dt>
+                    <dd className="text-sm font-semibold text-amber-800 bg-amber-100 px-2 py-1 rounded">
+                      Until you close this tab
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between py-3.5">
+                    <dt className="text-sm text-brand-muted">With a report purchase</dt>
+                    <dd className="text-sm font-semibold text-brand-accent-ink bg-brand-accent-2 px-2 py-1 rounded">
+                      Two years
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between py-3.5 last:pb-0">
+                    <dt className="text-sm text-brand-muted">Content refresh</dt>
+                    <dd className="text-sm font-semibold text-brand-ink">Quarterly</dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-start gap-4 p-7 md:p-8 bg-brand-bg border border-brand-border rounded-xl max-w-3xl">
+              <ShieldCheck className="w-5 h-5 text-brand-accent shrink-0 mt-1" />
+              <div>
+                <h2 className="font-brand-serif text-2xl font-medium text-brand-ink mb-2">
+                  Two-year access active
+                </h2>
+                <p className="text-brand-muted leading-relaxed">
+                  You can return to this Hub anytime using your email and session code. Content is
+                  refreshed quarterly.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <p className="text-sm leading-relaxed text-brand-muted max-w-3xl mt-10 pt-8 border-t border-brand-border">
+            This relocation hub provides peer insights and general tips. For professional emigration
+            guidance, consider consulting with qualified immigration professionals.
+          </p>
+        </div>
+      </section>
+
+      {/* ── FOOTER NAV ────────────────────────────────────────────── */}
+      <section className="bg-brand-surface">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 text-center">
+          <Link
+            to={`/results/${id}`}
+            className="inline-flex items-center gap-2 font-semibold text-brand-ink-2 hover:text-brand-accent transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to your assessment results
+          </Link>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );
