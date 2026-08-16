@@ -255,7 +255,7 @@ export default function Results() {
       {/* ── RESULT HEADER ─────────────────────────────────────────── */}
       <section className="bg-brand-surface border-b border-brand-border">
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
-          <div className="grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-16 items-center">
+          <div className="grid lg:grid-cols-[1.1fr_0.9fr_0.78fr] gap-8 lg:gap-8 items-stretch">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-bg border border-brand-border rounded-full text-xs font-semibold text-brand-ink-2 uppercase tracking-wide mb-7">
                 <span className="w-1.5 h-1.5 bg-brand-accent rounded-full" />
@@ -279,7 +279,7 @@ export default function Results() {
             </div>
 
             {/* Score panel */}
-            <div className="bg-brand-bg border border-brand-border rounded-xl p-7 md:p-8">
+            <div className="bg-brand-bg border border-brand-border rounded-xl p-7 md:p-8 flex flex-col justify-center">
               <div className="flex items-start justify-between mb-6">
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-wide text-brand-muted mb-2">
@@ -306,6 +306,43 @@ export default function Results() {
                   <span className="text-sm font-semibold text-brand-ink">{stars}/5</span>
                 </div>
               </div>
+            </div>
+
+            {/* Relocation Hub — free bonus */}
+            <div className="bg-brand-bg border border-brand-accent rounded-xl p-7 flex flex-col">
+              <div className="flex items-center gap-2 mb-5">
+                <span className="text-[11px] font-bold uppercase tracking-wide bg-brand-accent-2 text-brand-accent-ink px-2 py-1 rounded">
+                  Free bonus
+                </span>
+              </div>
+
+              <h2 className="font-brand-serif text-2xl font-medium text-brand-ink leading-snug mb-3">
+                Your Relocation Hub
+              </h2>
+              <p className="text-sm leading-relaxed text-brand-muted mb-6">
+                Vetted providers, expat video insights, and active communities for{' '}
+                {assessment.preferred_city || assessment.preferred_country} — ready now, free to access.
+              </p>
+
+              <ul className="space-y-2 mb-7">
+                {['Immigration & banking contacts', 'Destination video insights', 'Expat community groups'].map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-sm text-brand-ink">
+                    <span className="text-brand-accent font-bold leading-5">&#10003;</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                to={`/relocation-hub/${id}`}
+                className="inline-flex items-center justify-center gap-2 w-full px-5 py-3.5 bg-[#15803d] text-white rounded-lg font-semibold text-[15px] hover:bg-[#166534] transition-colors no-underline mt-auto"
+              >
+                Open your Hub
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <span className="text-[12px] text-brand-muted font-medium text-center mt-2">
+                No card required
+              </span>
             </div>
           </div>
         </div>
