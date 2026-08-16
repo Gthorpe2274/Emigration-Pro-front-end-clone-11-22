@@ -125,19 +125,13 @@ export default function Home() {
               <div className="flex flex-col gap-1.5 items-center">
                 <Link
                   to="/assessment"
-                  className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-brand-btn text-brand-btn-ink rounded-lg font-semibold text-base hover:bg-brand-ink-2 transition-colors w-full md:w-auto"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-brand-surface-2 text-black rounded-lg font-semibold text-base hover:bg-brand-border-strong transition-colors w-full md:w-auto"
                 >
-                  Start free assessment
+                  Step One - Start free assessment
                   <span className="text-lg leading-none">&rarr;</span>
                 </Link>
                 <span className="text-[13px] text-brand-muted font-medium">Find the City that suits you best.</span>
               </div>
-              <Link
-                to="/sample-report"
-                className="px-6 py-4 text-brand-ink border border-brand-border-strong rounded-lg font-semibold text-base bg-brand-bg hover:bg-brand-surface transition-colors"
-              >
-                See sample report
-              </Link>
             </div>
             <div className="flex flex-wrap items-center gap-6 text-sm text-brand-muted">
               <span className="inline-flex items-center gap-1.5"><span className="text-brand-accent font-bold">&#10003;</span> No credit card</span>
