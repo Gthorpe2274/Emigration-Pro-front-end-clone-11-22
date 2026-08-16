@@ -430,12 +430,11 @@ export default function RelocationHub() {
 
             <div className="rounded-xl overflow-hidden border border-brand-border bg-brand-bg">
               <img
-                src="/images/hub-arrival.jpg"
-                alt="A couple arriving at their new home abroad, keys in hand"
-                width={1200}
-                height={654}
-                className="w-full h-full object-cover aspect-[16/9]"
-                style={{ filter: 'saturate(0.9)' }}
+                src="/images/relocation-hub-overview.png"
+                alt="Emigration Pro relocation planning services and resources"
+                width={1536}
+                height={1024}
+                className="w-full h-full object-cover aspect-[3/2]"
               />
             </div>
           </div>
