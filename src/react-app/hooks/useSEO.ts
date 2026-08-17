@@ -106,7 +106,10 @@ export function useSEO({
     // Route-specific structured data. Removed on unmount so it never leaks into the
     // next route — the static @graph in index.html is left untouched.
     let script: HTMLScriptElement | undefined;
-    if (serializedJsonLd) {
+    // Netlify's edge renderer injects route schema into the initial HTML for
+    // non-JavaScript crawlers. Do not publish the same entity again after React
+    // hydrates; duplicate Article/Breadcrumb items create noisy validator output.
+    if (serializedJsonLd && !document.head.querySelector('script[data-seo-server-route]')) {
       script = document.createElement('script');
       script.type = 'application/ld+json';
       script.setAttribute('data-seo-route', '');

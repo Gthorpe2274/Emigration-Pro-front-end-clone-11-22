@@ -58,6 +58,13 @@ function summarize(post: BlogPost): string {
   return `${plain.slice(0, 157).replace(/\s+\S*$/, '')}…`;
 }
 
+/** Google Article markup expects an ISO datetime with an explicit timezone. */
+function schemaDate(value?: string): string | undefined {
+  if (!value) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return `${value}T00:00:00Z`;
+  return /(?:Z|[+-]\d{2}:?\d{2})$/.test(value) ? value : `${value}Z`;
+}
+
 function glossaryId(term: string): string {
   return term.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
@@ -126,9 +133,13 @@ export default async function handler(request: Request, context: Context) {
       headline: post.title,
       description,
       image: [image],
-      datePublished: post.published_date,
-      dateModified: post.updated_at || post.published_date,
-      author: { '@type': 'Person', name: post.author || 'Emigration Pro' },
+      datePublished: schemaDate(post.published_date),
+      dateModified: schemaDate(post.updated_at || post.published_date),
+      author: {
+        '@type': 'Person',
+        name: post.author || 'Emigration Pro',
+        url: `${SITE_ORIGIN}/about`,
+      },
       publisher: { '@id': `${SITE_ORIGIN}/#organization` },
       mainEntityOfPage: { '@type': 'WebPage', '@id': url },
       inLanguage: 'en-US',
@@ -146,7 +157,7 @@ export default async function handler(request: Request, context: Context) {
 
     html = html.replace(
       '</head>',
-      `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(
+      `<script type="application/ld+json" data-seo-server-route>${JSON.stringify(jsonLd).replace(
         /</g,
         '\\u003c'
       )}</script></head>`

@@ -43,6 +43,12 @@ function glossaryId(term: string): string {
   return term.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
+function schemaDate(value?: string): string | undefined {
+  if (!value) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return `${value}T00:00:00Z`;
+  return /(?:Z|[+-]\d{2}:?\d{2})$/.test(value) ? value : `${value}Z`;
+}
+
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<BlogPostType | null>(null);
@@ -79,9 +85,13 @@ export default function BlogPost() {
             headline: post.title,
             description: summarize(post.excerpt, post.body),
             image: post.featured_image ? [post.featured_image] : undefined,
-            datePublished: post.published_date,
-            dateModified: post.updated_at || post.published_date,
-            author: { '@type': 'Person', name: post.author || 'Emigration Pro' },
+            datePublished: schemaDate(post.published_date),
+            dateModified: schemaDate(post.updated_at || post.published_date),
+            author: {
+              '@type': 'Person',
+              name: post.author || 'Emigration Pro',
+              url: 'https://emigrationpro.com/about',
+            },
             publisher: { '@id': 'https://emigrationpro.com/#organization' },
             mainEntityOfPage: {
               '@type': 'WebPage',

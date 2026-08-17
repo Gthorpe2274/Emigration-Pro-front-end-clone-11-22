@@ -150,7 +150,7 @@ export default async function handler(request: Request, context: Context) {
 
     html = html.replace(
       '</head>',
-      `<script type="application/ld+json">${JSON.stringify(structuredData).replace(
+      `<script type="application/ld+json" data-seo-server-route>${JSON.stringify(structuredData).replace(
         /</g,
         '\\u003c'
       )}</script></head>`
