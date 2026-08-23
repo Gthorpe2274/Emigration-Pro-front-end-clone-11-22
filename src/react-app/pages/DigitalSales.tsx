@@ -34,6 +34,18 @@ const VIDEOS = [
     id: 'BRurSZW8w3g',
     title: '12 Digital Product Ideas That Still Work in 2026',
   },
+  {
+    id: 'VzhY_-IYwoU',
+    title: "Inside the World's Largest Wholesale Market in China | Documentary",
+  },
+  {
+    id: 'FhKnw1L1f24',
+    title: '5 Best Jobs For People Over 50',
+  },
+  {
+    id: 'O-GFGCefoY4',
+    title: 'Gang Of Four - Paper Thin (Official Video)',
+  },
 ];
 
 export default function DigitalSales() {
