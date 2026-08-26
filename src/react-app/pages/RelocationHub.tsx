@@ -820,7 +820,7 @@ export default function RelocationHub() {
               <div>
                 <Eyebrow>Access</Eyebrow>
                 <h2 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight tracking-tight text-brand-ink mb-5">
-                  This page disappears when you close the tab.
+                  This page will not be available once the session is over.
                 </h2>
                 <p className="text-lg leading-relaxed text-brand-muted max-w-md mb-6">
                   Everything shown here is temporary. Purchase your full Emigration Report and this
@@ -850,7 +850,7 @@ export default function RelocationHub() {
                   <div className="flex items-center justify-between py-3.5 first:pt-0">
                     <dt className="text-sm text-brand-muted">Access</dt>
                     <dd className="text-sm font-semibold text-amber-800 bg-amber-100 px-2 py-1 rounded">
-                      Until you close this tab
+                      Until the session is over
                     </dd>
                   </div>
                   <div className="flex items-center justify-between py-3.5">

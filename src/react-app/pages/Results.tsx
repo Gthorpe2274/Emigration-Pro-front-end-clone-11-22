@@ -77,6 +77,8 @@ const getScoreDescription = (score: number) => {
   return 'This destination may have significant challenges for your specific needs.';
 };
 
+const capScore = (score: number) => Math.max(0, Math.min(100, Number(score) || 0));
+
 const Stars = ({ rating, size = 'w-5 h-5' }: { rating: number; size?: string }) => (
   <div className="flex items-center gap-1">
     {[1, 2, 3, 4, 5].map((star) => (
@@ -215,7 +217,7 @@ export default function Results() {
     );
   }
 
-  const score = assessment.overall_score;
+  const score = capScore(assessment.overall_score);
   const tone = scoreTone(score);
   const stars = getStarRating(score);
   const destination = `${assessment.preferred_country}${assessment.preferred_city ? ` · ${assessment.preferred_city}` : ''}`;
@@ -225,7 +227,8 @@ export default function Results() {
         .map((factor) => {
           const criteriaKey = factor.key.replace('_importance', '');
           const importance = Number(assessment[factor.key as keyof AssessmentResultType] || 0);
-          const criteriaScore = assessment.criteriaScores![criteriaKey];
+          const rawCriteriaScore = assessment.criteriaScores![criteriaKey];
+          const criteriaScore = rawCriteriaScore === undefined ? undefined : capScore(rawCriteriaScore);
           return { ...factor, importance, score: criteriaScore };
         })
         .filter((f) => f.score !== undefined && f.score < 80)
@@ -344,6 +347,82 @@ export default function Results() {
                 No card required
               </span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── YOUR ASSESSMENT ───────────────────────────────────────── */}
+      <section className="border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
+          <Eyebrow>Your inputs</Eyebrow>
+          <h2 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight tracking-tight text-brand-ink mb-10 max-w-2xl">
+            What we scored you against.
+          </h2>
+
+          {/* Profile */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-px bg-brand-border border border-brand-border rounded-xl overflow-hidden mb-12">
+            {[
+              { label: 'Age', value: `${assessment.user_age} years old` },
+              { label: 'Occupation', value: assessment.user_job },
+              { label: 'Monthly housing budget', value: `$${assessment.monthly_budget?.toLocaleString() || 'Not specified'}` },
+              { label: 'Destination', value: destination },
+              { label: 'Location preference', value: assessment.location_preference.replace('_', ' '), capitalize: true },
+            ].map((item) => (
+              <div key={item.label} className="bg-brand-bg p-6">
+                <div className="text-xs font-semibold uppercase tracking-wide text-brand-muted mb-2.5">
+                  {item.label}
+                </div>
+                <div className={`font-brand-serif text-lg font-medium text-brand-ink leading-snug ${item.capitalize ? 'capitalize' : ''}`}>
+                  {item.value}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Priority factors */}
+          <h3 className="font-brand-serif text-2xl font-medium text-brand-ink mb-6">Your priority factors</h3>
+          <div className="grid md:grid-cols-2 gap-5">
+            {factors.map((factor) => {
+              const criteriaKey = factor.key.replace('_importance', '');
+              const rawCriteriaScore = assessment.criteriaScores ? assessment.criteriaScores[criteriaKey] : undefined;
+              const criteriaScore = rawCriteriaScore === undefined ? undefined : capScore(rawCriteriaScore);
+              const importance = Number(assessment[factor.key as keyof AssessmentResultType] || 0);
+              const factorTone = criteriaScore !== undefined ? scoreTone(criteriaScore) : null;
+
+              return (
+                <div key={factor.key} className="p-6 bg-brand-surface border border-brand-border rounded-xl">
+                  <div className="flex items-center justify-between gap-4 mb-5">
+                    <span className="flex items-center gap-3 font-medium text-brand-ink">
+                      <factor.Icon className="w-[18px] h-[18px] text-brand-ink-2 shrink-0" />
+                      {factor.label}
+                    </span>
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <span className="text-[11px] uppercase tracking-wide text-brand-muted font-semibold">
+                        Importance
+                      </span>
+                      <Stars rating={importance} size="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+
+                  {criteriaScore !== undefined && factorTone && (
+                    <div className="pt-5 border-t border-dashed border-brand-border">
+                      <div className="flex justify-between items-baseline mb-3">
+                        <span className="text-sm text-brand-muted">Compatibility</span>
+                        <span className="font-brand-serif text-lg font-medium text-brand-ink">
+                          {Math.round(criteriaScore)}<span className="text-sm text-brand-muted">/100</span>
+                        </span>
+                      </div>
+                      <div className="h-1 w-full bg-brand-surface-2 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${factorTone.bar}`}
+                          style={{ width: `${Math.max(2, criteriaScore)}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -575,81 +654,6 @@ export default function Results() {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── YOUR ASSESSMENT ───────────────────────────────────────── */}
-      <section className="border-b border-brand-border">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
-          <Eyebrow>Your inputs</Eyebrow>
-          <h2 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight tracking-tight text-brand-ink mb-10 max-w-2xl">
-            What we scored you against.
-          </h2>
-
-          {/* Profile */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-px bg-brand-border border border-brand-border rounded-xl overflow-hidden mb-12">
-            {[
-              { label: 'Age', value: `${assessment.user_age} years old` },
-              { label: 'Occupation', value: assessment.user_job },
-              { label: 'Monthly housing budget', value: `$${assessment.monthly_budget?.toLocaleString() || 'Not specified'}` },
-              { label: 'Destination', value: destination },
-              { label: 'Location preference', value: assessment.location_preference.replace('_', ' '), capitalize: true },
-            ].map((item) => (
-              <div key={item.label} className="bg-brand-bg p-6">
-                <div className="text-xs font-semibold uppercase tracking-wide text-brand-muted mb-2.5">
-                  {item.label}
-                </div>
-                <div className={`font-brand-serif text-lg font-medium text-brand-ink leading-snug ${item.capitalize ? 'capitalize' : ''}`}>
-                  {item.value}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Priority factors */}
-          <h3 className="font-brand-serif text-2xl font-medium text-brand-ink mb-6">Your priority factors</h3>
-          <div className="grid md:grid-cols-2 gap-5">
-            {factors.map((factor) => {
-              const criteriaKey = factor.key.replace('_importance', '');
-              const criteriaScore = assessment.criteriaScores ? assessment.criteriaScores[criteriaKey] : undefined;
-              const importance = Number(assessment[factor.key as keyof AssessmentResultType] || 0);
-              const factorTone = criteriaScore !== undefined ? scoreTone(criteriaScore) : null;
-
-              return (
-                <div key={factor.key} className="p-6 bg-brand-surface border border-brand-border rounded-xl">
-                  <div className="flex items-center justify-between gap-4 mb-5">
-                    <span className="flex items-center gap-3 font-medium text-brand-ink">
-                      <factor.Icon className="w-[18px] h-[18px] text-brand-ink-2 shrink-0" />
-                      {factor.label}
-                    </span>
-                    <div className="flex flex-col items-end gap-1.5 shrink-0">
-                      <span className="text-[11px] uppercase tracking-wide text-brand-muted font-semibold">
-                        Importance
-                      </span>
-                      <Stars rating={importance} size="w-3.5 h-3.5" />
-                    </div>
-                  </div>
-
-                  {criteriaScore !== undefined && factorTone && (
-                    <div className="pt-5 border-t border-dashed border-brand-border">
-                      <div className="flex justify-between items-baseline mb-3">
-                        <span className="text-sm text-brand-muted">Compatibility</span>
-                        <span className="font-brand-serif text-lg font-medium text-brand-ink">
-                          {Math.round(criteriaScore)}<span className="text-sm text-brand-muted">/100</span>
-                        </span>
-                      </div>
-                      <div className="h-1 w-full bg-brand-surface-2 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${factorTone.bar}`}
-                          style={{ width: `${Math.max(2, criteriaScore)}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
           </div>
         </div>
       </section>

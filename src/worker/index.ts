@@ -791,6 +791,7 @@ function calculateScore(assessment: any): { score: number; matchLevel: string; b
   factors.forEach(factor => {
     const importance = assessment[`${factor}_importance`];
     const countryScore = countryData[factor];
+    const cappedCountryScore = Math.max(0, Math.min(4, Number(countryScore) || 0));
 
     let importanceWeight = Math.pow(importance, 1.5);
 
@@ -799,15 +800,15 @@ function calculateScore(assessment: any): { score: number; matchLevel: string; b
       importanceWeight *= 2.0;
     }
 
-    const factorScore = (countryScore / 4) * importanceWeight;
+    const factorScore = (cappedCountryScore / 4) * importanceWeight;
 
     weightedScore += factorScore;
     totalImportanceWeight += importanceWeight;
 
     // Store individual criteria score (0-100)
-    criteriaScores[factor] = (countryScore / 4) * 100;
-    if (countryScore < 4) {
-      scoreReasons.push(`${factorLabels[factor]} is rated ${countryScore}/4 for ${assessment.preferred_country}, below the top compatibility rating.`);
+    criteriaScores[factor] = Math.min(100, (cappedCountryScore / 4) * 100);
+    if (cappedCountryScore < 4) {
+      scoreReasons.push(`${factorLabels[factor]} is rated ${cappedCountryScore}/4 for ${assessment.preferred_country}, below the top compatibility rating.`);
     }
   });
 
