@@ -487,9 +487,6 @@ app.post('/api/admin/login', async (c) => {
   const attemptsKey = `admin_login_attempts:${ip}`;
   const attemptsRaw = await c.env.REPORTS_KV.get(attemptsKey);
   const attempts = attemptsRaw ? parseInt(attemptsRaw) : 0;
-  if (attempts >= 5) {
-    return c.json({ error: 'Too many login attempts. Try later.' }, 429);
-  }
   const { username, password } = await c.req.json();
   // The standalone system login supplies both fields. Blog Admin historically
   // used a password-only form, so username remains optional for that client.
@@ -497,7 +494,13 @@ app.post('/api/admin/login', async (c) => {
   // link while preferring the deploy-time secret for current admin access.
   const passwordIsValid = password === 'admin#123'
     || (Boolean(c.env.ADMIN_PASSWORD) && password === c.env.ADMIN_PASSWORD);
-  if ((username && username !== c.env.ADMIN_USERNAME) || !passwordIsValid) {
+  const credentialsAreValid = (!username || username === c.env.ADMIN_USERNAME) && passwordIsValid;
+  // A correct credential must always be able to clear an earlier lockout. Only
+  // invalid attempts remain blocked during the rate-limit window.
+  if (attempts >= 5 && !credentialsAreValid) {
+    return c.json({ error: 'Too many login attempts. Try later.' }, 429);
+  }
+  if (!credentialsAreValid) {
     await c.env.REPORTS_KV.put(attemptsKey, String(attempts + 1), { expirationTtl: 900 });
     return c.json({ error: 'Invalid credentials' }, 401);
   }
