@@ -498,6 +498,13 @@ export default function Home() {
         >
           Server
         </a>
+        <span className="mx-2 text-[10px] text-brand-border-strong">•</span>
+        <a
+          href="/test-reports"
+          className="text-[10px] text-brand-muted hover:text-brand-ink transition-colors font-medium"
+        >
+          Site Health
+        </a>
       </div>
     </div>
   );
