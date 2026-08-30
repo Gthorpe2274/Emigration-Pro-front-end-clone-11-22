@@ -20,13 +20,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Logo and Description Section */}
           <div className="lg:col-span-2">
-            <div className="mb-6 flex items-start">
+            <div className="mb-6">
               <img
                 src="/images/logo-square.png"
                 alt="Emigration Pro Logo"
                 className="h-16 w-auto mb-4"
               />
-              <span className="text-[10px] font-bold text-gray-400 mt-2 ml-1">&trade;</span>
             </div>
             <p className="text-gray-300 text-sm leading-relaxed mb-6 max-w-md">
               Your trusted partner in international migration. We provide comprehensive assessments and access to professional services to help you make informed decisions about your future abroad.

@@ -22,13 +22,18 @@ export default function Navigation() {
         <div className="flex items-center justify-between gap-6 py-3">
           {/* Logo */}
           <Link to="/" className="flex items-center shrink-0" onClick={() => setIsMenuOpen(false)}>
-            <div className="flex items-start">
+            <div className="relative inline-flex">
               <img
                 src="/images/logo-full.png"
                 alt="Emigration Pro"
                 className="h-11 w-auto"
               />
-              <span className="text-[10px] font-bold text-brand-ink mt-1 ml-0.5">&trade;</span>
+              <span
+                aria-hidden="true"
+                className="absolute -right-2 bottom-0 text-[9px] font-bold leading-none text-brand-ink"
+              >
+                &trade;
+              </span>
             </div>
           </Link>
 
