@@ -125,7 +125,7 @@ export default function Home() {
               <div className="flex flex-col gap-1.5 items-center">
                 <Link
                   to="/assessment"
-                  className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-brand-surface-2 text-black rounded-lg font-semibold text-base hover:bg-brand-border-strong transition-colors w-full md:w-auto"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-[#15803d] text-white rounded-lg font-semibold text-lg hover:bg-[#166534] transition-colors w-full md:w-auto"
                 >
                   Step One - Start free assessment
                   <span className="text-lg leading-none">&rarr;</span>
