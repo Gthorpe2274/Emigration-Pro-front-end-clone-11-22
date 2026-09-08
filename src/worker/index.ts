@@ -3409,7 +3409,8 @@ app.get('/sitemap.xml', async (c) => {
   </url>
   <url>
     <loc>${baseUrl}/best-countries</loc>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-09-07</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>

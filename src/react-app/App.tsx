@@ -4,7 +4,6 @@ import Home from './pages/Home';
 import Assessment from './pages/Assessment';
 import Results from './pages/Results';
 import RelocationHub from './pages/RelocationHub';
-import BestCountries from './pages/BestCountries';
 import CityDetails from './pages/CityDetails';
 import AboutUs from './pages/AboutUs';
 import { SampleReport } from './pages/SampleReport';
@@ -36,6 +35,7 @@ import AdminReportGen from './pages/AdminReportGen';
 import CheckoutReport from './pages/CheckoutReport';
 import NoIndex from './components/NoIndex';
 import Glossary from './pages/Glossary';
+import LowCostQuickEntry from './pages/LowCostQuickEntry';
 
 function App() {
   return (
@@ -47,7 +47,8 @@ function App() {
         {/* Per-customer output — noindex, see components/NoIndex.tsx */}
         <Route path="/results/:id" element={<NoIndex title="Your Results"><Results /></NoIndex>} />
         <Route path="/relocation-hub/:id" element={<NoIndex title="Relocation Hub"><RelocationHub /></NoIndex>} />
-        <Route path="/best-countries" element={<BestCountries />} />
+        <Route path="/best-countries" element={<LowCostQuickEntry />} />
+        <Route path="/low-cost-quick-entry-countries" element={<Navigate to="/best-countries" replace />} />
         <Route path="/city/:country/:city" element={<CityDetails />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/sample-report" element={<SampleReport />} />

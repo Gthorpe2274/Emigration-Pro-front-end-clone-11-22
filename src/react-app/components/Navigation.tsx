@@ -5,7 +5,7 @@ import { Menu, X } from 'lucide-react';
 const NAV_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/assessment', label: 'Assessment' },
-  { to: '/best-countries', label: 'Popular Countries' },
+  { to: '/best-countries', label: 'Leave Now' },
   { to: '/earn-abroad', label: 'Earn Abroad' },
   { to: '/sample-report', label: 'Sample Report' },
   { to: '/blog', label: 'Blog' },

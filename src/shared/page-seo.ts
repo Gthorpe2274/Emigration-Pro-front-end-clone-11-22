@@ -44,8 +44,8 @@ export const KEY_PAGES: { href: string; label: string; blurb: string }[] = [
   },
   {
     href: '/best-countries',
-    label: 'Compare the best countries for American expats',
-    blurb: 'Portugal, Spain, Mexico, Costa Rica, Germany and Canada, side by side.',
+    label: 'Leave now: compare low-cost countries with quick entry',
+    blurb: 'Six practical destinations with simple initial entry for U.S. passport holders.',
   },
   {
     href: '/sample-report',
@@ -92,15 +92,18 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     ],
   },
   '/best-countries': {
-    image: '/og/best-countries.jpg',
-    imageAlt: 'Popular countries for American expats — Emigration Pro',
-    title: 'Best Countries for American Expats',
+    title: 'Low-Cost Countries Americans Can Enter Quickly',
     description:
-      'Portugal, Spain, Mexico, Costa Rica, Germany and Canada compared for Americans moving abroad — residency routes, cost of living, healthcare and safety.',
-    heading: 'Best countries for American expats',
+      'Compare 6 affordable countries U.S. citizens can enter without a lengthy advance visa: entry windows, budget fit, limits and official sources.',
+    heading: 'Low-cost countries Americans can enter quickly',
     summary: [
-      'A side-by-side comparison of the destinations Americans most often choose: Portugal, Spain, Mexico, Costa Rica, Germany and Canada.',
-      'Each is assessed on its residency and immigration pathways, cost of living relative to the U.S., healthcare quality, safety, common languages, climate and the cities where expat communities are already established.',
+      'A practical comparison of Albania, Georgia, Mexico, Colombia, Ecuador and Thailand for U.S. citizens seeking a lower-cost destination and a simple first arrival.',
+      'The page distinguishes visa-free visitor admission from legal residency and work authorization, shows the ordinary initial entry window, explains important limits and links every country to current U.S. State Department guidance.',
+      'Entry rules were reviewed September 7, 2026. Immigration rules can change and admission is never guaranteed, so travelers should verify the official source immediately before booking or moving.',
+    ],
+    links: [
+      { href: '/assessment', label: 'Match countries to your budget and priorities' },
+      { href: '/moving-abroad-glossary', label: 'Understand visa and residency terms' },
     ],
   },
   '/sample-report': {

@@ -28,6 +28,12 @@
   status = 301
   force = true
 
+[[redirects]]
+  from = "/low-cost-quick-entry-countries"
+  to = "/best-countries"
+  status = 301
+  force = true
+
 # SPA redirect rule - all non-API routes should be handled by React Router
 [[redirects]]
   from = "/*"
