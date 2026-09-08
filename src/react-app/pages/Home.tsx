@@ -486,24 +486,24 @@ export default function Home() {
       {/* Footer Links - Below Footer */}
       <div className="text-center py-4 bg-brand-surface border-t border-brand-border">
         <a
-          href="/admin/blog"
+          href="/system-login?redirect=%2Fadmin%2Fblog"
           className="text-[10px] text-brand-muted hover:text-brand-ink transition-colors font-medium"
         >
           Site Health
         </a>
         <span className="mx-2 text-[10px] text-brand-border-strong">•</span>
         <a
-          href="/admin/crm"
+          href="/system-login?redirect=%2Fadmin%2Fcrm"
           className="text-[10px] text-brand-muted hover:text-brand-ink transition-colors font-medium"
         >
           Server
         </a>
         <span className="mx-2 text-[10px] text-brand-border-strong">•</span>
         <a
-          href="/test-reports"
+          href="/system-login?redirect=%2Ftest-reports"
           className="text-[10px] text-brand-muted hover:text-brand-ink transition-colors font-medium"
         >
-          Site Health
+          Stats
         </a>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, AlertCircle } from 'lucide-react';
 
@@ -8,10 +8,11 @@ export default function SystemLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Debug: Log when component mounts
-  useEffect(() => {
-    console.log('SystemLogin component mounted');
-  }, []);
+  const getSafeRedirect = () => {
+    const requestedPath = new URLSearchParams(window.location.search).get('redirect');
+    const allowedPaths = new Set(['/admin/blog', '/admin/crm', '/test-reports']);
+    return requestedPath && allowedPaths.has(requestedPath) ? requestedPath : '/admin/crm';
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,9 +38,7 @@ export default function SystemLogin() {
       sessionStorage.setItem('adminAuth', 'true');
 
       // Check if there's a redirect parameter, otherwise go to CRM
-      const urlParams = new URLSearchParams(window.location.search);
-      const redirectTo = urlParams.get('redirect') || '/admin/crm';
-      navigate(redirectTo, { replace: true });
+      navigate(getSafeRedirect(), { replace: true });
     } catch (error) {
       console.error('Login error:', error);
       setError(error instanceof Error ? error.message : 'Login failed. Please try again.');
@@ -54,8 +53,8 @@ export default function SystemLogin() {
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Lock className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-white mb-2">System Status</h2>
-          <p className="text-blue-200">CRM Management Access Portal</p>
+          <h2 className="text-3xl font-bold text-white mb-2">Admin Access</h2>
+          <p className="text-blue-200">Enter the admin password to continue</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -93,7 +92,7 @@ export default function SystemLogin() {
                 Authenticating...
               </div>
             ) : (
-              'Access CRM Management'
+              'Continue'
             )}
           </button>
         </form>
@@ -109,7 +108,7 @@ export default function SystemLogin() {
 
         <div className="mt-8 text-center text-xs text-blue-400">
           <p>Authorized personnel only</p>
-          <p className="mt-1">Access the Customer Relationship Management system</p>
+          <p className="mt-1">Protected administration tools</p>
         </div>
       </div>
     </div>

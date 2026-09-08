@@ -36,6 +36,7 @@ import CheckoutReport from './pages/CheckoutReport';
 import NoIndex from './components/NoIndex';
 import Glossary from './pages/Glossary';
 import LowCostQuickEntry from './pages/LowCostQuickEntry';
+import SystemLogin from './pages/SystemLogin';
 
 function App() {
   return (
@@ -63,8 +64,8 @@ function App() {
         <Route path="/admin/email-test" element={<NoIndex title="Email Test"><EmailTest /></NoIndex>} />
         <Route path="/admin/jobs" element={<NoIndex title="Job Processor"><JobProcessor /></NoIndex>} />
         <Route path="/admin/social-login" element={<NoIndex title="Social Login"><SocialLogin /></NoIndex>} />
-        <Route path="/system-login" element={<Navigate to="/admin/crm" replace />} />
-        <Route path="/admin/system-login" element={<Navigate to="/admin/crm" replace />} />
+        <Route path="/system-login" element={<NoIndex title="Admin Login"><SystemLogin /></NoIndex>} />
+        <Route path="/admin/system-login" element={<Navigate to="/system-login" replace />} />
         <Route path="/admin/crm" element={<NoIndex title="CRM"><CRM /></NoIndex>} />
         <Route path="/admin/blog" element={<NoIndex title="Blog Admin"><BlogAdmin /></NoIndex>} />
         <Route path="/admin/login" element={<NoIndex title="Admin Login"><AdminLogin /></NoIndex>} />
