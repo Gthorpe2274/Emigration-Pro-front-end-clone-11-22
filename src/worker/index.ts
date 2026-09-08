@@ -1298,6 +1298,14 @@ app.post('/api/admin/blog/posts', adminAuth, async (c) => {
       return c.json({ success: false, error: 'A valid title or slug is required' }, 400);
     }
 
+    if (typeof title !== 'string' || !title.trim() || typeof content !== 'string' || !content.trim()) {
+      return c.json({ success: false, error: 'Title and post content are required' }, 400);
+    }
+
+    const effectivePublishedDate = is_published
+      ? (published_date || new Date().toISOString())
+      : (published_date || null);
+
     await c.env.DB.prepare(`
       INSERT INTO blog_posts (
         title, slug, featured_image, featured_image_credit, featured_image_credit_url,
@@ -1308,7 +1316,7 @@ app.post('/api/admin/blog/posts', adminAuth, async (c) => {
       title, normalizedSlug, featured_image, featured_image_credit || null,
       featured_image_credit_url || null, featured_image_source_url || null,
       content, excerpt,
-      published_date, is_published ? 1 : 0, allow_comments ? 1 : 0, author
+      effectivePublishedDate, is_published ? 1 : 0, allow_comments ? 1 : 0, author
     ).run();
 
     if (is_published) {
@@ -1325,7 +1333,10 @@ app.post('/api/admin/blog/posts', adminAuth, async (c) => {
 // Admin: Update post
 app.put('/api/admin/blog/posts/:id', adminAuth, async (c) => {
   try {
-    const id = c.req.param('id');
+    const id = Number(c.req.param('id'));
+    if (!Number.isInteger(id) || id <= 0) {
+      return c.json({ success: false, error: 'Invalid post ID' }, 400);
+    }
     const body = await c.req.json();
     const {
       title, slug, featured_image, featured_image_credit, featured_image_credit_url,
@@ -1345,7 +1356,14 @@ app.put('/api/admin/blog/posts/:id', adminAuth, async (c) => {
       return c.json({ success: false, error: 'A valid title or slug is required' }, 400);
     }
 
-    await c.env.DB.prepare(`
+    if (typeof title !== 'string' || !title.trim() || typeof content !== 'string' || !content.trim()) {
+      return c.json({ success: false, error: 'Title and post content are required' }, 400);
+    }
+
+    const effectivePublishedDate = is_published
+      ? (published_date || new Date().toISOString())
+      : (published_date || null);
+    const result = await c.env.DB.prepare(`
       UPDATE blog_posts 
       SET title = ?, slug = ?, featured_image = ?, featured_image_credit = ?,
           featured_image_credit_url = ?, featured_image_source_url = ?, body = ?,
@@ -1356,8 +1374,12 @@ app.put('/api/admin/blog/posts/:id', adminAuth, async (c) => {
       title, normalizedSlug, featured_image, featured_image_credit || null,
       featured_image_credit_url || null, featured_image_source_url || null,
       content, excerpt,
-      published_date, is_published ? 1 : 0, allow_comments ? 1 : 0, author, id
+      effectivePublishedDate, is_published ? 1 : 0, allow_comments ? 1 : 0, author, id
     ).run();
+
+    if (result.meta.changes === 0) {
+      return c.json({ success: false, error: 'Post was not updated' }, 409);
+    }
 
     const changedUrls: string[] = [];
     if (existing.is_published) changedUrls.push(publicBlogUrl(existing.slug));
@@ -1374,14 +1396,24 @@ app.put('/api/admin/blog/posts/:id', adminAuth, async (c) => {
   }
 });
 
-// Admin: Delete post
-app.delete('/api/admin/blog/posts/:id', adminAuth, async (c) => {
+// Admin: Delete post. POST is the primary action because some hosting proxies
+// reject DELETE requests; DELETE remains available for API compatibility.
+const deleteBlogPost = async (c: any) => {
   try {
-    const id = c.req.param('id');
+    const id = Number(c.req.param('id'));
+    if (!Number.isInteger(id) || id <= 0) {
+      return c.json({ success: false, error: 'Invalid post ID' }, 400);
+    }
     const existing = await c.env.DB.prepare(
       'SELECT slug, is_published FROM blog_posts WHERE id = ?'
     ).bind(id).first<{ slug: string; is_published: number }>();
-    await c.env.DB.prepare('DELETE FROM blog_posts WHERE id = ?').bind(id).run();
+    if (!existing) {
+      return c.json({ success: false, error: 'Post not found' }, 404);
+    }
+    const result = await c.env.DB.prepare('DELETE FROM blog_posts WHERE id = ?').bind(id).run();
+    if (result.meta.changes === 0) {
+      return c.json({ success: false, error: 'Post was not deleted' }, 409);
+    }
     if (existing?.is_published) {
       queueIndexNow(c, [publicBlogUrl(existing.slug), `${SITE_ORIGIN}/blog`]);
     }
@@ -1390,7 +1422,10 @@ app.delete('/api/admin/blog/posts/:id', adminAuth, async (c) => {
     console.error('Error deleting post:', error);
     return c.json({ success: false, error: 'Failed to delete post' }, 500);
   }
-});
+};
+
+app.post('/api/admin/blog/posts/:id/delete', adminAuth, deleteBlogPost);
+app.delete('/api/admin/blog/posts/:id', adminAuth, deleteBlogPost);
 
 // Admin: Search Unsplash without exposing the application credential to the browser.
 app.get('/api/admin/blog/unsplash/search', adminAuth, async (c) => {

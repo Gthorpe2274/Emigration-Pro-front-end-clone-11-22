@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import { blogImages } from '../data/blogImages';
@@ -24,8 +24,8 @@ interface BlogPost {
   body: string;
   excerpt?: string;
   published_date?: string;
-  is_published: boolean;
-  allow_comments: boolean;
+  is_published: boolean | number;
+  allow_comments: boolean | number;
   author?: string;
   created_at: string;
 }
@@ -53,6 +53,9 @@ export default function BlogAdmin() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Image modal states
   const [showImageModal, setShowImageModal] = useState(false);
@@ -184,6 +187,7 @@ export default function BlogAdmin() {
       return;
     }
 
+    setIsSaving(true);
     try {
       const apiBase = getApiBaseUrl();
       const url = editingPost
@@ -198,7 +202,12 @@ export default function BlogAdmin() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${adminToken}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          published_date: formData.is_published && !formData.published_date
+            ? new Date().toISOString().slice(0, 10)
+            : formData.published_date,
+        })
       });
 
       if (!response.ok) {
@@ -230,6 +239,8 @@ export default function BlogAdmin() {
       } else {
         alert('Failed to save post: ' + (error instanceof Error ? error.message : String(error)));
       }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -244,35 +255,44 @@ export default function BlogAdmin() {
       featured_image_source_url: post.featured_image_source_url || '',
       body: post.body,
       excerpt: post.excerpt || '',
-      published_date: post.published_date || '',
-      is_published: post.is_published,
-      allow_comments: post.allow_comments,
+      published_date: post.published_date ? post.published_date.slice(0, 10) : '',
+      is_published: Boolean(post.is_published),
+      allow_comments: Boolean(post.allow_comments),
       author: post.author || ''
     });
     setShowForm(true);
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this post?')) return;
 
+    setDeletingPostId(id);
     try {
       const apiBase = getApiBaseUrl();
-      const response = await fetch(`${apiBase}/api/admin/blog/posts/${id}`, {
-        method: 'DELETE',
+      const response = await fetch(`${apiBase}/api/admin/blog/posts/${id}/delete`, {
+        method: 'POST',
         headers: {
           Authorization: `Bearer ${adminToken}`
         }
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
-      if (data.success) {
-        alert('Post deleted successfully');
-        fetchAllPosts();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `Unable to delete post (HTTP ${response.status})`);
       }
+
+      setPosts((currentPosts) => currentPosts.filter((post) => post.id !== id));
+      if (editingPost?.id === id) resetForm();
+      alert('Post deleted successfully');
     } catch (error) {
       console.error('Error deleting post:', error);
-      alert('Failed to delete post');
+      alert(error instanceof Error ? error.message : 'Failed to delete post');
+    } finally {
+      setDeletingPostId(null);
     }
   };
 
@@ -496,7 +516,15 @@ export default function BlogAdmin() {
 
           <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
             <button
-              onClick={() => setShowForm(!showForm)}
+              type="button"
+              onClick={() => {
+                if (showForm) {
+                  resetForm();
+                } else {
+                  setEditingPost(null);
+                  setShowForm(true);
+                }
+              }}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition"
             >
               {showForm ? 'Cancel' : '+ Create New Post'}
@@ -504,7 +532,7 @@ export default function BlogAdmin() {
           </div>
 
           {showForm && (
-            <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div ref={formRef} className="bg-white rounded-xl shadow-lg p-8 mb-8 scroll-mt-4">
               <h2 className="text-2xl font-bold mb-6">
                 {editingPost ? 'Edit Post' : 'Create New Post'}
               </h2>
@@ -516,10 +544,13 @@ export default function BlogAdmin() {
                     type="text"
                     value={formData.title}
                     onChange={(e) => {
+                      const previousGeneratedSlug = generateSlug(formData.title);
                       setFormData({
                         ...formData,
                         title: e.target.value,
-                        slug: generateSlug(e.target.value)
+                        slug: !formData.slug || formData.slug === previousGeneratedSlug
+                          ? generateSlug(e.target.value)
+                          : formData.slug
                       });
                     }}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -817,9 +848,10 @@ export default function BlogAdmin() {
                 <div className="flex space-x-4">
                   <button
                     type="submit"
+                    disabled={isSaving}
                     className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition"
                   >
-                    {editingPost ? 'Update Post' : 'Create Post'}
+                    {isSaving ? 'Saving…' : editingPost ? 'Update Post' : 'Create Post'}
                   </button>
                   <button
                     type="button"
@@ -855,16 +887,19 @@ export default function BlogAdmin() {
                       </div>
                       <div className="flex space-x-2">
                         <button
+                          type="button"
                           onClick={() => handleEdit(post)}
                           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition"
                         >
                           Edit
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(post.id)}
+                          disabled={deletingPostId === post.id}
                           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition"
                         >
-                          Delete
+                          {deletingPostId === post.id ? 'Deleting…' : 'Delete'}
                         </button>
                       </div>
                     </div>
