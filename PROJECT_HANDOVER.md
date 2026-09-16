@@ -49,7 +49,7 @@ The following secrets must be set in the Cloudflare Worker environment:
 -   `GEMINI_API_KEY`: (Optional) For AI features.
 -   `OPENAI_API_KEY`: (Optional) Fallback for AI features.
 
-> Note: an older revision of this doc referenced `BLOG_ADMIN_API_KEY` set to a hardcoded `admin#123` value. That password was hardcoded client-side in multiple pages and, separately, hardcoded server-side as a permanent bypass in the login endpoint regardless of any secret's value. Both were removed as a security fix — verify `ADMIN_PASSWORD` is set with `npx wrangler secret list` before relying on admin login post-deploy.
+> Note: an older revision of this doc referenced a hardcoded admin password. That password was embedded client-side in multiple pages and, separately, server-side as a permanent login bypass. Both were removed as a security fix — verify `ADMIN_PASSWORD` is set with `npx wrangler secret list` before relying on admin login post-deploy.
 
 To update a secret:
 ```bash

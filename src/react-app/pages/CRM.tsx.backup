@@ -48,7 +48,7 @@ export default function CRM() {
   // Handle login
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'admin#123') {
+    if (password === '<removed-legacy-password>') {
       sessionStorage.setItem('crmAuth', 'true');
       setIsAuthenticated(true);
       setLoginError('');
