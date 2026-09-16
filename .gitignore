@@ -1,15 +1,17 @@
 dist/
 node_modules/
 .wrangler/
-.dev.vars
+.dev.vars*
+!.dev.vars.example
 worker-configuration.d.ts
-.env
+.env*
+!.env.example
 # Local Netlify folder
 .netlify
 
 # Secrets - do not commit
-secrets.json
-youtube_key.txt
+secrets*.json
+*_key.txt
 
 # Local design rollback snapshots / previews
 .design-backups/

@@ -20,7 +20,7 @@ export default function PrivacyPolicy() {
         <div className="bg-white/60 backdrop-blur-sm p-8 rounded-2xl border border-white/20 shadow-lg">
           <div className="prose max-w-none text-gray-700">
             <p className="text-lg mb-6">
-              <strong>Effective Date:</strong> August 2025
+              <strong>Effective Date:</strong> September 15, 2026
             </p>
 
             <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Information We Collect</h2>
@@ -80,9 +80,10 @@ export default function PrivacyPolicy() {
 
             <h2 className="text-2xl font-bold text-gray-900 mb-4">6. Cookies and Tracking</h2>
             <p className="mb-6">
-              Our website may use cookies to enhance user experience and analyze website traffic. We do not use 
-              third-party advertising cookies or tracking for marketing purposes. You can control cookie settings 
-              through your browser preferences.
+              We ask for permission before loading Microsoft Clarity behavioral analytics. If you accept, Clarity may
+              use analytics storage to produce aggregate usage insights, heatmaps, and session recordings. Advertising
+              storage is disabled, form controls are masked, and tracking is limited to selected public pages. You may
+              decline without losing site functionality and can reopen Privacy choices at any time.
             </p>
 
             <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Third-Party Services</h2>
@@ -90,6 +91,7 @@ export default function PrivacyPolicy() {
             <ul className="list-disc list-inside mb-6 space-y-1">
               <li><strong>Stripe:</strong> For secure payment processing (subject to Stripe's privacy policy)</li>
               <li><strong>Cloudflare:</strong> For website hosting and security (subject to Cloudflare's privacy policy)</li>
+              <li><strong>Microsoft Clarity:</strong> For consent-based, masked website analytics and heatmaps (subject to Microsoft's privacy statement)</li>
             </ul>
 
             <h2 className="text-2xl font-bold text-gray-900 mb-4">8. Your Rights</h2>

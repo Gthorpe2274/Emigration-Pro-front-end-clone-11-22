@@ -37,11 +37,14 @@ import NoIndex from './components/NoIndex';
 import Glossary from './pages/Glossary';
 import LowCostQuickEntry from './pages/LowCostQuickEntry';
 import SystemLogin from './pages/SystemLogin';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
+import ClarityAnalytics from './components/ClarityAnalytics';
 
 function App() {
   return (
     <Router>
       <ScrollToTop />
+      <ClarityAnalytics />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/assessment" element={<Assessment />} />
@@ -67,6 +70,7 @@ function App() {
         <Route path="/system-login" element={<NoIndex title="Admin Login"><SystemLogin /></NoIndex>} />
         <Route path="/admin/system-login" element={<Navigate to="/system-login" replace />} />
         <Route path="/admin/crm" element={<NoIndex title="CRM"><CRM /></NoIndex>} />
+        <Route path="/admin/analytics" element={<NoIndex title="Analytics"><ProtectedAdmin><AnalyticsDashboard /></ProtectedAdmin></NoIndex>} />
         <Route path="/admin/blog" element={<NoIndex title="Blog Admin"><BlogAdmin /></NoIndex>} />
         <Route path="/admin/login" element={<NoIndex title="Admin Login"><AdminLogin /></NoIndex>} />
         <Route path="/access-hub" element={<NoIndex title="Relocation Hub"><PermanentRelocationHub /></NoIndex>} />

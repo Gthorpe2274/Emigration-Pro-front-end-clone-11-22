@@ -338,114 +338,6 @@ app.use('*', async (c, next) => {
   c.header('Content-Security-Policy', "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline' https:; connect-src 'self' https:; img-src 'self' https: data: blob:; font-src 'self' https: data:; frame-src 'self' https://www.youtube.com https://youtube.com; object-src 'none'; base-uri 'self'; form-action 'self';");
 });
 
-// Test endpoint - confirms env vars are loaded
-app.get('/api/env-test', async (c) => {
-  const hasYouTube = !!c.env.YOUTUBE_API_KEY;
-  const hasGemini = !!c.env.GEMINI_API_KEY;
-
-  console.log('Environment check:', {
-    youtube: hasYouTube,
-    gemini: hasGemini,
-    youtubeValue: c.env.YOUTUBE_API_KEY ? `${c.env.YOUTUBE_API_KEY.substring(0, 5)}...` : 'undefined',
-    geminiValue: c.env.GEMINI_API_KEY ? `${c.env.GEMINI_API_KEY.substring(0, 5)}...` : 'undefined',
-    allKeys: Object.keys(c.env)
-  });
-
-  return c.json({
-    youtube: hasYouTube ? '✅ set' : '❌ missing',
-    gemini: hasGemini ? '✅ set' : '❌ missing',
-    debug: {
-      youtubePrefix: c.env.YOUTUBE_API_KEY ? c.env.YOUTUBE_API_KEY.substring(0, 5) : 'N/A',
-      geminiPrefix: c.env.GEMINI_API_KEY ? c.env.GEMINI_API_KEY.substring(0, 5) : 'N/A',
-      envKeys: Object.keys(c.env)
-    }
-  });
-});
-
-// Debug endpoint - tests YouTube API only
-app.get('/api/debug/youtube-test', async (c) => {
-  if (!c.env.YOUTUBE_API_KEY) {
-    return c.json({ error: 'YouTube API key not configured' }, 500);
-  }
-
-  try {
-    console.log('Testing YouTube API with key:', c.env.YOUTUBE_API_KEY.substring(0, 10) + '...');
-    const yt = new YouTubeAPIService(c.env.YOUTUBE_API_KEY);
-    const searchResults = await yt.searchVideos({
-      query: 'Portugal expat guide',
-      maxResults: 3
-    });
-
-    console.log('YouTube API test successful, results:', searchResults.length);
-    return c.json({
-      success: true,
-      resultsCount: searchResults.length,
-      results: searchResults
-    });
-  } catch (error) {
-    console.error('YouTube API test failed:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorStack = error instanceof Error ? error.stack : undefined;
-
-    return c.json({
-      success: false,
-      error: errorMessage,
-      stack: errorStack,
-      apiKeySet: !!c.env.YOUTUBE_API_KEY,
-      apiKeyPrefix: c.env.YOUTUBE_API_KEY ? c.env.YOUTUBE_API_KEY.substring(0, 10) : 'N/A'
-    }, 500);
-  }
-});
-
-// Debug endpoint - tests YouTube search and Gemini curation
-app.get('/api/debug/gemini-curate', async (c) => {
-  if (!c.env.YOUTUBE_API_KEY || !c.env.GEMINI_API_KEY) {
-    return c.json({ error: 'API keys not configured' }, 500);
-  }
-
-  try {
-    // 1. Search YouTube
-    const yt = new YouTubeAPIService(c.env.YOUTUBE_API_KEY);
-    const searchResults = await yt.searchVideos({
-      query: 'Portugal expat guide',
-      maxResults: 5
-    });
-
-    // 2. Curate with Gemini
-    // Mock current video data
-    const mockCurrentVideo = {
-      video_id: 'mock_id',
-      title: 'Old Video Title',
-      channel_name: 'Old Channel',
-      description: 'Old description',
-      video_slot: 1
-    };
-
-    const curated = await findBestVideoReplacement(
-      {
-        assessment_id: 999, // Mock ID
-        currentVideo: mockCurrentVideo,
-        country: 'Portugal',
-        city: 'Lisbon'
-      },
-      searchResults,
-      c.env.GEMINI_API_KEY
-    );
-
-    return c.json({
-      success: true,
-      searchResultsCount: searchResults.length,
-      geminiResult: curated,
-      rawSearchResults: searchResults
-    });
-  } catch (error) {
-    return c.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, 500);
-  }
-});
-
 // Middleware for blog admin API authentication (simplified - no API key required)
 const adminAuth = async (c: any, next: any) => {
   const authHeader = c.req.header('Authorization');
@@ -490,10 +382,11 @@ app.post('/api/admin/login', async (c) => {
   const { username, password } = await c.req.json();
   // The standalone system login supplies both fields. Blog Admin historically
   // used a password-only form, so username remains optional for that client.
-  // Keep the original admin credential working for the legacy report-generator
-  // link while preferring the deploy-time secret for current admin access.
-  const passwordIsValid = password === 'admin#123'
-    || (Boolean(c.env.ADMIN_PASSWORD) && password === c.env.ADMIN_PASSWORD);
+  if (!c.env.ADMIN_PASSWORD) {
+    console.error('ADMIN_PASSWORD is not configured');
+    return c.json({ error: 'Admin login is temporarily unavailable' }, 503);
+  }
+  const passwordIsValid = password === c.env.ADMIN_PASSWORD;
   const credentialsAreValid = (!username || username === c.env.ADMIN_USERNAME) && passwordIsValid;
   // A correct credential must always be able to clear an earlier lockout. Only
   // invalid attempts remain blocked during the rate-limit window.

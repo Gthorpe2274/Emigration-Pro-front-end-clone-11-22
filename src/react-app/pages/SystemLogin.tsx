@@ -10,7 +10,7 @@ export default function SystemLogin() {
 
   const getSafeRedirect = () => {
     const requestedPath = new URLSearchParams(window.location.search).get('redirect');
-    const allowedPaths = new Set(['/admin/blog', '/admin/crm', '/test-reports']);
+    const allowedPaths = new Set(['/admin/blog', '/admin/crm', '/admin/analytics', '/test-reports']);
     return requestedPath && allowedPaths.has(requestedPath) ? requestedPath : '/admin/crm';
   };
 

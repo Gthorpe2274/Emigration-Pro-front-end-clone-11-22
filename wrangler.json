@@ -1,9 +1,5 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "vars": {
-    "YOUTUBE_API_KEY": "AIzaSyDTnhQ4nyDLEu9eoVQKz0xVXpTFN08UQpw",
-    "GEMINI_API_KEY": "AIzaSyBT2qs3VtQRU_Gv9YqZFSQA3ikEiQ0CCGg"
-  },
   "name": "emigration-pro",
   "main": "./src/worker/index.ts",
   "compatibility_date": "2025-06-17",
