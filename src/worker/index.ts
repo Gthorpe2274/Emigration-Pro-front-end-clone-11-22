@@ -177,28 +177,13 @@ const app = new Hono<{ Bindings: Env }>();
 const SITE_ORIGIN = 'https://emigrationpro.com';
 const INDEXNOW_KEY = '72c62d03371f45b7a2177112fafe5a53';
 const INDEXNOW_KEY_LOCATION = `${SITE_ORIGIN}/${INDEXNOW_KEY}.txt`;
-const CRM_SALES_STATS_CACHE_KEY = 'crm:stripe-sales-stats:v2';
 const CRM_TIME_ZONE = 'America/New_York';
-
-type StripePaymentIntent = {
-  id: string;
-  created: number;
-  amount_received: number;
-  currency: string;
-  livemode: boolean;
-  status: string;
-};
-
-type StripePaymentIntentList = {
-  data: StripePaymentIntent[];
-  has_more: boolean;
-};
 
 type CrmSalesStats = {
   totalSales: number;
   salesThisMonth: number;
   asOf: string;
-  source: 'stripe';
+  source: 'crm';
 };
 
 const monthKey = (date: Date) => new Intl.DateTimeFormat('en-CA', {
@@ -207,53 +192,24 @@ const monthKey = (date: Date) => new Intl.DateTimeFormat('en-CA', {
   month: '2-digit'
 }).format(date);
 
-async function fetchStripeSalesStats(env: Env): Promise<CrmSalesStats> {
-  const cached = await env.REPORTS_KV.get(CRM_SALES_STATS_CACHE_KEY, 'json') as CrmSalesStats | null;
-  if (cached) return cached;
-  if (!env.STRIPE_SECRET_KEY) throw new Error('Stripe is not configured');
-
-  const reportPriceCents = Math.round(Number(env.REPORT_PRICE_USD || '2') * 100);
-  if (!Number.isFinite(reportPriceCents) || reportPriceCents <= 0) {
-    throw new Error('The report price is not configured correctly');
-  }
+async function fetchCrmSalesStats(env: Env, includeDeleted: boolean, includeRefunded: boolean): Promise<CrmSalesStats> {
   const currentMonth = monthKey(new Date());
-  let totalSales = 0;
-  let salesThisMonth = 0;
-  let startingAfter = '';
-
-  // Count actual live captured payments for the report price. A completed
-  // Checkout Session alone is not sufficient: it can be unpaid, zero-dollar,
-  // or belong to another product in the same Stripe account.
-  for (let page = 0; page < 1000; page += 1) {
-    const params = new URLSearchParams({ limit: '100' });
-    if (startingAfter) params.set('starting_after', startingAfter);
-    const response = await fetch(`https://api.stripe.com/v1/payment_intents?${params}`, {
-      headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` }
-    });
-    if (!response.ok) {
-      const detail = await response.text();
-      console.error('Stripe sales stats request failed:', response.status, detail);
-      throw new Error('Unable to load Stripe sales totals');
-    }
-
-    const result = await response.json() as StripePaymentIntentList;
-    for (const payment of result.data) {
-      if (!payment.livemode || payment.status !== 'succeeded' || payment.currency !== 'usd' || payment.amount_received !== reportPriceCents) continue;
-      totalSales += 1;
-      if (monthKey(new Date(payment.created * 1000)) === currentMonth) salesThisMonth += 1;
-    }
-
-    if (!result.has_more || result.data.length === 0) break;
-    startingAfter = result.data[result.data.length - 1].id;
-  }
+  const conditions = ['stripe_confirmed_at IS NOT NULL', 'COALESCE(purchase_confirmed, 0) = 1'];
+  if (!includeDeleted) conditions.push('deleted_at IS NULL');
+  if (!includeRefunded) conditions.push('COALESCE(is_refunded, 0) = 0');
+  const { results } = await env.DB.prepare(`
+    SELECT stripe_confirmed_at FROM relocation_hub_access
+    WHERE ${conditions.join(' AND ')}
+  `).all<{ stripe_confirmed_at: string }>();
+  const totalSales = results.length;
+  const salesThisMonth = results.filter((sale) => monthKey(new Date(sale.stripe_confirmed_at)) === currentMonth).length;
 
   const stats: CrmSalesStats = {
     totalSales,
     salesThisMonth,
     asOf: new Date().toISOString(),
-    source: 'stripe'
+    source: 'crm'
   };
-  await env.REPORTS_KV.put(CRM_SALES_STATS_CACHE_KEY, JSON.stringify(stats), { expirationTtl: 300 });
   return stats;
 }
 
@@ -874,13 +830,15 @@ app.get('/api/admin/crm/purchasers', adminAuth, async (c) => {
     const { results } = await c.env.DB.prepare(`
       SELECT 
         r.id, r.email, r.session_code, r.assessment_id,
-        CASE WHEN r.stripe_confirmed_at IS NOT NULL THEN 1 ELSE 0 END AS purchase_confirmed,
+        COALESCE(r.purchase_confirmed, 0) AS purchase_confirmed,
         COALESCE(r.is_active, 0) AS is_active,
         COALESCE(r.is_archived, 0) AS is_archived,
         r.created_at, r.expires_at, r.stripe_confirmed_at,
+        COALESCE(r.is_refunded, 0) AS is_refunded,
         a.preferred_country, a.preferred_city, a.overall_score
       FROM relocation_hub_access r
       LEFT JOIN assessments a ON r.assessment_id = a.id
+      WHERE r.deleted_at IS NULL
       ORDER BY r.created_at DESC
     `).all();
 
@@ -901,16 +859,20 @@ app.get('/api/admin/crm/purchasers', adminAuth, async (c) => {
   }
 });
 
-// CRM sales totals come from live, succeeded Stripe PaymentIntents for the
-// report price. CRM contacts are captured before checkout and are not sales.
+// CRM totals count confirmed CRM-linked sales. Deleted and refunded sales are
+// excluded by default and can be included explicitly for historical reporting.
 app.get('/api/admin/crm/sales-stats', adminAuth, async (c) => {
   try {
-    const stats = await fetchStripeSalesStats(c.env);
+    const stats = await fetchCrmSalesStats(
+      c.env,
+      c.req.query('includeDeleted') === 'true',
+      c.req.query('includeRefunded') === 'true'
+    );
     c.header('Cache-Control', 'no-store');
     return c.json({ success: true, ...stats });
   } catch (error) {
     console.error('Error fetching CRM sales stats:', error);
-    return c.json({ success: false, error: 'Failed to load Stripe sales totals' }, 502);
+    return c.json({ success: false, error: 'Failed to load CRM sales totals' }, 500);
   }
 });
 
@@ -931,7 +893,7 @@ app.post('/api/admin/crm/purchasers/bulk', adminAuth, async (c) => {
     }
 
     const statements = ids.map(id => action === 'delete'
-      ? c.env.DB.prepare('DELETE FROM relocation_hub_access WHERE id = ?').bind(id)
+      ? c.env.DB.prepare('UPDATE relocation_hub_access SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL').bind(id)
       : c.env.DB.prepare('UPDATE relocation_hub_access SET is_archived = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
           .bind(action === 'archive' ? 1 : 0, id));
     const results = await c.env.DB.batch(statements);
@@ -953,13 +915,13 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
     }
     const body = await c.req.json();
     if (body.action === 'delete') {
-      const result = await c.env.DB.prepare('DELETE FROM relocation_hub_access WHERE id = ?').bind(id).run();
+      const result = await c.env.DB.prepare('UPDATE relocation_hub_access SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL').bind(id).run();
       if (result.meta.changes === 0) {
         return c.json({ success: false, error: 'Purchaser not found' }, 404);
       }
-      return c.json({ success: true, message: 'Purchaser deleted permanently' });
+      return c.json({ success: true, message: 'Purchaser deleted' });
     }
-    const { email, session_code, is_active, is_archived, purchase_confirmed } = body;
+    const { email, session_code, is_active, is_archived, purchase_confirmed, is_refunded } = body;
 
     if (!email || !session_code) {
       return c.json({
@@ -975,7 +937,9 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
           session_code = ?,
           is_active = ?,
           is_archived = ?,
-          purchase_confirmed = ?
+          purchase_confirmed = ?,
+          is_refunded = ?,
+          updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `).bind(
       email.toLowerCase(),
@@ -983,6 +947,7 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
       is_active ? 1 : 0,
       is_archived ? 1 : 0,
       purchase_confirmed ? 1 : 0,
+      is_refunded ? 1 : 0,
       id
     ).run();
 
@@ -1003,8 +968,8 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
   }
 });
 
-// CRM - Delete purchaser permanently. POST is the primary action because some
-// hosting proxies reject DELETE requests; DELETE remains for API compatibility.
+// Soft-delete purchasers so confirmed sales remain auditable and can be
+// included in historical totals. POST is primary for hosting compatibility.
 const deletePurchaser = async (c: any) => {
   try {
     const id = Number(c.req.param('id'));
@@ -1012,8 +977,11 @@ const deletePurchaser = async (c: any) => {
       return c.json({ success: false, error: 'Invalid purchaser ID' }, 400);
     }
 
-    // Delete the purchaser record
-    const result = await c.env.DB.prepare('DELETE FROM relocation_hub_access WHERE id = ?').bind(id).run();
+    const result = await c.env.DB.prepare(`
+      UPDATE relocation_hub_access
+      SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ? AND deleted_at IS NULL
+    `).bind(id).run();
 
     if (result.meta.changes === 0) {
       return c.json({ success: false, error: 'Purchaser not found' }, 404);
@@ -1021,7 +989,7 @@ const deletePurchaser = async (c: any) => {
 
     return c.json({
       success: true,
-      message: 'Purchaser deleted permanently'
+      message: 'Purchaser deleted'
     });
   } catch (error) {
     console.error('Error deleting purchaser:', error);

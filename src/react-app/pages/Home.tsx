@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, FileText, MapPin, Network, Route, Star } from 'lucide-react';
+import { ArrowRight, Check, FileText, MapPin, Network, Route, Star } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import EmailCaptureModal from '@/react-app/components/EmailCaptureModal';
@@ -159,15 +159,51 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TAGLINE SECTION */}
-      <section className="bg-brand-surface border-b border-brand-border py-12 md:py-16">
-        <div className="max-w-4xl mx-auto px-4 md:px-8 text-center flex flex-col items-center justify-center">
-          <h2 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight tracking-tight text-brand-ink mb-2">
-            From Multimillionaire to Working People find your suitable Country.
-          </h2>
-          <p className="text-3xl md:text-4xl text-brand-accent font-medium">
-            Get the information you need about the country and city of your choice.
-          </p>
+      {/* TAGLINE / SEGMENTATION SECTION */}
+      <section className="bg-brand-surface border-b border-brand-border py-14 md:py-20">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
+          <div className="text-center mb-10">
+            <h2 className="font-brand-serif font-medium text-3xl md:text-4xl leading-tight tracking-tight text-brand-ink mb-3">
+              Planning a move abroad looks different at every financial level.
+            </h2>
+            <p className="text-lg text-brand-muted max-w-2xl mx-auto">
+              Tell us which one sounds like you, and we'll point you to the right starting place.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            <Link
+              to="/assessment"
+              className="group p-7 bg-brand-bg border border-brand-border rounded-xl no-underline flex flex-col hover:border-brand-accent transition-colors"
+            >
+              <div className="text-xs font-semibold text-brand-muted uppercase tracking-wide mb-3">Most visitors</div>
+              <h3 className="font-brand-serif text-2xl font-medium text-brand-ink mb-2">Find where you fit</h3>
+              <p className="text-sm leading-relaxed text-brand-muted mb-6">
+                Answer a few questions about your budget, work, and family, and get matched to the
+                countries that realistically fit your move.
+              </p>
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-ink-2 mt-auto group-hover:text-brand-accent transition-colors">
+                Take the free assessment
+                <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
+
+            <Link
+              to="/global-wealth-strategy"
+              className="group p-7 bg-brand-ink border border-brand-ink rounded-xl no-underline flex flex-col text-white hover:border-brand-accent-2 transition-colors"
+            >
+              <div className="text-xs font-semibold text-brand-accent-2 uppercase tracking-wide mb-3">$500K+ income / $1M+ net worth</div>
+              <h3 className="font-brand-serif text-2xl font-medium text-white mb-2">Explore global wealth strategy</h3>
+              <p className="text-sm leading-relaxed text-[#b8c8e2] mb-6">
+                If your move is really about tax residency, asset protection, or a second
+                citizenship, see how our referral partner builds that holistic plan.
+              </p>
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-accent-2 mt-auto">
+                See if you qualify
+                <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </Link>
+          </div>
         </div>
       </section>
 

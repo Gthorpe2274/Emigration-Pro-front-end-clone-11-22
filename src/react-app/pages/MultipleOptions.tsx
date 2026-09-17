@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Youtube } from 'lucide-react';
+import { ArrowLeft, Youtube, BookOpen, ExternalLink } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import { useSEO } from '@/react-app/hooks/useSEO';
@@ -15,6 +15,16 @@ const VIDEOS = [
     id: 'GmatBYbb74U',
     title: 'Multiple Income Options Resource',
     description: 'Explore another approach to building flexible and diversified income streams.',
+  },
+];
+
+const BOOKS = [
+  {
+    title: 'The Laptop Millionaire: How Anyone Can Escape the 9 to 5 and Make Money Online',
+    author: 'Mark Anastasi',
+    description:
+      'A practical guide to building online income streams and breaking free of traditional employment — a useful primer for anyone exploring multiple income options.',
+    url: 'https://www.amazon.com/Laptop-Millionaire-Anyone-Escape-Online/dp/1118271793?_encoding=UTF8&qid=1597074370&sr=1-2&linkCode=sl1&tag=nmds03-20&linkId=9b5665ff076b2c7c20cdaade66a5a59e&language=en_US&ref_=as_li_ss_tl',
   },
 ];
 
@@ -89,6 +99,39 @@ export default function MultipleOptions() {
                 </h3>
                 <p className="text-sm leading-relaxed text-brand-muted px-2 pb-2">{video.description}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-brand-bg border-b border-brand-border">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
+          <div className="flex items-center gap-3 mb-10">
+            <div className="inline-flex items-center justify-center w-10 h-10 bg-brand-surface border border-brand-border rounded-xl">
+              <BookOpen className="w-5 h-5 text-brand-accent" />
+            </div>
+            <h2 className="font-brand-serif font-medium text-3xl text-brand-ink">Recommended Reading</h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {BOOKS.map((book) => (
+              <a
+                key={book.title}
+                href={book.url}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                className="group bg-brand-surface p-6 rounded-xl border border-brand-border shadow-sm hover:border-brand-accent transition-colors flex flex-col"
+              >
+                <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-1">
+                  {book.title}
+                </h3>
+                <p className="text-sm font-semibold text-brand-muted mb-3">By {book.author}</p>
+                <p className="text-sm leading-relaxed text-brand-muted mb-6 flex-1">{book.description}</p>
+                <span className="inline-flex items-center gap-2 text-sm font-semibold text-brand-accent group-hover:underline">
+                  View on Amazon
+                  <ExternalLink className="w-4 h-4" />
+                </span>
+              </a>
             ))}
           </div>
         </div>

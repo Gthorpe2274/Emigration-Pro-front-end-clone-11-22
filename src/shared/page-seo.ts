@@ -118,6 +118,16 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       'The report covers 14 categories: steps to leave America, job market analysis, a master relocation timeline, comprehensive healthcare mapping, cost of living, political stability and security, environmental and water quality, digital connectivity and internet, infrastructure and power reliability, mobility and urban connectivity, culture and entertainment, sports and recreation, senior and retirement benefits, and children\'s education.',
     ],
   },
+  '/global-wealth-strategy': {
+    title: 'Global Wealth Strategy for High-Net-Worth Relocation',
+    description:
+      'For entrepreneurs and investors relocating for tax residency, asset protection, or a second citizenship -- our referral partner Nomad Capitalist builds the holistic plan.',
+    heading: 'Global wealth strategy',
+    summary: [
+      'For US $500K+ income / $1M+ net worth entrepreneurs and investors, relocation is often really about tax residency, asset protection, and second citizenship -- a different scope than a single visa filing.',
+      'Nomad Capitalist is Emigration Pro\'s referral partner for this scope: a boutique advisory serving 1,500+ clients across 100+ countries since 2012 on international tax strategy, residency and citizenship planning, offshore banking, and corporate structuring.',
+    ],
+  },
   '/earn-abroad': {
     title: 'Earn Abroad: Self-Employment for Expats',
     description:

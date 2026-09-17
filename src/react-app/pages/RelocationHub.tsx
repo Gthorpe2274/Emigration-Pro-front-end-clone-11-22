@@ -39,9 +39,21 @@ type Provider = {
   summary: string;
   services: string;
   url: string;
+  featured?: boolean;
+  linkLabel?: string;
 };
 
 const providers: Provider[] = [
+  {
+    name: 'Nomad Capitalist',
+    category: 'Global tax & citizenship',
+    Icon: ShieldCheck,
+    summary: 'Referral partner for high-net-worth relocation -- holistic tax residency, second citizenship, and asset protection planning for $500K+ income / $1M+ net worth clients.',
+    services: 'Tax residency strategy · Second citizenship · Offshore banking & asset protection',
+    url: '/global-wealth-strategy',
+    featured: true,
+    linkLabel: 'See if you qualify',
+  },
   {
     name: 'Fragomen',
     category: 'Immigration law',
@@ -559,29 +571,54 @@ export default function RelocationHub() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-            {providers.map((p) => (
-              <a
-                key={p.name}
-                href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group p-6 bg-brand-surface border border-brand-border rounded-xl no-underline flex flex-col hover:border-brand-accent transition-colors"
-              >
-                <div className="flex items-start justify-between mb-5">
-                  <p.Icon className="w-5 h-5 text-brand-ink-2" />
-                  <span className="text-xs font-semibold uppercase tracking-wide text-brand-muted">
-                    {p.category}
+            {providers.map((p) =>
+              p.featured ? (
+                <Link
+                  key={p.name}
+                  to={p.url}
+                  className="group relative p-6 bg-brand-ink border-2 border-brand-accent-2 rounded-xl no-underline flex flex-col hover:border-brand-accent transition-colors"
+                >
+                  <span className="absolute -top-3 left-6 px-2.5 py-1 bg-brand-accent-2 text-brand-accent-ink text-[10px] font-semibold uppercase tracking-wide rounded-full">
+                    Referral partner
                   </span>
-                </div>
-                <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-2">{p.name}</h3>
-                <p className="text-sm leading-relaxed text-brand-muted mb-4">{p.summary}</p>
-                <div className="text-xs text-brand-muted leading-relaxed mb-5">{p.services}</div>
-                <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-ink-2 mt-auto pt-4 border-t border-dashed border-brand-border group-hover:text-brand-accent transition-colors">
-                  Visit website
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </span>
-              </a>
-            ))}
+                  <div className="flex items-start justify-between mb-5">
+                    <p.Icon className="w-5 h-5 text-brand-accent-2" />
+                    <span className="text-xs font-semibold uppercase tracking-wide text-[#b8c8e2]">
+                      {p.category}
+                    </span>
+                  </div>
+                  <h3 className="font-brand-serif text-xl font-medium text-white mb-2">{p.name}</h3>
+                  <p className="text-sm leading-relaxed text-[#b8c8e2] mb-4">{p.summary}</p>
+                  <div className="text-xs text-[#b8c8e2] leading-relaxed mb-5">{p.services}</div>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-accent-2 mt-auto pt-4 border-t border-dashed border-white/20 transition-colors">
+                    {p.linkLabel ?? 'Learn more'}
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </span>
+                </Link>
+              ) : (
+                <a
+                  key={p.name}
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group p-6 bg-brand-surface border border-brand-border rounded-xl no-underline flex flex-col hover:border-brand-accent transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-5">
+                    <p.Icon className="w-5 h-5 text-brand-ink-2" />
+                    <span className="text-xs font-semibold uppercase tracking-wide text-brand-muted">
+                      {p.category}
+                    </span>
+                  </div>
+                  <h3 className="font-brand-serif text-xl font-medium text-brand-ink mb-2">{p.name}</h3>
+                  <p className="text-sm leading-relaxed text-brand-muted mb-4">{p.summary}</p>
+                  <div className="text-xs text-brand-muted leading-relaxed mb-5">{p.services}</div>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-ink-2 mt-auto pt-4 border-t border-dashed border-brand-border group-hover:text-brand-accent transition-colors">
+                    Visit website
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </span>
+                </a>
+              )
+            )}
 
             {/* Consulates — expandable */}
             <div className="p-6 bg-brand-surface border border-brand-border rounded-xl flex flex-col">

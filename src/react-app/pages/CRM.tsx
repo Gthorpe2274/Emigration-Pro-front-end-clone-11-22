@@ -27,6 +27,7 @@ interface Purchaser {
   preferred_city: string | null;
   overall_score: number;
   stripe_confirmed_at: string | null;
+  is_refunded: number;
 }
 
 interface SalesStats {
@@ -47,6 +48,7 @@ const normalizePurchaser = (value: Record<string, unknown>): Purchaser => ({
   purchase_confirmed: toFlag(value.purchase_confirmed),
   is_active: toFlag(value.is_active),
   is_archived: toFlag(value.is_archived),
+  is_refunded: toFlag(value.is_refunded),
 } as Purchaser);
 
 export default function CRM() {
@@ -64,6 +66,8 @@ export default function CRM() {
   const [loadError, setLoadError] = useState('');
   const [salesStats, setSalesStats] = useState<SalesStats | null>(null);
   const [salesStatsError, setSalesStatsError] = useState('');
+  const [includeDeletedSales, setIncludeDeletedSales] = useState(false);
+  const [includeRefundedSales, setIncludeRefundedSales] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -79,7 +83,8 @@ export default function CRM() {
     session_code: '',
     is_active: 1,
     is_archived: 0,
-    purchase_confirmed: 0
+    purchase_confirmed: 0,
+    is_refunded: 0
   });
 
   // Handle login - authenticates against the server; no password is ever compared client-side.
@@ -129,6 +134,11 @@ export default function CRM() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adminToken]);
 
+  useEffect(() => {
+    if (adminToken) fetchSalesStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [includeDeletedSales, includeRefundedSales]);
+
   const fetchPurchasers = async () => {
     setLoading(true);
     setLoadError('');
@@ -156,7 +166,11 @@ export default function CRM() {
   const fetchSalesStats = async () => {
     setSalesStatsError('');
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/sales-stats`, {
+      const params = new URLSearchParams({
+        includeDeleted: String(includeDeletedSales),
+        includeRefunded: String(includeRefundedSales),
+      });
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/sales-stats?${params}`, {
         headers: { Authorization: `Bearer ${adminToken}` }
       });
       if (response.status === 401) {
@@ -164,16 +178,16 @@ export default function CRM() {
         return;
       }
       const data = await response.json();
-      if (!response.ok || !data.success) throw new Error(data.error || 'Failed to load Stripe sales totals');
+      if (!response.ok || !data.success) throw new Error(data.error || 'Failed to load CRM sales totals');
       setSalesStats({
         totalSales: Number(data.totalSales),
         salesThisMonth: Number(data.salesThisMonth),
         asOf: String(data.asOf)
       });
     } catch (error) {
-      console.error('Error fetching Stripe sales totals:', error);
+      console.error('Error fetching CRM sales totals:', error);
       setSalesStats(null);
-      setSalesStatsError(error instanceof Error ? error.message : 'Failed to load Stripe sales totals');
+      setSalesStatsError(error instanceof Error ? error.message : 'Failed to load CRM sales totals');
     }
   };
 
@@ -184,7 +198,8 @@ export default function CRM() {
       session_code: purchaser.session_code,
       is_active: purchaser.is_active,
       is_archived: purchaser.is_archived,
-      purchase_confirmed: purchaser.purchase_confirmed
+      purchase_confirmed: purchaser.purchase_confirmed,
+      is_refunded: purchaser.is_refunded
     });
     setShowEditModal(true);
   };
@@ -222,7 +237,7 @@ export default function CRM() {
   };
 
   const handleDeletePurchaser = async (purchaser: Purchaser) => {
-    if (!confirm(`Permanently delete ${purchaser.email}? This action cannot be undone.`)) return;
+    if (!confirm(`Delete ${purchaser.email}? Confirmed sales remain available in historical totals.`)) return;
 
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/admin/crm/purchasers/${purchaser.id}`, {
@@ -233,8 +248,9 @@ export default function CRM() {
       const data = await response.json().catch(() => ({ success: false, error: `Delete request failed (${response.status})` }));
 
       if (response.ok && data.success) {
-        alert('Purchaser deleted permanently!');
+        alert('Purchaser deleted. Its sale remains available in historical totals.');
         setPurchasers(current => current.filter(item => item.id !== purchaser.id));
+        fetchSalesStats();
       } else {
         alert('Error: ' + (data.error || 'Failed to delete purchaser'));
       }
@@ -265,6 +281,7 @@ export default function CRM() {
         setShowEditModal(false);
         setEditingPurchaser(null);
         fetchPurchasers();
+        fetchSalesStats();
       } else {
         alert('Error: ' + (data.error || 'Failed to update purchaser'));
       }
@@ -334,8 +351,8 @@ export default function CRM() {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
 
-    const description = action === 'delete' ? 'permanently delete' : action;
-    const warning = action === 'delete' ? ' This action cannot be undone.' : '';
+    const description = action === 'delete' ? 'delete' : action;
+    const warning = action === 'delete' ? ' Confirmed sales remain available in historical totals.' : '';
     if (!confirm(`${description.charAt(0).toUpperCase() + description.slice(1)} ${ids.length} selected customer${ids.length === 1 ? '' : 's'}?${warning}`)) return;
 
     setBulkLoading(true);
@@ -353,6 +370,7 @@ export default function CRM() {
 
       if (action === 'delete') {
         setPurchasers(current => current.filter(purchaser => !selectedIds.has(purchaser.id)));
+        fetchSalesStats();
       } else {
         const archived = action === 'archive' ? 1 : 0;
         setPurchasers(current => current.map(purchaser =>
@@ -513,16 +531,28 @@ export default function CRM() {
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <div className="text-sm text-gray-600 mb-1">Total Sales</div>
-                <div className="text-2xl font-bold text-blue-600" title={salesStatsError || 'Successful live Stripe payments for the report price'}>
+                <div className="text-2xl font-bold text-blue-600" title={salesStatsError || 'Confirmed sales linked to CRM records'}>
                   {salesStats ? salesStats.totalSales : '—'}
                 </div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <div className="text-sm text-gray-600 mb-1">Sales This Month</div>
-                <div className="text-2xl font-bold text-purple-600" title={salesStatsError || `Successful live Stripe report payments this month (${salesStats?.asOf || 'loading'})`}>
+                <div className="text-2xl font-bold text-purple-600" title={salesStatsError || `Confirmed CRM sales this month (${salesStats?.asOf || 'loading'})`}>
                   {salesStats ? salesStats.salesThisMonth : '—'}
                 </div>
               </div>
+            </div>
+
+            <div className="mb-6 flex flex-wrap gap-6 rounded-xl border border-blue-100 bg-white/50 px-4 py-3 text-sm text-gray-700">
+              <span className="font-semibold">Sales total options:</span>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={includeDeletedSales} onChange={(e) => setIncludeDeletedSales(e.target.checked)} />
+                Include deleted sales
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={includeRefundedSales} onChange={(e) => setIncludeRefundedSales(e.target.checked)} />
+                Include refunded sales
+              </label>
             </div>
 
             {/* Search and Filter */}
@@ -644,7 +674,7 @@ export default function CRM() {
                 <RotateCcw className="h-4 w-4" /> Restore
               </button>
               <button disabled={bulkLoading} onClick={() => handleBulkAction('delete')} className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50">
-                <Trash2 className="h-4 w-4" /> Delete permanently
+                <Trash2 className="h-4 w-4" /> Delete
               </button>
               <button disabled={bulkLoading} onClick={() => setSelectedIds(new Set())} className="px-2 py-2 text-sm font-medium text-blue-700 hover:text-blue-900 disabled:opacity-50">
                 Clear selection
@@ -739,6 +769,11 @@ export default function CRM() {
                               Confirmed
                             </span>
                           )}
+                          {purchaser.is_refunded === 1 && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                              Refunded
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-3 py-4 whitespace-nowrap">
@@ -772,7 +807,7 @@ export default function CRM() {
                           <button
                             onClick={() => handleDeletePurchaser(purchaser)}
                             className="flex items-center space-x-1 text-red-600 hover:text-red-800 transition-colors"
-                            title="Delete permanently"
+                            title="Delete"
                           >
                             <Trash2 className="w-4 h-4" />
                             <span className="hidden 2xl:inline text-sm">Delete</span>
@@ -869,6 +904,16 @@ export default function CRM() {
                     className="mr-2 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <span className="text-sm font-medium text-gray-700">Purchase Confirmed</span>
+                </label>
+
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={editForm.is_refunded === 1}
+                    onChange={(e) => setEditForm({ ...editForm, is_refunded: e.target.checked ? 1 : 0 })}
+                    className="mr-2 w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Refunded</span>
                 </label>
               </div>
 

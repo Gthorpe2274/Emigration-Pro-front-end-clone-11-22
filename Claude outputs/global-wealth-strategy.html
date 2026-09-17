@@ -1,0 +1,259 @@
+<title>Global Wealth Strategy Page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* This page is a fixed, light-only brand identity (Emigration Pro's production
+     palette) — committing to that single look per source, everything painted
+     explicitly so it renders correctly regardless of the viewer's host theme. */
+  :root{
+    --bg:#ffffff;
+    --surface:#faf5e9;
+    --surface-2:#f3ead3;
+    --ink:#0b2545;
+    --ink-2:#13315c;
+    --muted:#5a6a86;
+    --accent:#14b8a6;
+    --accent-2:#5eead4;
+    --accent-ink:#063d38;
+    --border:#e6dcc0;
+    --border-strong:#d4c99e;
+    --btn:#0b2545;
+    --btn-ink:#ffffff;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box;}
+  html,body{background:var(--bg);}
+  body{
+    margin:0;color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{text-decoration:none;color:inherit;}
+  h1,h2,h3{font-family:'Fraunces',ui-serif,Georgia,serif;text-wrap:balance;letter-spacing:-.01em;margin:0;}
+  .wrap{max-width:1152px;margin:0 auto;padding-inline:20px;}
+  @media (min-width:768px){.wrap{padding-inline:32px;}}
+
+  /* ---- preview strip ---- */
+  .preview-strip{
+    background:var(--ink);color:#cfe0ee;font-size:12.5px;text-align:center;
+    padding:9px 16px;font-family:ui-monospace,'SF Mono',Menlo,monospace;
+    letter-spacing:.01em;
+  }
+  .preview-strip b{color:var(--accent-2);font-weight:600;}
+
+  /* ---- nav ---- */
+  header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);}
+  .nav-row{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-block:14px;}
+  .logo{display:flex;align-items:baseline;gap:2px;font-family:'Fraunces',serif;font-weight:600;font-size:19px;color:var(--ink);flex:none;}
+  .logo sup{font-size:9px;font-weight:700;}
+  nav.links{display:flex;align-items:center;gap:20px;font-size:14px;font-weight:500;}
+  nav.links a{color:var(--muted);white-space:nowrap;}
+  nav.links a:hover{color:var(--accent);}
+  @media (max-width:920px){ nav.links{display:none;} }
+  .cta-pill{
+    flex:none;display:inline-flex;align-items:center;gap:8px;padding:10px 20px;
+    background:var(--btn);color:var(--btn-ink);border-radius:999px;font-size:14px;font-weight:600;
+    white-space:nowrap;
+  }
+
+  /* ---- hero ---- */
+  .hero{border-bottom:1px solid var(--border);}
+  .hero-inner{padding-top:56px;padding-bottom:40px;text-align:center;}
+  @media (min-width:768px){.hero-inner{padding-top:80px;padding-bottom:56px;}}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:var(--surface);
+    border:1px solid var(--border);border-radius:999px;font-size:12px;font-weight:600;
+    color:var(--ink-2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:28px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+  h1.title{font-size:clamp(34px,5.6vw,60px);font-weight:500;line-height:1.05;margin-bottom:24px;}
+  h1.title .accent-word{color:var(--ink-2);}
+  .hero p.dek{font-size:18px;line-height:1.7;color:var(--muted);max-width:640px;margin:0 auto;}
+  .hero-ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;}
+  .btn-primary,.btn-secondary{
+    display:inline-flex;align-items:center;gap:8px;padding:16px 28px;border-radius:10px;
+    font-weight:600;font-size:16px;transition:filter .15s,background .15s;
+  }
+  .btn-primary{background:var(--accent-2);color:var(--accent-ink);}
+  .btn-primary:hover{filter:brightness(.96);}
+  .btn-secondary{color:var(--ink);border:1px solid var(--border);}
+  .btn-secondary:hover{background:var(--surface);}
+
+  /* ---- capabilities ---- */
+  section.capabilities{background:var(--surface);border-bottom:1px solid var(--border);}
+  .section-pad{padding-block:64px;}
+  @media (min-width:768px){.section-pad{padding-block:96px;}}
+  .section-pad.tight-top{padding-top:40px;}
+  @media (min-width:768px){.section-pad.tight-top{padding-top:56px;}}
+  .section-head{text-align:center;max-width:600px;margin:0 auto 56px;}
+  .kicker{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;}
+  .section-head h2{font-size:clamp(26px,3.4vw,36px);font-weight:500;line-height:1.2;}
+
+  .cap-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  @media (max-width:640px){.cap-grid{grid-template-columns:1fr;}}
+  .cap-card{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:28px;}
+  .cap-icon{width:44px;height:44px;background:var(--surface);border:1px solid var(--border);border-radius:12px;
+    display:flex;align-items:center;justify-content:center;margin-bottom:20px;color:var(--accent);}
+  .cap-card h3{font-size:19px;font-weight:500;margin-bottom:8px;}
+  .cap-card p{font-size:14px;line-height:1.6;color:var(--muted);margin:0;}
+
+  /* ---- qualifier ---- */
+  section.qualifier{border-bottom:1px solid var(--border);}
+  .qual-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  @media (max-width:720px){.qual-grid{grid-template-columns:1fr;}}
+  .qual-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;}
+  .qual-card h3{font-size:17px;font-weight:500;margin-bottom:16px;}
+  .qual-card ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;}
+  .qual-card li{display:flex;gap:10px;font-size:14.5px;line-height:1.55;}
+  .qual-card li svg{flex:none;margin-top:2px;}
+  .qual-yes li{color:var(--ink);}
+  .qual-yes svg{color:var(--accent);}
+  .qual-no li{color:var(--muted);}
+  .qual-no svg{color:var(--muted);}
+
+  /* ---- disclosure ---- */
+  section.disclosure{background:var(--surface);text-align:center;}
+  .disclosure .wrap{max-width:640px;}
+  .disclosure p{font-size:14px;line-height:1.7;color:var(--muted);margin:0 0 14px;}
+  .disclosure a{font-size:14px;font-weight:600;color:var(--ink-2);}
+  .disclosure a:hover{color:var(--accent);}
+
+  /* ---- footer ---- */
+  footer{background:var(--ink);color:#cbd5e1;padding-block:56px;}
+  .foot-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:32px;}
+  @media (max-width:720px){.foot-grid{grid-template-columns:1fr;}}
+  footer .flogo{font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:#fff;margin-bottom:14px;}
+  footer p.fdesc{font-size:13.5px;line-height:1.6;color:#9fb0c4;max-width:360px;margin:0;}
+  footer h4{color:#fff;font-family:'Fraunces',serif;font-size:15px;font-weight:600;margin:0 0 14px;}
+  footer ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;}
+  footer a.flink{font-size:13.5px;color:#c3ccd8;}
+  footer a.flink:hover{color:var(--accent-2);}
+  .fcopy{border-top:1px solid #223a5a;margin-top:44px;padding-top:24px;text-align:center;font-size:11.5px;color:#8093a9;line-height:1.6;}
+</style>
+
+<div class="preview-strip">Static preview of <b>/global-wealth-strategy</b> — the new referral-partner page linked from the homepage's "Explore global wealth strategy" card</div>
+
+<header>
+  <div class="wrap nav-row">
+    <div class="logo">Emigration Pro<sup>™</sup></div>
+    <nav class="links">
+      <a href="#">Home</a>
+      <a href="#">Assessment</a>
+      <a href="#">Leave Now</a>
+      <a href="#">Earn Abroad</a>
+      <a href="#">Sample Report</a>
+      <a href="#">Blog</a>
+      <a href="#">Glossary</a>
+      <a href="#">About Us</a>
+    </nav>
+    <a href="#" class="cta-pill">Free assessment</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <span class="eyebrow"><span class="dot"></span>Referral partner &middot; Nomad Capitalist</span>
+    <h1 class="title">Planning at a <span class="accent-word">different scale</span>.</h1>
+    <p class="dek">For Business Owners and Investors whose relocation is really about tax residency, asset protection, and a second citizenship, our Partner Nomad Capitalist has been serving over 1,500 clients across 100+ countries since 2012.</p>
+  </div>
+</section>
+
+<section class="qualifier">
+  <div class="wrap section-pad tight-top">
+    <div class="section-head">
+      <div class="kicker">Who this is for</div>
+      <h2>A quick gut-check before you click through.</h2>
+    </div>
+    <div class="qual-grid">
+      <div class="qual-card">
+        <h3>This is a fit if you&hellip;</h3>
+        <ul class="qual-yes">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><polyline points="8 12.5 11 15.5 16 9"/></svg>US $500K+ annual income or US $1M+ in assets</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><polyline points="8 12.5 11 15.5 16 9"/></svg>Value one integrated strategy over one-off "products"</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><polyline points="8 12.5 11 15.5 16 9"/></svg>Are open to exploring more than one jurisdiction</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><polyline points="8 12.5 11 15.5 16 9"/></svg>Want a long-term partner, not a single transaction</li>
+        </ul>
+      </div>
+      <div class="qual-card">
+        <h3>Probably not yet, if you&hellip;</h3>
+        <ul class="qual-no">
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>Looking for a single, standalone service (one bank account, one visa filing)</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>Not yet near the $500K income / $1M net worth threshold</li>
+          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>Want a DIY approach without professional coordination</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="capabilities">
+  <div class="wrap section-pad">
+    <div class="section-head">
+      <div class="kicker">Holistic international structuring</div>
+      <h2>A Tailored Implementation Plan</h2>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 11V3H8v4H2v14h20V11h-6zM10 5h4v16h-4z"/><path d="M12 3v18"/></svg>
+        </div>
+        <h3>International tax strategy</h3>
+        <p>Cross-border tax optimization and jurisdiction analysis built around where you actually spend your time.</p>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="10" width="18" height="10" rx="1"/><path d="M12 2 3 8h18z"/><line x1="7" y1="14" x2="7" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="17" y1="14" x2="17" y2="17"/></svg>
+        </div>
+        <h3>Residency &amp; second citizenship</h3>
+        <p>Citizenship by investment, residency by investment, and long-term relocation planning across 100+ countries.</p>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 4 5v6c0 5.25 3.4 9.74 8 11 4.6-1.26 8-5.75 8-11V5z"/></svg>
+        </div>
+        <h3>Offshore banking &amp; asset protection</h3>
+        <p>International banking relationships, asset-protection structures, and global wealth diversification.</p>
+      </div>
+      <div class="cap-card">
+        <div class="cap-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 0 20 15.3 15.3 0 0 1 0-20z"/></svg>
+        </div>
+        <h3>International corporate structuring</h3>
+        <p>Cross-border business structuring for entrepreneurs operating in more than one country.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="disclosure">
+  <div class="wrap section-pad" style="padding-block:56px;">
+    <p>Nomad Capitalist is an independent advisory firm and a paid referral partner of Emigration Pro — we may earn a referral fee if you engage their services. Neither Emigration Pro nor Nomad Capitalist is a licensed legal, financial, or tax advisor; nothing on this page is legal, financial, or tax advice.</p>
+    <a href="#">Visit Nomad Capitalist
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="vertical-align:-2px;margin-left:4px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="flogo">Emigration Pro</div>
+        <p class="fdesc">Your trusted partner in international migration. We provide comprehensive assessments and access to professional services to help you make informed decisions about your future abroad.</p>
+      </div>
+      <div>
+        <h4>Resources</h4>
+        <ul><li><a class="flink" href="#">Moving Abroad Glossary</a></li><li><a class="flink" href="#">Calculators</a></li></ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul><li><a class="flink" href="#">Terms of Service</a></li><li><a class="flink" href="#">Privacy Policy</a></li></ul>
+      </div>
+    </div>
+    <div class="fcopy">
+      Copyright © 2024 emigrationpro.com<br>
+      a Division of Clear Products, LLC. All rights reserved. This tool provides general guidance. Always consult official government sources and immigration professionals.
+    </div>
+  </div>
+</footer>

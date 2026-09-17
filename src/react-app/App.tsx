@@ -24,6 +24,7 @@ import BlogPost from './pages/BlogPost';
 import BlogAdmin from './pages/BlogAdmin';
 import Blog from './pages/Blog';
 import EarnAbroad from './pages/EarnAbroad';
+import GlobalWealthStrategy from './pages/GlobalWealthStrategy';
 import LivingWageBusiness from './pages/LivingWageBusiness';
 import DigitalSales from './pages/DigitalSales';
 import MultipleOptions from './pages/MultipleOptions';
@@ -77,6 +78,7 @@ function App() {
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/earn-abroad" element={<EarnAbroad />} />
+        <Route path="/global-wealth-strategy" element={<GlobalWealthStrategy />} />
         <Route path="/living-wage-business" element={<LivingWageBusiness />} />
         <Route path="/digital-sales" element={<DigitalSales />} />
         <Route path="/multiple-options" element={<MultipleOptions />} />
