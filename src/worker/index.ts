@@ -192,11 +192,115 @@ const monthKey = (date: Date) => new Intl.DateTimeFormat('en-CA', {
   month: '2-digit'
 }).format(date);
 
+/**
+ * CRM schema safety net.
+ *
+ * A deploy can reach production before its D1 migration has been applied. When
+ * that happened the CRM endpoints referenced columns that did not exist yet,
+ * every request failed, and the admin CRM page looked empty even though the
+ * rows were still there. Repair the table idempotently before touching it and
+ * build the queries from the columns that actually exist, so a lagging
+ * migration can never hide CRM data again.
+ */
+const CRM_REQUIRED_COLUMNS: Array<[string, string]> = [
+  ['affiliate_code', 'TEXT'],
+  ['is_archived', 'BOOLEAN DEFAULT 0'],
+  ['stripe_session_id', 'TEXT'],
+  ['stripe_confirmed_at', 'TIMESTAMP'],
+  ['is_refunded', 'BOOLEAN NOT NULL DEFAULT 0'],
+  ['deleted_at', 'TIMESTAMP'],
+];
+
+let crmSchemaReady = false;
+
+async function ensureCrmSchema(db: D1Database): Promise<Set<string>> {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS relocation_hub_access (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      assessment_id INTEGER,
+      email TEXT NOT NULL,
+      session_code TEXT NOT NULL,
+      is_active BOOLEAN DEFAULT 1,
+      purchase_confirmed BOOLEAN DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      expires_at TIMESTAMP,
+      affiliate_code TEXT,
+      is_archived BOOLEAN DEFAULT 0,
+      stripe_session_id TEXT,
+      stripe_confirmed_at TIMESTAMP,
+      is_refunded BOOLEAN NOT NULL DEFAULT 0,
+      deleted_at TIMESTAMP
+    )
+  `).run();
+
+  const { results } = await db.prepare(`SELECT name FROM pragma_table_info('relocation_hub_access')`)
+    .all<{ name: string }>();
+  const columns = new Set((results || []).map((row) => String(row.name)));
+
+  let repaired = true;
+  for (const [name, definition] of CRM_REQUIRED_COLUMNS) {
+    if (columns.has(name)) continue;
+    try {
+      await db.prepare(`ALTER TABLE relocation_hub_access ADD COLUMN ${name} ${definition}`).run();
+      columns.add(name);
+      console.warn(`CRM schema repair: added missing column "${name}" to relocation_hub_access`);
+    } catch (error) {
+      repaired = false;
+      console.error(`CRM schema repair failed for column "${name}":`, error);
+    }
+  }
+
+  try {
+    await db.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_relocation_hub_sales_status
+        ON relocation_hub_access(purchase_confirmed, is_refunded, deleted_at, stripe_confirmed_at)
+    `).run();
+  } catch (error) {
+    console.warn('CRM schema repair: sales status index unavailable:', error);
+  }
+
+  // Only remember success so a failed repair is retried on the next request.
+  crmSchemaReady = repaired;
+  return columns;
+}
+
+async function crmColumns(env: Env): Promise<Set<string>> {
+  if (crmSchemaReady) return new Set(CRM_REQUIRED_COLUMNS.map(([name]) => name));
+  return ensureCrmSchema(env.DB);
+}
+
+async function fetchCrmPurchasers(env: Env): Promise<Record<string, unknown>[]> {
+  const columns = await crmColumns(env);
+  const hasDeletedAt = columns.has('deleted_at');
+  const hasIsRefunded = columns.has('is_refunded');
+
+  // Rows are never filtered out because a column is missing; optional columns
+  // fall back to their historical default instead.
+  const { results } = await env.DB.prepare(`
+    SELECT
+      r.id, r.email, r.session_code, r.assessment_id,
+      COALESCE(r.purchase_confirmed, 0) AS purchase_confirmed,
+      COALESCE(r.is_active, 0) AS is_active,
+      COALESCE(r.is_archived, 0) AS is_archived,
+      r.created_at, r.expires_at, r.stripe_confirmed_at,
+      ${hasIsRefunded ? 'COALESCE(r.is_refunded, 0)' : '0'} AS is_refunded,
+      a.preferred_country, a.preferred_city, a.overall_score
+    FROM relocation_hub_access r
+    LEFT JOIN assessments a ON r.assessment_id = a.id
+    ${hasDeletedAt ? 'WHERE r.deleted_at IS NULL' : ''}
+    ORDER BY r.created_at DESC
+  `).all();
+
+  return results as Record<string, unknown>[];
+}
+
 async function fetchCrmSalesStats(env: Env, includeDeleted: boolean, includeRefunded: boolean): Promise<CrmSalesStats> {
   const currentMonth = monthKey(new Date());
+  const columns = await crmColumns(env);
   const conditions = ['stripe_confirmed_at IS NOT NULL', 'COALESCE(purchase_confirmed, 0) = 1'];
-  if (!includeDeleted) conditions.push('deleted_at IS NULL');
-  if (!includeRefunded) conditions.push('COALESCE(is_refunded, 0) = 0');
+  if (!includeDeleted && columns.has('deleted_at')) conditions.push('deleted_at IS NULL');
+  if (!includeRefunded && columns.has('is_refunded')) conditions.push('COALESCE(is_refunded, 0) = 0');
   const { results } = await env.DB.prepare(`
     SELECT stripe_confirmed_at FROM relocation_hub_access
     WHERE ${conditions.join(' AND ')}
@@ -824,23 +928,30 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
   }
 });
 
+async function softDeletePurchaser(env: Env, id: number): Promise<number> {
+  const columns = await crmColumns(env);
+  if (columns.has('deleted_at')) {
+    const result = await env.DB.prepare(`
+      UPDATE relocation_hub_access
+      SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ? AND deleted_at IS NULL
+    `).bind(id).run();
+    return result.meta.changes || 0;
+  }
+
+  // Without the soft-delete column, archive the row rather than destroy it.
+  const result = await env.DB.prepare(`
+    UPDATE relocation_hub_access
+    SET is_archived = 1, updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `).bind(id).run();
+  return result.meta.changes || 0;
+}
+
 // CRM - Get all purchasers
 app.get('/api/admin/crm/purchasers', adminAuth, async (c) => {
   try {
-    const { results } = await c.env.DB.prepare(`
-      SELECT 
-        r.id, r.email, r.session_code, r.assessment_id,
-        COALESCE(r.purchase_confirmed, 0) AS purchase_confirmed,
-        COALESCE(r.is_active, 0) AS is_active,
-        COALESCE(r.is_archived, 0) AS is_archived,
-        r.created_at, r.expires_at, r.stripe_confirmed_at,
-        COALESCE(r.is_refunded, 0) AS is_refunded,
-        a.preferred_country, a.preferred_city, a.overall_score
-      FROM relocation_hub_access r
-      LEFT JOIN assessments a ON r.assessment_id = a.id
-      WHERE r.deleted_at IS NULL
-      ORDER BY r.created_at DESC
-    `).all();
+    const purchasers = await fetchCrmPurchasers(c.env);
 
     // Prevent caching of CRM data
     c.header('Cache-Control', 'no-store, no-cache, must-revalidate');
@@ -848,7 +959,7 @@ app.get('/api/admin/crm/purchasers', adminAuth, async (c) => {
 
     return c.json({
       success: true,
-      purchasers: results
+      purchasers
     });
   } catch (error) {
     console.error('Error fetching CRM data:', error);
@@ -892,8 +1003,12 @@ app.post('/api/admin/crm/purchasers/bulk', adminAuth, async (c) => {
       return c.json({ success: false, error: 'Select between 1 and 500 customers' }, 400);
     }
 
+    const columns = await crmColumns(c.env);
     const statements = ids.map(id => action === 'delete'
-      ? c.env.DB.prepare('UPDATE relocation_hub_access SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL').bind(id)
+      // Rows are retained: soft delete when supported, otherwise archive.
+      ? (columns.has('deleted_at')
+        ? c.env.DB.prepare('UPDATE relocation_hub_access SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL').bind(id)
+        : c.env.DB.prepare('UPDATE relocation_hub_access SET is_archived = 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?').bind(id))
       : c.env.DB.prepare('UPDATE relocation_hub_access SET is_archived = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
           .bind(action === 'archive' ? 1 : 0, id));
     const results = await c.env.DB.batch(statements);
@@ -915,8 +1030,8 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
     }
     const body = await c.req.json();
     if (body.action === 'delete') {
-      const result = await c.env.DB.prepare('UPDATE relocation_hub_access SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL').bind(id).run();
-      if (result.meta.changes === 0) {
+      const changes = await softDeletePurchaser(c.env, id);
+      if (changes === 0) {
         return c.json({ success: false, error: 'Purchaser not found' }, 404);
       }
       return c.json({ success: true, message: 'Purchaser deleted' });
@@ -930,7 +1045,9 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
       }, 400);
     }
 
-    // Update the purchaser record
+    // Update the purchaser record. Optional columns are only written when the
+    // schema actually has them, so a lagging migration cannot fail the save.
+    const columns = await crmColumns(c.env);
     const result = await c.env.DB.prepare(`
       UPDATE relocation_hub_access
       SET email = ?,
@@ -938,7 +1055,7 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
           is_active = ?,
           is_archived = ?,
           purchase_confirmed = ?,
-          is_refunded = ?,
+          ${columns.has('is_refunded') ? 'is_refunded = ?,' : ''}
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `).bind(
@@ -947,7 +1064,7 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
       is_active ? 1 : 0,
       is_archived ? 1 : 0,
       purchase_confirmed ? 1 : 0,
-      is_refunded ? 1 : 0,
+      ...(columns.has('is_refunded') ? [is_refunded ? 1 : 0] : []),
       id
     ).run();
 
@@ -969,7 +1086,9 @@ app.put('/api/admin/crm/purchasers/:id', adminAuth, async (c) => {
 });
 
 // Soft-delete purchasers so confirmed sales remain auditable and can be
-// included in historical totals. POST is primary for hosting compatibility.
+// included in historical totals. Rows are never hard-deleted: without the
+// soft-delete column the row is archived instead of destroyed.
+// POST is primary for hosting compatibility.
 const deletePurchaser = async (c: any) => {
   try {
     const id = Number(c.req.param('id'));
@@ -977,13 +1096,9 @@ const deletePurchaser = async (c: any) => {
       return c.json({ success: false, error: 'Invalid purchaser ID' }, 400);
     }
 
-    const result = await c.env.DB.prepare(`
-      UPDATE relocation_hub_access
-      SET deleted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ? AND deleted_at IS NULL
-    `).bind(id).run();
+    const changes = await softDeletePurchaser(c.env, id);
 
-    if (result.meta.changes === 0) {
+    if (changes === 0) {
       return c.json({ success: false, error: 'Purchaser not found' }, 404);
     }
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, Mail, Key, Calendar, MapPin, Search, Download, Edit, Archive, Trash2, RotateCcw } from 'lucide-react';
+import { Users, Mail, Key, Calendar, MapPin, Search, Download, Edit, Archive, Trash2, RotateCcw, Flame } from 'lucide-react';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 
@@ -495,6 +495,14 @@ export default function CRM() {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
+                <Link
+                  to="/admin/analytics"
+                  className="flex items-center space-x-2 bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors"
+                  title="Heat maps, session recordings, and tracked pages"
+                >
+                  <Flame className="w-4 h-4" />
+                  <span>Heat map dashboard</span>
+                </Link>
                 <button
                   onClick={exportToCSV}
                   className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
@@ -515,18 +523,18 @@ export default function CRM() {
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <div className="text-sm text-gray-600 mb-1">CRM Contacts</div>
-                <div className="text-2xl font-bold text-gray-900">{purchasers.length}</div>
+                <div className="text-2xl font-bold text-gray-900">{loadError ? '—' : purchasers.length}</div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <div className="text-sm text-gray-600 mb-1">Active CRM Records</div>
                 <div className="text-2xl font-bold text-green-600">
-                  {purchasers.filter(p => p.is_active === 1 && p.is_archived === 0).length}
+                  {loadError ? '—' : purchasers.filter(p => p.is_active === 1 && p.is_archived === 0).length}
                 </div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
                 <div className="text-sm text-gray-600 mb-1">Archived</div>
                 <div className="text-2xl font-bold text-gray-500">
-                  {purchasers.filter(p => p.is_archived === 1).length}
+                  {loadError ? '—' : purchasers.filter(p => p.is_archived === 1).length}
                 </div>
               </div>
               <div className="bg-white/60 backdrop-blur-sm p-4 rounded-xl border border-white/20">
@@ -823,14 +831,20 @@ export default function CRM() {
             {filteredPurchasers.length === 0 && (
               <div className="text-center py-12">
                 <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No purchasers found matching your criteria</p>
+                {loadError ? (
+                  <p className="text-red-600">
+                    CRM records could not be loaded, so this list is not proof that the database is empty. Use Retry above.
+                  </p>
+                ) : (
+                  <p className="text-gray-500">No purchasers found matching your criteria</p>
+                )}
               </div>
             )}
           </div>
 
           {/* Results count */}
           <div className="mt-4 text-center text-sm text-gray-600">
-            Showing {filteredPurchasers.length} of {purchasers.length} total purchasers
+            {loadError ? 'CRM data unavailable — counts withheld' : `Showing ${filteredPurchasers.length} of ${purchasers.length} total purchasers`}
           </div>
         </div>
       </div>
