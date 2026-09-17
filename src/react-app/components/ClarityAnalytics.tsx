@@ -1,29 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import clarity from '@microsoft/clarity';
 import { useLocation } from 'react-router-dom';
+import {
+  CLARITY_PROJECT_ID,
+  getTrackedClarityPage,
+  normalizeClarityPath,
+} from '@/react-app/analytics/clarityConfig';
 
-const CLARITY_PROJECT_ID = import.meta.env.VITE_CLARITY_PROJECT_ID || 'yif8w21arg';
 const CONSENT_KEY = 'emigrationpro_analytics_consent_v1';
 const VISITOR_KEY = 'emigrationpro_clarity_visitor_v1';
-
-export type TrackedClarityPage = {
-  path: string;
-  pageId: string;
-  label: string;
-  group: 'leave-now' | 'earn-abroad';
-};
-
-export const TRACKED_CLARITY_PAGES: TrackedClarityPage[] = [
-  { path: '/best-countries', pageId: 'leave-now', label: 'Leave Now', group: 'leave-now' },
-  { path: '/earn-abroad', pageId: 'earn-abroad', label: 'Earn Abroad', group: 'earn-abroad' },
-  { path: '/global-wealth-strategy', pageId: 'global-wealth-strategy', label: 'Global Wealth Strategy', group: 'earn-abroad' },
-  { path: '/living-wage-business', pageId: 'living-wage-business', label: 'Living Wage Business', group: 'earn-abroad' },
-  { path: '/digital-sales', pageId: 'digital-sales', label: 'Digital Sales', group: 'earn-abroad' },
-  { path: '/multiple-options', pageId: 'multiple-options', label: 'Multiple Options', group: 'earn-abroad' },
-  { path: '/youtuber', pageId: 'youtuber', label: 'YouTube Creator', group: 'earn-abroad' },
-  { path: '/affiliate', pageId: 'affiliate', label: 'Affiliate', group: 'earn-abroad' },
-  { path: '/agency', pageId: 'agency', label: 'Agency', group: 'earn-abroad' },
-];
 
 type ConsentChoice = 'granted' | 'denied' | null;
 let clarityInitialized = false;
@@ -59,7 +44,7 @@ export default function ClarityAnalytics() {
   const location = useLocation();
   const [consent, setConsent] = useState<ConsentChoice>(() => getConsent());
   const trackedPage = useMemo(
-    () => TRACKED_CLARITY_PAGES.find((page) => page.path === location.pathname),
+    () => getTrackedClarityPage(location.pathname),
     [location.pathname],
   );
 
@@ -86,9 +71,9 @@ export default function ClarityAnalytics() {
     clarity.identify(getAnonymousVisitorId(), undefined, trackedPage.pageId, trackedPage.label);
     clarity.setTag('content_group', trackedPage.group);
     clarity.setTag('tracked_page', trackedPage.pageId);
-    clarity.setTag('route_path', trackedPage.path);
+    clarity.setTag('route_path', normalizeClarityPath(location.pathname));
     clarity.event('tracked_page_view');
-  }, [consent, trackedPage]);
+  }, [consent, location.pathname, trackedPage]);
 
   const acceptAnalytics = () => {
     localStorage.setItem(CONSENT_KEY, 'granted');
