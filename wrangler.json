@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "emigration-pro",
   "main": "./src/worker/index.ts",
-  "compatibility_date": "2025-06-17",
+  "compatibility_date": "2026-09-17",
   "compatibility_flags": [
     "nodejs_compat"
   ],
@@ -34,10 +34,30 @@
       "bucket_name": "emigration-pro-bucket"
     }
   ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "IMMIGRATION_AUDIT_QUEUE",
+        "queue": "immigration-audit"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "immigration-audit",
+        "max_batch_size": 2,
+        "max_batch_timeout": 5,
+        "max_retries": 4,
+        "retry_delay": 60,
+        "dead_letter_queue": "immigration-audit-dlq",
+        "max_concurrency": 3
+      }
+    ]
+  },
   "triggers": {
     "crons": [
       "0 2 * * *",
-      "0 3 1 */3 *"
+      "0 3 1 */3 *",
+      "0 4 1 * *"
     ]
   }
 }

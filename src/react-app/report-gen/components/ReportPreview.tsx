@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ReportSectionData, UserInput } from '../types';
-import { downloadAsHtml } from '../utils/htmlDownloader';
+import { downloadAsHtml, REPORT_COVER_PATH } from '../utils/htmlDownloader';
 import { CONCERNS } from '../constants';
 import SimpleMarkdown from './SimpleMarkdown';
 
@@ -161,6 +161,14 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ reportData, userInput, on
                 <p className="font-semibold text-slate-900 mb-2">Create a PDF from the HTML report</p>
                 <p>After opening the downloaded report in your browser, click the browser's print button or press <span className="font-bold">Ctrl+P</span> / <span className="font-bold">Cmd+P</span>. Then choose <span className="font-bold">Save as PDF</span> instead of sending the file to a printer.</p>
             </div>
+
+            <section className="mb-8 overflow-hidden rounded-2xl border border-slate-200 bg-[#f1eadf] shadow-xl" aria-label="Report cover">
+                <img
+                    src={REPORT_COVER_PATH}
+                    alt="Emigration Pro — Your New Country report cover"
+                    className="block h-auto w-full object-contain"
+                />
+            </section>
 
             <div id="report-content" className="bg-white p-6 sm:p-12 rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
                 <div className="text-center mb-16 space-y-2">

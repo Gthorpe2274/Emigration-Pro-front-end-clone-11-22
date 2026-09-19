@@ -1,30 +1,24 @@
 
-/**
- * Generates and triggers a download for a standalone HTML version of the report.
- * This creates a full HTML5 document with embedded styles and external CDN links
- * so the report looks identical to the app version when opened locally.
- * 
- * @param elementId The ID of the HTML element containing the report content.
- * @param fileName The desired name for the downloaded file.
- */
-export const downloadAsHtml = (elementId: string, fileName: string): void => {
-  const reportElement = document.getElementById(elementId);
-  if (!reportElement) {
-    console.error('Report content element not found');
-    return;
-  }
+const escapeHtml = (value: string): string => value
+  .replaceAll('&', '&amp;')
+  .replaceAll('<', '&lt;')
+  .replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;')
+  .replaceAll("'", '&#039;');
 
-  // Clone the content to avoid modifying the live DOM
-  const content = reportElement.innerHTML;
-  
-  // Construct a full, valid HTML document
-  const fullHtml = `
+export const REPORT_COVER_PATH = '/images/emigration-pro-report-cover.jpg';
+
+export const buildStandaloneReportHtml = (
+  content: string,
+  fileName: string,
+  coverImageSrc: string = REPORT_COVER_PATH,
+): string => `
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${fileName.replace('.html', '').replace(/_/g, ' ')}</title>
+    <title>${escapeHtml(fileName.replace(/\.html$/i, '').replace(/_/g, ' '))}</title>
     <!-- Use Tailwind CDN for instant styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -35,10 +29,25 @@ export const downloadAsHtml = (elementId: string, fileName: string): void => {
             line-height: 1.6;
             color: #1e293b;
         }
+        [data-report-cover-page] {
+            background: #f1eadf;
+            break-after: page;
+            page-break-after: always;
+            width: 100%;
+        }
+        [data-report-cover] {
+            display: block;
+            height: auto;
+            object-fit: contain;
+            width: 100%;
+        }
         @media print {
+            @page { size: A4; margin: 0; }
             .no-print { display: none !important; }
             body { background-color: white !important; padding: 0 !important; }
-            .report-card { box-shadow: none !important; border: none !important; width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+            .report-card { box-shadow: none !important; border: none !important; border-radius: 0 !important; overflow: visible !important; width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+            [data-report-cover-page] { height: 297mm; margin: 0; width: 210mm; }
+            [data-report-cover] { height: 100%; object-fit: contain; width: 100%; }
             /* Force background colors to print */
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
@@ -88,8 +97,12 @@ export const downloadAsHtml = (elementId: string, fileName: string): void => {
 </head>
 <body class="bg-slate-50 text-slate-900 py-12 px-4 md:px-8">
     <div class="report-card max-w-4xl mx-auto bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <section data-report-cover-page aria-label="Report cover">
+            <img data-report-cover src="${escapeHtml(coverImageSrc)}" alt="Emigration Pro — Your New Country report cover">
+        </section>
+
         <!-- Header Branding (Optional, matching app header) -->
-        <div class="bg-slate-900 text-white p-8 text-center">
+        <div class="report-header bg-slate-900 text-white p-8 text-center">
             <h1 class="text-3xl font-bold">Emigration Pro Report</h1>
             <p class="text-slate-400 mt-2">Personalized Analysis & Relocation Strategy</p>
         </div>
@@ -120,7 +133,39 @@ export const downloadAsHtml = (elementId: string, fileName: string): void => {
     </div>
 </body>
 </html>
-  `;
+`.trim();
+
+const blobToDataUrl = (blob: Blob): Promise<string> => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(String(reader.result));
+  reader.onerror = () => reject(reader.error ?? new Error('Unable to read report cover image'));
+  reader.readAsDataURL(blob);
+});
+
+const getEmbeddedReportCover = async (): Promise<string> => {
+  try {
+    const response = await fetch(REPORT_COVER_PATH);
+    if (!response.ok) throw new Error(`Unable to load report cover (${response.status})`);
+    return await blobToDataUrl(await response.blob());
+  } catch (error) {
+    console.warn('The report cover could not be embedded; using its website URL instead.', error);
+    return new URL(REPORT_COVER_PATH, window.location.origin).href;
+  }
+};
+
+/**
+ * Generates and triggers a download for a standalone HTML version of the report.
+ * The report cover is embedded so it remains available when the file is offline.
+ */
+export const downloadAsHtml = async (elementId: string, fileName: string): Promise<void> => {
+  const reportElement = document.getElementById(elementId);
+  if (!reportElement) {
+    console.error('Report content element not found');
+    return;
+  }
+
+  const coverImageSrc = await getEmbeddedReportCover();
+  const fullHtml = buildStandaloneReportHtml(reportElement.innerHTML, fileName, coverImageSrc);
 
   const blob = new Blob([fullHtml.trim()], { type: 'text/html' });
   const url = URL.createObjectURL(blob);

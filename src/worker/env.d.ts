@@ -3,6 +3,7 @@ interface Env {
   REPORTS_KV: KVNamespace;
   R2_BUCKET: R2Bucket;
   ASSETS: Fetcher;
+  IMMIGRATION_AUDIT_QUEUE: Queue<import('./immigration-audit').ImmigrationAuditMessage>;
   MOCHA_USERS_SERVICE_API_KEY?: string;
   MOCHA_USERS_SERVICE_API_URL?: string;
   RAGATOUILLE_API_URL?: string;

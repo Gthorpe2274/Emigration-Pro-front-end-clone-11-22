@@ -8,6 +8,21 @@ import { runScheduledCleanup } from './retention-cleanup';
 import { YouTubeAPIService } from './youtube-api-service';
 import { findBestVideoReplacement } from './youtube-video-curator';
 import { convertMarkdownToHTML, convertPDFToHTML } from './file-converter';
+import {
+  IMMIGRATION_AUDIT_CRON,
+  IMMIGRATION_SENSITIVE_CONCERN_IDS,
+  ImmigrationSnapshotUnavailableError,
+  approveImmigrationSnapshot,
+  ensureFreshImmigrationSnapshot,
+  formatImmigrationSnapshotForPrompt,
+  getImmigrationAuditAdminSummary,
+  getLatestApprovedImmigrationSnapshot,
+  processImmigrationAuditBatch,
+  rejectImmigrationSnapshot,
+  runMonthlyImmigrationAudit,
+  startImmigrationAudit,
+  type ImmigrationAuditMessage,
+} from './immigration-audit';
 
 // Helper function for scheduled video updates
 async function runScheduledVideoUpdates(env: Env): Promise<void> {
@@ -472,6 +487,51 @@ app.post('/api/admin/rotate-sessions', adminAuth, async (c) => {
     await c.env.REPORTS_KV.delete(key);
   }
   return c.json({ rotated: keys.length });
+});
+
+// Immigration audit operations. All mutations are protected by the existing
+// short-lived admin session rather than exposing a standalone cron secret.
+app.get('/api/admin/immigration-audits', adminAuth, async (c) => {
+  const requestedLimit = Number(c.req.query('limit') || 12);
+  const summary = await getImmigrationAuditAdminSummary(c.env.DB, requestedLimit);
+  return c.json({ success: true, ...summary as Record<string, unknown> });
+});
+
+app.post('/api/admin/immigration-audits/run', adminAuth, async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const parsed = z.object({
+    countries: z.array(z.string().trim().min(1)).min(1).max(126).optional(),
+  }).safeParse(body);
+  if (!parsed.success) return c.json({ error: 'countries must be an array of catalog country names' }, 400);
+
+  try {
+    const result = await startImmigrationAudit(c.env, {
+      triggerType: 'manual',
+      countries: parsed.data.countries,
+    });
+    return c.json({ success: true, ...result }, 202);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Could not start immigration audit';
+    return c.json({ error: message }, 400);
+  }
+});
+
+app.post('/api/admin/immigration-snapshots/:id/approve', adminAuth, async (c) => {
+  const snapshotId = Number(c.req.param('id'));
+  if (!Number.isInteger(snapshotId) || snapshotId <= 0) return c.json({ error: 'Invalid snapshot id' }, 400);
+  const approved = await approveImmigrationSnapshot(c.env.DB, snapshotId);
+  return approved
+    ? c.json({ success: true, snapshotId })
+    : c.json({ error: 'Snapshot is not awaiting review' }, 409);
+});
+
+app.post('/api/admin/immigration-snapshots/:id/reject', adminAuth, async (c) => {
+  const snapshotId = Number(c.req.param('id'));
+  if (!Number.isInteger(snapshotId) || snapshotId <= 0) return c.json({ error: 'Invalid snapshot id' }, 400);
+  const rejected = await rejectImmigrationSnapshot(c.env.DB, snapshotId);
+  return rejected
+    ? c.json({ success: true, snapshotId })
+    : c.json({ error: 'Snapshot is not awaiting review' }, 409);
 });
 
 // Confirm that the browser still holds a valid server-issued admin session.
