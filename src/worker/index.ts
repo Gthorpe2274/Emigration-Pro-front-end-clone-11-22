@@ -4095,5 +4095,22 @@ export default {
       console.log('Running scheduled video updates (quarterly)...');
       ctx.waitUntil(runScheduledVideoUpdates(env));
     }
+
+    // Run the monthly immigration-requirements audit. The run only seeds items and
+    // enqueues one message per destination, so each country is verified (and retried)
+    // independently by the queue consumer below.
+    if (event.cron === IMMIGRATION_AUDIT_CRON) {
+      console.log('Running scheduled immigration audit (monthly)...');
+      ctx.waitUntil(runMonthlyImmigrationAudit(env, event.scheduledTime));
+    }
+  },
+  /**
+   * Verify one immigration-requirements snapshot per queued destination.
+   * A consumer must exist for the queue binding declared in wrangler.json or
+   * `wrangler deploy` refuses to register this worker as its consumer.
+   */
+  async queue(batch: MessageBatch<ImmigrationAuditMessage>, env: Env): Promise<void> {
+    await processImmigrationAuditBatch(batch, env);
   }
 };
+

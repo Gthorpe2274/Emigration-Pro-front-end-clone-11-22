@@ -41,7 +41,7 @@
     "dev:converter": "vite --open /file-converter-standalone.html",
     "build:converter": "node build-standalone.js",
     "lint": "eslint .",
-    "test": "node --test --experimental-strip-types tests/clarity-config.test.ts tests/report-cover.test.ts",
+    "test": "node --test --experimental-strip-types --import ./tests/support/register-ts-resolver.mjs tests/clarity-config.test.ts tests/report-cover.test.ts tests/immigration-audit-wiring.test.ts",
     "start": "node dist/worker/index.js",
     "worker": "wrangler dev"
   },
