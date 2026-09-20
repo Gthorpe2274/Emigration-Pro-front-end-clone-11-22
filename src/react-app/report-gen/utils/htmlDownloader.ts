@@ -1,10 +1,12 @@
 
+// Written with regex replaces rather than String.replaceAll: the app targets
+// ES2020 (tsconfig.app.json lib), where replaceAll does not exist.
 const escapeHtml = (value: string): string => value
-  .replaceAll('&', '&amp;')
-  .replaceAll('<', '&lt;')
-  .replaceAll('>', '&gt;')
-  .replaceAll('"', '&quot;')
-  .replaceAll("'", '&#039;');
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#039;');
 
 export const REPORT_COVER_PATH = '/images/emigration-pro-report-cover.jpg';
 

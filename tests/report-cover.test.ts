@@ -24,3 +24,15 @@ test('standalone report preserves its cover as the first report page', () => {
   assert.match(html, /\[data-report-cover\][^{]*\{[^}]*object-fit:\s*contain/s);
   assert.match(html, /@page\s*\{[^}]*size:\s*A4[^}]*margin:\s*0/s);
 });
+
+test('cover markup escapes the report title and cover source', () => {
+  const html = buildStandaloneReportHtml(
+    '<h1>Report</h1>',
+    'Report <b>City</b> & "Co".html',
+    'data:image/jpeg;base64,c&<>"',
+  );
+
+  assert.match(html, /<title>Report &lt;b&gt;City&lt;\/b&gt; &amp; &quot;Co&quot;<\/title>/);
+  assert.match(html, /data-report-cover src="data:image\/jpeg;base64,c&amp;&lt;&gt;&quot;"/);
+  assert.ok(!html.includes('<b>City</b>'));
+});

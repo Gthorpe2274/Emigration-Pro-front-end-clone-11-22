@@ -188,7 +188,9 @@ export default function AdminReportGen() {
           try {
             const text = await reportResponse.text();
             if (text && text.length < 500) errorMessage = text;
-          } catch (e2) {}
+          } catch (e2) {
+            // The response body was already consumed, so keep the status-based message.
+          }
         }
         throw new Error(errorMessage);
       }

@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 
 import { runScheduledCleanup } from './retention-cleanup';
 import { YouTubeAPIService } from './youtube-api-service';
@@ -372,7 +373,7 @@ async function submitIndexNow(urls: string[]): Promise<void> {
   }
 }
 
-function queueIndexNow(c: { executionCtx: ExecutionContext }, urls: string[]): void {
+function queueIndexNow(c: { executionCtx: { waitUntil(promise: Promise<unknown>): void } }, urls: string[]): void {
   c.executionCtx.waitUntil(submitIndexNow(urls));
 }
 
@@ -1053,7 +1054,7 @@ app.post('/api/admin/crm/purchasers/bulk', adminAuth, async (c) => {
     const body = await c.req.json();
     const action = body.action as unknown;
     const ids = Array.isArray(body.ids)
-      ? Array.from(new Set(body.ids.map(Number))).filter(id => Number.isInteger(id) && id > 0)
+      ? Array.from(new Set(body.ids.map(Number))).filter((id: number) => Number.isInteger(id) && id > 0)
       : [];
 
     if (!['archive', 'restore', 'delete'].includes(String(action))) {
@@ -1442,7 +1443,7 @@ const deleteBlogPost = async (c: any) => {
     }
     const existing = await c.env.DB.prepare(
       'SELECT slug, is_published FROM blog_posts WHERE id = ?'
-    ).bind(id).first<{ slug: string; is_published: number }>();
+    ).bind(id).first() as { slug: string; is_published: number } | null;
     if (!existing) {
       return c.json({ success: false, error: 'Post not found' }, 404);
     }
@@ -3906,10 +3907,13 @@ app.post("/api/perplexity", async (c) => {
 
       if (!response.ok) {
         const errorText = await response.text();
-        return c.json({ error: `Perplexity API Error: ${response.status}`, details: errorText }, response.status);
+        return c.json({ error: `Perplexity API Error: ${response.status}`, details: errorText }, response.status as ContentfulStatusCode);
       }
 
-      const data = await response.json();
+      const data = await response.json() as {
+        choices: { message: { content: string } }[];
+        citations?: string[];
+      };
       const rawText = data.choices[0].message.content;
       
       const candidateSources = (Array.isArray(data.citations) ? data.citations.slice(0, 30) : []).map((url: string) => {

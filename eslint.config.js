@@ -5,7 +5,18 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", "./worker-configuration.d.ts"] },
+  {
+    ignores: [
+      "dist",
+      "dist-worker",
+      ".netlify",
+      "./worker-configuration.d.ts",
+      // An unrelated Next.js project kept locally in the repo; its build output
+      // (hundreds of generated files) otherwise fails `npm run lint`.
+      "affiliate-security-fix/**",
+      "**/.next/**",
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
