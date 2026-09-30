@@ -9,6 +9,7 @@ import { runScheduledCleanup } from './retention-cleanup';
 import { YouTubeAPIService } from './youtube-api-service';
 import { findBestVideoReplacement } from './youtube-video-curator';
 import { convertMarkdownToHTML, convertPDFToHTML } from './file-converter';
+import { ClarityApiError, fetchClarityInsights, type ClarityDashboardData } from './clarity-analytics';
 import {
   IMMIGRATION_AUDIT_CRON,
   IMMIGRATION_SENSITIVE_CONCERN_IDS,
@@ -539,6 +540,61 @@ app.post('/api/admin/immigration-snapshots/:id/reject', adminAuth, async (c) => 
 // Admin-only frontend tools use this before unlocking privileged workflows.
 app.get('/api/admin/session', adminAuth, (c) => {
   return c.json({ authenticated: true });
+});
+
+type CachedClarityDashboard = {
+  syncedAt: string;
+  data: ClarityDashboardData;
+};
+
+const CLARITY_FRESH_CACHE_KEY = 'admin:clarity-dashboard:fresh:v1';
+const CLARITY_STALE_CACHE_KEY = 'admin:clarity-dashboard:stale:v1';
+const CLARITY_FRESH_TTL_SECONDS = 3 * 60 * 60;
+const CLARITY_STALE_TTL_SECONDS = 7 * 24 * 60 * 60;
+
+// Clarity permits only 10 export requests per project each day. Keep one
+// shared Worker-side snapshot for three hours, while retaining a longer-lived
+// fallback so a temporary Clarity outage never empties the admin dashboard.
+app.get('/api/admin/analytics/clarity', adminAuth, async (c) => {
+  c.header('Cache-Control', 'private, no-store');
+
+  const fresh = await c.env.REPORTS_KV.get<CachedClarityDashboard>(CLARITY_FRESH_CACHE_KEY, 'json');
+  if (fresh) {
+    return c.json({ ...fresh, source: 'clarity', cached: true, stale: false });
+  }
+
+  const stale = await c.env.REPORTS_KV.get<CachedClarityDashboard>(CLARITY_STALE_CACHE_KEY, 'json');
+  if (!c.env.CLARITY_API_TOKEN) {
+    if (stale) return c.json({ ...stale, source: 'clarity', cached: true, stale: true });
+    return c.json({
+      error: 'Clarity data export is not connected',
+      code: 'clarity_not_configured',
+    }, 503);
+  }
+
+  try {
+    const snapshot: CachedClarityDashboard = {
+      syncedAt: new Date().toISOString(),
+      data: await fetchClarityInsights(c.env.CLARITY_API_TOKEN),
+    };
+    const serialized = JSON.stringify(snapshot);
+    await Promise.all([
+      c.env.REPORTS_KV.put(CLARITY_FRESH_CACHE_KEY, serialized, { expirationTtl: CLARITY_FRESH_TTL_SECONDS }),
+      c.env.REPORTS_KV.put(CLARITY_STALE_CACHE_KEY, serialized, { expirationTtl: CLARITY_STALE_TTL_SECONDS }),
+    ]);
+    return c.json({ ...snapshot, source: 'clarity', cached: false, stale: false });
+  } catch (error) {
+    console.error('Clarity analytics refresh failed', error instanceof Error ? error.message : error);
+    if (stale) return c.json({ ...stale, source: 'clarity', cached: true, stale: true });
+
+    const status = error instanceof ClarityApiError ? error.status : 502;
+    const message = status === 401 || status === 403
+      ? 'The Clarity data export connection needs to be renewed'
+      : status === 429
+        ? 'Clarity has reached its daily export limit. Try again later.'
+        : 'Clarity data is temporarily unavailable';
+    return c.json({ error: message, code: 'clarity_unavailable' }, status === 429 ? 429 : 502);
+  }
 });
 
 // Assessment submission schema - aligned with shared types
@@ -4006,11 +4062,26 @@ app.get('*', async (c) => {
           `).bind(slug).first();
           
           if (post) {
+            const socialImage = (() => {
+              const value = post.featured_image as string | undefined;
+              if (!value) return undefined;
+              try {
+                const imageUrl = new URL(value, SITE_ORIGIN);
+                if (imageUrl.hostname === 'images.unsplash.com') {
+                  imageUrl.searchParams.set('w', '1200');
+                  imageUrl.searchParams.set('h', '630');
+                  imageUrl.searchParams.set('fit', 'crop');
+                }
+                return imageUrl.toString();
+              } catch {
+                return value;
+              }
+            })();
             const jsonLd = {
               "@context": "https://schema.org",
               "@type": "Article",
               "headline": post.title,
-              "image": [post.featured_image || "https://mocha-cdn.com/og.png"],
+              "image": [socialImage || "https://emigrationpro.com/og/home.jpg"],
               "datePublished": post.published_date,
               "dateModified": post.updated_at || post.published_date,
               "author": [{
@@ -4049,12 +4120,12 @@ app.get('*', async (c) => {
               });
             }
 
-            if (post.featured_image) {
+            if (socialImage) {
               rewriter.on('meta[property="og:image"]', {
-                element(e) { e.setAttribute('content', post.featured_image as string); }
+                element(e) { e.setAttribute('content', socialImage); }
               })
               .on('meta[property="twitter:image"]', {
-                element(e) { e.setAttribute('content', post.featured_image as string); }
+                element(e) { e.setAttribute('content', socialImage); }
               });
             }
 

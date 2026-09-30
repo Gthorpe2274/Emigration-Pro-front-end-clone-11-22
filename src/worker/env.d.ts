@@ -15,6 +15,8 @@ interface Env {
   RESEND_API_KEY?: string;
   YOUTUBE_API_KEY?: string;
   UNSPLASH_ACCESS_KEY?: string;
+  // Microsoft Clarity Settings > Data Export token. Server-side only.
+  CLARITY_API_TOKEN?: string;
   ADMIN_USERNAME: string;
   ADMIN_PASSWORD: string;
   // Affiliate system (Supabase) — set via wrangler secret put

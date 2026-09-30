@@ -49,6 +49,21 @@ function schemaDate(value?: string): string | undefined {
   return /(?:Z|[+-]\d{2}:?\d{2})$/.test(value) ? value : `${value}Z`;
 }
 
+function socialImageUrl(value?: string): string | undefined {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value, 'https://emigrationpro.com');
+    if (url.hostname === 'images.unsplash.com') {
+      url.searchParams.set('w', '1200');
+      url.searchParams.set('h', '630');
+      url.searchParams.set('fit', 'crop');
+    }
+    return url.toString();
+  } catch {
+    return value;
+  }
+}
+
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const [post, setPost] = useState<BlogPostType | null>(null);
@@ -73,7 +88,7 @@ export default function BlogPost() {
     // on a post opening with markup left a description of a few stray words.
     description: post ? summarize(post.excerpt, post.body) : undefined,
     canonicalPath: slug ? `/blog/${slug}` : undefined,
-    image: post?.featured_image,
+    image: socialImageUrl(post?.featured_image),
     type: 'article',
     // A bad slug renders the error state; don't let that be indexed.
     noindex: !loading && !post,
@@ -84,7 +99,7 @@ export default function BlogPost() {
             '@type': 'BlogPosting',
             headline: post.title,
             description: summarize(post.excerpt, post.body),
-            image: post.featured_image ? [post.featured_image] : undefined,
+            image: post.featured_image ? [socialImageUrl(post.featured_image)] : undefined,
             datePublished: schemaDate(post.published_date),
             dateModified: schemaDate(post.updated_at || post.published_date),
             author: {

@@ -19,3 +19,5 @@
 - Build sales messaging around the funnel: free assessment → personalized proof → free Hub → professional report.
 - Lead with the complete stack: personalized assessment and result, city-level intelligence, on-demand report, 14 sections, timeline, and Relocation Hub assets.
 - Position the report as personalized and available on demand with no wait.
+- Use `EmrPro Staff` as the author for all blog posts unless the user specifies another byline.
+- Include a relevant featured image with every blog post unless the user explicitly requests otherwise.
