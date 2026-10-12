@@ -227,7 +227,7 @@ const ReportPreview: React.FC<ReportPreviewProps> = ({ reportData, userInput, on
                 <div className="mt-20 pt-10 border-t border-slate-200">
                     <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 text-[10px] leading-relaxed text-slate-600 text-justify italic font-medium">
                         <p className="font-black text-slate-950 mb-2 uppercase tracking-widest">Legal Disclaimer</p>
-                        This report has been generated with AI assistance. It is for informational purposes only and does not constitute professional advice. Emigration Pro assumes no liability for reliance on this information.
+                        This report is for informational purposes only and does not constitute professional advice. Emigration Pro assumes no liability for reliance on this information.
                     </div>
                 </div>
             </div>

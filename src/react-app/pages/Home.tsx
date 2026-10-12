@@ -115,7 +115,7 @@ export default function Home() {
               For U.S. citizens planning to relocate
             </div>
             <h1 className="font-brand-serif font-medium text-5xl md:text-6xl leading-[1.05] tracking-tight text-brand-ink mb-6">
-              A serious plan for<br />
+              Find the Country and City that Suits You.<br />
               <span className="italic text-brand-ink-2">How to Leave the U.S.</span>
             </h1>
             <p className="text-lg leading-relaxed text-brand-accent font-bold max-w-xl mb-10">
