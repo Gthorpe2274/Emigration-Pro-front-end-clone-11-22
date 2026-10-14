@@ -40,6 +40,12 @@ import LowCostQuickEntry from './pages/LowCostQuickEntry';
 import SystemLogin from './pages/SystemLogin';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import ClarityAnalytics from './components/ClarityAnalytics';
+import {
+  BestCountriesGuide,
+  DigitalNomadVisaCountriesGuide,
+  MoveOutOfUnitedStatesGuide,
+  MovingToEuropeGuide,
+} from './pages/SeoGuides';
 
 function App() {
   return (
@@ -54,6 +60,10 @@ function App() {
         <Route path="/relocation-hub/:id" element={<NoIndex title="Relocation Hub"><RelocationHub /></NoIndex>} />
         <Route path="/best-countries" element={<LowCostQuickEntry />} />
         <Route path="/low-cost-quick-entry-countries" element={<Navigate to="/best-countries" replace />} />
+        <Route path="/best-countries-for-americans-to-move-to" element={<BestCountriesGuide />} />
+        <Route path="/how-to-move-out-of-the-united-states" element={<MoveOutOfUnitedStatesGuide />} />
+        <Route path="/moving-to-europe-from-usa" element={<MovingToEuropeGuide />} />
+        <Route path="/digital-nomad-visa-countries" element={<DigitalNomadVisaCountriesGuide />} />
         <Route path="/city/:country/:city" element={<CityDetails />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/sample-report" element={<SampleReport />} />

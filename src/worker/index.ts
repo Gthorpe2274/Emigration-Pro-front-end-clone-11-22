@@ -3542,6 +3542,30 @@ app.get('/sitemap.xml', async (c) => {
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>${baseUrl}/best-countries-for-americans-to-move-to</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/how-to-move-out-of-the-united-states</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/moving-to-europe-from-usa</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/digital-nomad-visa-countries</loc>
+    <lastmod>2026-10-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>${baseUrl}/sample-report</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

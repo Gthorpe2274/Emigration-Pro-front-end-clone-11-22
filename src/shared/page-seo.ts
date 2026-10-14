@@ -43,6 +43,11 @@ export const KEY_PAGES: { href: string; label: string; blurb: string }[] = [
     blurb: 'See which countries fit your budget, profession and family situation.',
   },
   {
+    href: '/best-countries-for-americans-to-move-to',
+    label: 'Compare the best countries for Americans to move to',
+    blurb: 'Build a realistic shortlist around residency, budget, healthcare, work and family needs.',
+  },
+  {
     href: '/best-countries',
     label: 'Leave now: compare low-cost countries with quick entry',
     blurb: 'Six practical destinations with simple initial entry for U.S. passport holders.',
@@ -66,13 +71,13 @@ export const KEY_PAGES: { href: string; label: string; blurb: string }[] = [
 
 export const PAGE_SEO: Record<string, PageSEO> = {
   '/': {
-    title: 'Emigration Pro — Plan Your Move Abroad from the U.S.',
+    title: 'Moving Abroad from the U.S. | Emigration Pro',
     standaloneTitle: true,
     image: '/og/home.jpg',
     imageAlt: 'A serious plan for leaving the U.S. — Emigration Pro',
     description:
-      'Plan your move abroad from the U.S. Take the free country-match assessment, then get a personalized report on visas, cost of living, healthcare and taxes.',
-    heading: 'Plan your move abroad from the United States',
+      'Moving abroad from the U.S.? Compare destinations with a free country-match assessment and get a personalized plan covering visas, costs and healthcare.',
+    heading: 'Moving abroad from the U.S.? Find the country and city that fit you',
     summary: [
       'Emigration Pro helps U.S. citizens work out where they could realistically move and what it would actually take. A free structured assessment matches your budget, profession, age, family situation and healthcare needs against destination countries.',
       'The personalized relocation report researches one destination city across 14 categories: U.S. departure and visa steps, employment, relocation timeline, healthcare, cost of living, political stability and security, environmental and water quality, digital connectivity, infrastructure and power, mobility, culture, recreation, retirement benefits, and children\'s education.',
@@ -104,6 +109,67 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     links: [
       { href: '/assessment', label: 'Match countries to your budget and priorities' },
       { href: '/moving-abroad-glossary', label: 'Understand visa and residency terms' },
+    ],
+  },
+  '/best-countries-for-americans-to-move-to': {
+    title: 'Best Countries for Americans to Move To in 2026',
+    description:
+      'Compare the best countries for Americans to move to by residency options, budget, healthcare, safety, work, family needs and expat lifestyle.',
+    heading: 'Best countries for Americans to move to',
+    summary: [
+      'The best destination depends on lawful residence options, budget, work, family, healthcare and preferred lifestyle. This guide helps Americans build a practical shortlist before comparing individual cities.',
+      'It compares the questions that matter across popular expat destinations: residence and work rights, housing, healthcare, safety, infrastructure, schools, taxes and distance from the United States.',
+      'Country rankings are a starting point, not immigration advice. Requirements and conditions change, so readers should confirm official sources before applying, booking or moving.',
+    ],
+    links: [
+      { href: '/assessment', label: 'Match countries to your circumstances' },
+      { href: '/best-countries', label: 'Compare low-cost quick-entry destinations' },
+      { href: '/moving-to-europe-from-usa', label: 'Explore moving to Europe from the USA' },
+    ],
+  },
+  '/how-to-move-out-of-the-united-states': {
+    title: 'How to Move Out of the United States: Step-by-Step Guide',
+    description:
+      'Learn how to move out of the United States: choose a country, identify a visa, budget, prepare documents and address U.S. tax and departure tasks.',
+    heading: 'How to move out of the United States',
+    summary: [
+      'A step-by-step guide to organizing an international move, from choosing a viable destination and legal pathway through budgeting, documents, U.S. obligations and arrival tasks.',
+      'The guide explains why visitor entry is different from residence or work permission and why Americans should review federal tax filing, state residency, healthcare, banking, voting and Social Security separately.',
+    ],
+    links: [
+      { href: '/assessment', label: 'Start with the country-match assessment' },
+      { href: '/moving-abroad-glossary', label: 'Understand moving-abroad terminology' },
+      { href: '/sample-report', label: 'Preview a city-level relocation report' },
+    ],
+  },
+  '/moving-to-europe-from-usa': {
+    title: 'Moving to Europe from USA: Countries, Visas and Costs',
+    description:
+      'Plan a move to Europe from the USA by comparing national residence routes, work rights, healthcare, costs, taxes and practical city-level tradeoffs.',
+    heading: 'Moving to Europe from USA: countries, visas and costs',
+    summary: [
+      'Moving to Europe requires a country-specific residence plan. Each country sets its own requirements for employment, remote work, retirement, study, investment and family-based stays.',
+      'This guide shows Americans how to compare eligibility, work rights, dependants, healthcare, housing, tax residence and renewal rules before narrowing the decision to individual cities.',
+    ],
+    links: [
+      { href: '/best-countries-for-americans-to-move-to', label: 'Compare a broader country shortlist' },
+      { href: '/assessment', label: 'Match European destinations to your priorities' },
+      { href: '/how-to-move-out-of-the-united-states', label: 'Organize the U.S. departure steps' },
+    ],
+  },
+  '/digital-nomad-visa-countries': {
+    title: 'Digital Nomad Visa Countries for Americans in 2026',
+    description:
+      'Compare digital nomad visa countries by eligibility, income evidence, duration, dependants, work limits, healthcare and possible tax residence.',
+    heading: 'Digital nomad visa countries for Americans',
+    summary: [
+      'A practical framework for comparing remote-work residence programs by eligibility, income evidence, duration, dependants, insurance, work restrictions and potential tax residence.',
+      'Program rules change. Readers should confirm every requirement with the responsible national authority and obtain individualized cross-border tax advice before relying on a program.',
+    ],
+    links: [
+      { href: '/earn-abroad', label: 'Plan how to earn abroad' },
+      { href: '/moving-to-europe-from-usa', label: 'Explore European residence options' },
+      { href: '/assessment', label: 'Find countries that fit your work and budget' },
     ],
   },
   '/sample-report': {
@@ -199,10 +265,10 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     ],
   },
   '/blog': {
-    title: 'Relocation Guides & Visa News for American Expats',
+    title: 'Relocation Guides for Americans Moving Abroad',
     description:
       'Guides on visa requirements, cost of living, healthcare and the practical logistics of moving abroad, written for U.S. citizens planning a relocation.',
-    heading: 'Relocation guides and visa news for American expats',
+    heading: 'Relocation guides for Americans moving abroad',
     summary: [
       'Guides on visa requirements, cost of living, healthcare systems and the practical logistics of moving abroad, written for U.S. citizens planning a relocation.',
     ],

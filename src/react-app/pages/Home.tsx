@@ -115,11 +115,11 @@ export default function Home() {
               For U.S. citizens planning to relocate
             </div>
             <h1 className="font-brand-serif font-medium text-5xl md:text-6xl leading-[1.05] tracking-tight text-brand-ink mb-6">
-              Find the Country and City that Suits You.<br />
-              <span className="italic text-brand-ink-2">How to Leave the U.S.</span>
+              Moving Abroad from the U.S.?<br />
+              <span className="italic text-brand-ink-2">Find the Country and City That Fit You.</span>
             </h1>
-            <p className="text-lg leading-relaxed text-brand-accent font-bold max-w-xl mb-10">
-              Here you will find the best places for you to move to and support yourself when there.
+            <p className="text-lg leading-relaxed text-brand-muted max-w-xl mb-8">
+              Emigration Pro helps Americans planning a move abroad compare realistic destinations based on their budget, profession, family, healthcare needs, and priorities.
             </p>
             <div className="flex flex-wrap items-center gap-4 mb-8">
               <div className="flex flex-col gap-1.5 items-center">
@@ -132,6 +132,13 @@ export default function Home() {
                 </Link>
                 <span className="text-[13px] text-brand-muted font-medium">Find the City that suits you best.</span>
               </div>
+              <Link
+                to="/best-countries-for-americans-to-move-to"
+                className="inline-flex items-center gap-2 px-2 py-3 text-sm font-semibold text-brand-ink-2 hover:text-brand-accent transition-colors"
+              >
+                Compare the best countries for Americans to move to
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
             <div className="flex flex-wrap items-center gap-6 text-sm text-brand-muted">
               <span className="inline-flex items-center gap-1.5"><span className="text-brand-accent font-bold">&#10003;</span> No credit card</span>

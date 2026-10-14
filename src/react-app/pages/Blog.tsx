@@ -117,13 +117,13 @@ export default function Blog() {
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-surface border border-brand-border rounded-full text-xs font-semibold text-brand-ink-2 uppercase tracking-wide mb-7">
               <span className="w-1.5 h-1.5 bg-brand-accent rounded-full" />
-              Latest Articles
+              Practical research
             </div>
             <h1 className="font-brand-serif font-medium text-5xl md:text-6xl leading-[1.05] tracking-tight text-brand-ink mb-6">
-              Emigration Insights & Resources
+              Relocation Guides for Americans Moving Abroad
             </h1>
             <p className="text-lg leading-relaxed text-brand-muted max-w-2xl mx-auto mb-10">
-              Expert advice, destination guides, and relocation tips for your journey abroad.
+              Visa, cost-of-living, healthcare, destination, and moving guidance for U.S. citizens planning life abroad.
             </p>
 
             <button
@@ -142,7 +142,7 @@ export default function Blog() {
             </div>
           ) : posts.length === 0 ? (
             <div className="text-center py-16 bg-brand-surface border border-brand-border rounded-xl">
-              <p className="text-brand-muted text-lg">No blog posts available yet. Check back soon!</p>
+              <p className="text-brand-muted text-lg">No relocation guides are available yet. Check back soon!</p>
             </div>
           ) : (
             <div className="space-y-8">

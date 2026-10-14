@@ -102,8 +102,28 @@ export default function Footer() {
             <h3 className="text-white text-lg font-semibold mb-4 font-brand-serif">Resources</h3>
             <ul className="space-y-3">
               <li>
+                <Link to="/blog" className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm">
+                  Relocation Guides
+                </Link>
+              </li>
+              <li>
+                <Link to="/best-countries-for-americans-to-move-to" className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm">
+                  Best Countries
+                </Link>
+              </li>
+              <li>
                 <Link to="/moving-abroad-glossary" className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm">
                   Moving Abroad Glossary
+                </Link>
+              </li>
+              <li>
+                <Link to="/sample-report" className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm">
+                  Sample Report
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="text-gray-300 hover:text-brand-accent-2 transition-colors text-sm">
+                  About Us
                 </Link>
               </li>
               <li className="relative">

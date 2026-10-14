@@ -18,7 +18,11 @@ retirees, remote workers and self-employed people.
 
 - [Home](https://emigrationpro.com/): What the service does and how the assessment and report fit together.
 - [Country-match assessment](https://emigrationpro.com/assessment): Free structured questionnaire covering budget, profession, age, family situation, climate and lifestyle preferences; returns matching destination countries.
+- [Best countries for Americans to move to](https://emigrationpro.com/best-countries-for-americans-to-move-to): A practical comparison framework covering residence options, budget, healthcare, work, family needs and expat lifestyle.
 - [Leave Now — low-cost countries with quick entry](https://emigrationpro.com/best-countries): Albania, Georgia, Mexico, Colombia, Ecuador and Thailand compared by initial entry window, budget fit and legal limits; reviewed September 7, 2026.
+- [How to move out of the United States](https://emigrationpro.com/how-to-move-out-of-the-united-states): Step-by-step guide to choosing a destination, identifying a lawful pathway, budgeting and organizing U.S. departure obligations.
+- [Moving to Europe from USA](https://emigrationpro.com/moving-to-europe-from-usa): Comparison framework for European residence routes, work rights, healthcare, costs, taxes and city-level decisions.
+- [Digital nomad visa countries](https://emigrationpro.com/digital-nomad-visa-countries): Guide to comparing remote-work residence programs by eligibility, evidence, duration, dependants, work limits and potential tax residence.
 - [Sample relocation report](https://emigrationpro.com/sample-report): Partial example of the personalized report, showing the depth and section structure.
 - [About](https://emigrationpro.com/about): Who runs Emigration Pro and how the research is produced.
 - [Moving abroad glossary](https://emigrationpro.com/moving-abroad-glossary): Plain-English definitions of 25 visa, residency, document, U.S. tax, healthcare and arrival terms, with practical examples and public-source links.
@@ -53,7 +57,7 @@ identify source links so readers can verify time-sensitive facts.
 
 ## Editorial
 
-- [Blog](https://emigrationpro.com/blog): Articles on visa requirements, cost of living, healthcare and country-specific relocation logistics.
+- [Relocation guides](https://emigrationpro.com/blog): Articles on visa requirements, cost of living, healthcare and country-specific relocation logistics.
 
 ## Optional
 

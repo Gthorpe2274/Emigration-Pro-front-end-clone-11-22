@@ -1,99 +1,138 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, Menu, X } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
-const NAV_LINKS = [
+const PRIMARY_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/assessment', label: 'Assessment' },
+  { to: '/best-countries-for-americans-to-move-to', label: 'Best Countries' },
   { to: '/best-countries', label: 'Leave Now' },
   { to: '/earn-abroad', label: 'Earn Abroad' },
-  { to: '/sample-report', label: 'Sample Report' },
-  { to: '/blog', label: 'Blog' },
-  { to: '/moving-abroad-glossary', label: 'Glossary' },
-  { to: '/about', label: 'About Us' },
+];
+
+const RESOURCE_LINKS = [
+  { to: '/blog', label: 'Relocation Guides', description: 'Visa, cost, healthcare and moving guidance' },
+  { to: '/moving-abroad-glossary', label: 'Moving Abroad Glossary', description: 'Plain-English relocation terminology' },
+  { to: '/sample-report', label: 'Sample Report', description: 'Preview the personalized research' },
+  { to: '/about', label: 'About Us', description: 'Methodology, scope and credentials' },
 ];
 
 export default function Navigation() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isResourcesOpen, setIsResourcesOpen] = useState(false);
+  const resourcesRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    setIsMobileOpen(false);
+    setIsResourcesOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      if (resourcesRef.current && !resourcesRef.current.contains(event.target as Node)) {
+        setIsResourcesOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsResourcesOpen(false);
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  const resourcesActive = RESOURCE_LINKS.some(({ to }) => location.pathname === to || location.pathname.startsWith(`${to}/`));
+  const linkClass = (active: boolean) =>
+    `rounded-md px-2.5 py-2 text-sm font-medium transition-colors ${
+      active ? 'bg-brand-surface text-brand-ink' : 'text-brand-muted hover:bg-brand-surface hover:text-brand-accent'
+    }`;
 
   return (
-    <header className="sticky top-0 z-50 bg-brand-bg border-b border-brand-border font-brand-sans">
+    <header className="sticky top-0 z-50 border-b border-brand-border bg-brand-bg font-brand-sans">
       <div className="container mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between gap-6 py-3">
-          {/* Logo */}
-          <Link to="/" className="flex items-center shrink-0" onClick={() => setIsMenuOpen(false)}>
-            <div className="relative inline-flex">
-              <img
-                src="/images/logo-full.png"
-                alt="Emigration Pro"
-                className="h-11 w-auto"
-              />
-              <span
-                aria-hidden="true"
-                className="absolute -right-2 bottom-0 text-[9px] font-bold leading-none text-brand-ink"
-              >
-                &trade;
-              </span>
-            </div>
+        <div className="flex items-center justify-between gap-5 py-3">
+          <Link to="/" className="relative inline-flex shrink-0" onClick={() => setIsMobileOpen(false)}>
+            <img src="/images/logo-full.png" alt="Emigration Pro" className="h-11 w-auto" />
+            <span aria-hidden="true" className="absolute -right-2 bottom-0 text-[9px] font-bold leading-none text-brand-ink">&trade;</span>
           </Link>
 
-          {/* Navigation Menu */}
-          <nav className="hidden md:flex md:items-center md:gap-5 text-sm font-medium">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="text-brand-muted hover:text-brand-accent transition-colors"
-              >
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
+            {PRIMARY_LINKS.map((link) => (
+              <Link key={link.to} to={link.to} className={linkClass(location.pathname === link.to)}>
                 {link.label}
               </Link>
             ))}
+
+            <div ref={resourcesRef} className="relative">
+              <button
+                type="button"
+                className={`${linkClass(resourcesActive)} inline-flex items-center gap-1`}
+                aria-expanded={isResourcesOpen}
+                aria-controls="resources-menu"
+                onClick={() => setIsResourcesOpen((open) => !open)}
+              >
+                Resources
+                <ChevronDown className={`h-4 w-4 transition-transform ${isResourcesOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+              </button>
+
+              {isResourcesOpen && (
+                <div id="resources-menu" className="absolute right-0 mt-2 w-72 rounded-xl border border-brand-border bg-brand-bg p-2 shadow-xl">
+                  {RESOURCE_LINKS.map((link) => (
+                    <Link key={link.to} to={link.to} className="block rounded-lg px-4 py-3 hover:bg-brand-surface">
+                      <span className="block text-sm font-semibold text-brand-ink">{link.label}</span>
+                      <span className="mt-1 block text-xs leading-relaxed text-brand-muted">{link.description}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </nav>
 
-          {/* CTA */}
-          <Link
-            to="/assessment"
-            className="hidden md:inline-flex shrink-0 items-center gap-2 px-5 py-2.5 bg-brand-btn text-brand-btn-ink rounded-full text-sm font-semibold hover:bg-brand-ink-2 transition-colors"
-          >
-            Free assessment
-          </Link>
-
-          {/* Hamburger toggle (mobile only) */}
           <button
             type="button"
-            className="md:hidden shrink-0 inline-flex items-center justify-center p-2 rounded-md text-brand-ink hover:text-brand-accent transition-colors"
-            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={isMenuOpen}
+            className="inline-flex shrink-0 items-center justify-center rounded-md p-2 text-brand-ink transition-colors hover:bg-brand-surface hover:text-brand-accent lg:hidden"
+            aria-label={isMobileOpen ? 'Close navigation' : 'Open navigation'}
+            aria-expanded={isMobileOpen}
             aria-controls="mobile-nav-menu"
-            onClick={() => setIsMenuOpen((open) => !open)}
+            onClick={() => setIsMobileOpen((open) => !open)}
           >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {isMobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
 
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <nav
-            id="mobile-nav-menu"
-            className="md:hidden flex flex-col gap-1 pb-4 text-sm font-medium border-t border-brand-border pt-3"
-          >
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="px-2 py-2.5 rounded-md text-brand-muted hover:text-brand-accent hover:bg-brand-border/30 transition-colors"
-                onClick={() => setIsMenuOpen(false)}
+        {isMobileOpen && (
+          <nav id="mobile-nav-menu" className="border-t border-brand-border pb-4 pt-3 lg:hidden" aria-label="Mobile navigation">
+            <div className="flex flex-col gap-1">
+              {PRIMARY_LINKS.map((link) => (
+                <Link key={link.to} to={link.to} className={linkClass(location.pathname === link.to)}>
+                  {link.label}
+                </Link>
+              ))}
+              <button
+                type="button"
+                className={`${linkClass(resourcesActive)} flex w-full items-center justify-between text-left`}
+                aria-expanded={isResourcesOpen}
+                aria-controls="mobile-resources-menu"
+                onClick={() => setIsResourcesOpen((open) => !open)}
               >
-                {link.label}
-              </Link>
-            ))}
-            <Link
-              to="/assessment"
-              className="mt-2 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-brand-btn text-brand-btn-ink rounded-full text-sm font-semibold hover:bg-brand-ink-2 transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Free assessment
-            </Link>
+                Resources
+                <ChevronDown className={`h-4 w-4 transition-transform ${isResourcesOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+              </button>
+              {isResourcesOpen && (
+                <div id="mobile-resources-menu" className="ml-3 border-l border-brand-border pl-3">
+                  {RESOURCE_LINKS.map((link) => (
+                    <Link key={link.to} to={link.to} className="block rounded-md px-3 py-2.5 text-sm text-brand-muted hover:bg-brand-surface hover:text-brand-accent">
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </nav>
         )}
       </div>
