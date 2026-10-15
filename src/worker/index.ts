@@ -11,6 +11,12 @@ import { findBestVideoReplacement } from './youtube-video-curator';
 import { convertMarkdownToHTML, convertPDFToHTML } from './file-converter';
 import { ClarityApiError, fetchClarityInsights, type ClarityDashboardData } from './clarity-analytics';
 import {
+  keepReferencedSources,
+  normalizeCitationUrl,
+  reconcileCitationMarkers,
+  type IndexedReportSource,
+} from './citation-mapping';
+import {
   IMMIGRATION_AUDIT_CRON,
   IMMIGRATION_SENSITIVE_CONCERN_IDS,
   ImmigrationSnapshotUnavailableError,
@@ -3874,8 +3880,8 @@ const checkCitationHealth = async (url: string, cache: KVNamespace): Promise<Lin
   return result;
 };
 
-const filterReachableSources = async (sources: ReportSource[], cache: KVNamespace): Promise<ReportSource[]> => {
-  const results: Array<ReportSource | null> = new Array(sources.length).fill(null);
+const filterReachableSources = async <T extends ReportSource>(sources: T[], cache: KVNamespace): Promise<T[]> => {
+  const results: Array<T | null> = new Array(sources.length).fill(null);
   let cursor = 0;
 
   const worker = async () => {
@@ -3888,7 +3894,7 @@ const filterReachableSources = async (sources: ReportSource[], cache: KVNamespac
   };
 
   await Promise.all(Array.from({ length: Math.min(LINK_CHECK_CONCURRENCY, sources.length) }, worker));
-  return results.filter((source): source is ReportSource => source !== null);
+  return results.filter((source): source is T => source !== null);
 };
 
 app.post("/api/perplexity", async (c) => {
@@ -3936,6 +3942,7 @@ app.post("/api/perplexity", async (c) => {
           3. TIER 3 — LAST RESORT, VIDEO PLATFORMS ONLY (YouTube, TikTok): use a video source only when no Tier 1 or Tier 2 source covers that specific fact, and only for firsthand/hyper-local detail (e.g., what a specific neighborhood or office actually looks like) rather than for legal, regulatory, tax, eligibility, or statistical claims. Whenever a video source is used, say explicitly in the text that this information is not otherwise independently verifiable and should be confirmed with the video's producer (or the relevant official body) before the customer acts on it.
           4. FORBIDDEN AS EVIDENCE (ALL OTHER SOCIAL/FORUM/CROWD SOURCES): social media posts (Reddit, Facebook, Instagram, X/Twitter, Pinterest), forums (expat forums, city-data, Quora), crowd-edited travel sites (Wikivoyage, TripAdvisor), and unverified personal blogs. NEVER cite these for any claim, and do not use them to fill a gap when no Tier 1/Tier 2 source exists — instead state that verifiable data was not found and tell the customer how to confirm it directly with the relevant official body.
         - Give the source organization and publication/effective date next to every material statistic, price, eligibility rule, processing time, schedule, and safety claim.
+        - Cite each material factual claim inline with the provider's citation marker (for example [1]). Cite only a page that directly supports that claim; do not cite a search result merely because it is topically similar.
         - For rapidly changing facts, prefer evidence from the last 24 months and explicitly identify older evidence.
         - Distinguish city-specific, regional, and national information. Never present national averages as city facts without labeling the limitation.
         - Never fabricate rankings, prices, processing times, program eligibility, addresses, operating status, or numerical scores. If reliable information is unavailable or conflicting, say so and explain how the customer should verify it.
@@ -3993,21 +4000,32 @@ app.post("/api/perplexity", async (c) => {
       const data = await response.json() as {
         choices: { message: { content: string } }[];
         citations?: string[];
+        search_results?: { title?: string; url?: string; date?: string; last_updated?: string; snippet?: string }[];
       };
       const rawText = data.choices[0].message.content;
-      
-      const candidateSources = (Array.isArray(data.citations) ? data.citations.slice(0, 30) : []).map((url: string) => {
+
+      const citations = Array.isArray(data.citations) ? data.citations.slice(0, 30) : [];
+      const searchResultTitles = new Map(
+        (Array.isArray(data.search_results) ? data.search_results : [])
+          .filter(result => typeof result.url === 'string' && typeof result.title === 'string' && result.title.trim())
+          .map(result => [normalizeCitationUrl(result.url!), result.title!.trim()]),
+      );
+
+      const unfilteredSources: IndexedReportSource[] = citations.map((url: string, index: number) => {
         try {
             const domain = new URL(url).hostname.replace('www.', '');
-            // Keep the title as a plain domain so the UI's single-line,
-            // truncated source chip still displays cleanly; the video caveat
-            // is surfaced separately via isVideo so the frontend can show a
-            // badge/note instead of silently truncating a long sentence.
-            return { title: domain, uri: url, isVideo: isVideoPlatformSource(domain) };
+            return {
+              title: searchResultTitles.get(normalizeCitationUrl(url)) || domain,
+              uri: url,
+              isVideo: isVideoPlatformSource(domain),
+              citationIndex: index + 1,
+            };
         } catch {
-            return { title: 'Source', uri: url };
+            return { title: 'Source', uri: url, citationIndex: index + 1 };
         }
-      })
+      });
+
+      const candidateSources = keepReferencedSources(rawText, unfilteredSources)
         // Defense-in-depth: even though search_domain_filter steers Perplexity's
         // own retrieval away from weak sources, strip any that slip through
         // (or that the model cites from memory) before they reach the report.
@@ -4031,14 +4049,17 @@ app.post("/api/perplexity", async (c) => {
             return false;
           }
         })
-        .filter((s: any, i: number, a: any[]) => a.findIndex(t => t.uri === s.uri) === i);
+        .filter((s: IndexedReportSource, i: number, a: IndexedReportSource[]) => a.findIndex(t => t.uri === s.uri) === i);
 
       const sources = await filterReachableSources(candidateSources, c.env.REPORTS_KV);
       if (sources.length !== candidateSources.length) {
         console.log(`Removed ${candidateSources.length - sources.length} confirmed broken or unsafe citation(s) from ${concern.id}`);
       }
 
-      return c.json({ content: rawText, sources }, 200);
+      const content = reconcileCitationMarkers(rawText, sources, citations.length);
+      const publicSources: ReportSource[] = sources.map(({ citationIndex: _citationIndex, ...source }) => source);
+
+      return c.json({ content, sources: publicSources }, 200);
     }
 
     return c.json({ error: 'Invalid action' }, 400);

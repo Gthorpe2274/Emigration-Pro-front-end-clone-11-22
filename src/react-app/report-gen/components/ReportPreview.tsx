@@ -17,14 +17,9 @@ const cleanAndTruncateUrl = (url: string, maxLength: number = 75): string => {
     return cleanUrl.length > maxLength ? cleanUrl.substring(0, maxLength) + '...' : cleanUrl;
 };
 
-const toTitleCase = (str: string): string => {
-    if (!str) return '';
-    return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase());
-};
-
 const getSourceWebsiteName = (source: { title: string; uri: string }): string => {
     if (source.title && source.title.trim().length > 0) {
-        return toTitleCase(source.title.trim());
+        return source.title.trim();
     }
 
     try {
@@ -71,7 +66,7 @@ const ReportSection: React.FC<{ section: ReportSectionData; index: number; total
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
-                <p className="text-slate-900 font-bold text-xs truncate">{getSourceWebsiteName(source)}</p>
+                <p className="text-slate-900 font-bold text-xs line-clamp-2" title={source.uri}>{getSourceWebsiteName(source)}</p>
                 {source.isVideo && (
                   <span className="text-[9px] uppercase tracking-[0.1em] text-amber-700 bg-amber-100 border border-amber-300 font-black px-1.5 py-0.5 rounded shrink-0">Video</span>
                 )}
