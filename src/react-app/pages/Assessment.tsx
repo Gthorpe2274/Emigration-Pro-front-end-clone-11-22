@@ -422,10 +422,10 @@ export default function Assessment() {
           </Link>
         </div>
 
-        {/* Step 1: Personal Information */}
+        {/* Step 1: Your Criteria */}
         {currentStep === 1 && (
           <div className="bg-brand-bg p-8 rounded-2xl border border-brand-border">
-            <h2 className="font-brand-serif text-3xl font-medium text-brand-ink mb-6">Personal information</h2>
+            <h2 className="font-brand-serif text-3xl font-medium text-brand-ink mb-6">Your Criteria</h2>
 
             <div className="space-y-6">
               <div>

@@ -11,10 +11,10 @@ const PRIMARY_LINKS = [
 ];
 
 const RESOURCE_LINKS = [
-  { to: '/blog', label: 'Relocation Guides', description: 'Visa, cost, healthcare and moving guidance' },
+  { to: '/blog', href: 'https://emigrationpro.com/blog', label: 'Relocation Guides', description: 'Visa, cost, healthcare and moving guidance' },
   { to: '/moving-abroad-glossary', label: 'Moving Abroad Glossary', description: 'Plain-English relocation terminology' },
-  { to: '/sample-report', label: 'Sample Report', description: 'Preview the personalized research' },
-  { to: '/about', label: 'About Us', description: 'Methodology, scope and credentials' },
+  { to: '/sample-report', href: 'https://emigrationpro.com/sample-report', label: 'Sample Report', description: 'Preview the personalized research' },
+  { to: '/about', href: 'https://emigrationpro.com/about', label: 'About Us', description: 'Methodology, scope and credentials' },
 ];
 
 export default function Navigation() {
@@ -83,7 +83,10 @@ export default function Navigation() {
               {isResourcesOpen && (
                 <div id="resources-menu" className="absolute right-0 mt-2 w-72 rounded-xl border border-brand-border bg-brand-bg p-2 shadow-xl">
                   {RESOURCE_LINKS.map((link) => (
-                    <Link key={link.to} to={link.to} className="block rounded-lg px-4 py-3 hover:bg-brand-surface">
+                    link.href ? <a key={link.to} href={link.href} className="block rounded-lg px-4 py-3 hover:bg-brand-surface">
+                      <span className="block text-sm font-semibold text-brand-ink">{link.label}</span>
+                      <span className="mt-1 block text-xs leading-relaxed text-brand-muted">{link.description}</span>
+                    </a> : <Link key={link.to} to={link.to} className="block rounded-lg px-4 py-3 hover:bg-brand-surface">
                       <span className="block text-sm font-semibold text-brand-ink">{link.label}</span>
                       <span className="mt-1 block text-xs leading-relaxed text-brand-muted">{link.description}</span>
                     </Link>
@@ -126,7 +129,9 @@ export default function Navigation() {
               {isResourcesOpen && (
                 <div id="mobile-resources-menu" className="ml-3 border-l border-brand-border pl-3">
                   {RESOURCE_LINKS.map((link) => (
-                    <Link key={link.to} to={link.to} className="block rounded-md px-3 py-2.5 text-sm text-brand-muted hover:bg-brand-surface hover:text-brand-accent">
+                    link.href ? <a key={link.to} href={link.href} className="block rounded-md px-3 py-2.5 text-sm text-brand-muted hover:bg-brand-surface hover:text-brand-accent">
+                      {link.label}
+                    </a> : <Link key={link.to} to={link.to} className="block rounded-md px-3 py-2.5 text-sm text-brand-muted hover:bg-brand-surface hover:text-brand-accent">
                       {link.label}
                     </Link>
                   ))}

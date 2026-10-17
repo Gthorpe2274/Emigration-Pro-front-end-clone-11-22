@@ -195,9 +195,10 @@ export default function Home() {
               </span>
             </Link>
 
-            <Link
-              to="/global-wealth-strategy"
-              className="group p-7 bg-brand-ink border border-brand-ink rounded-xl no-underline flex flex-col text-white hover:border-brand-accent-2 transition-colors"
+            {/* Temporarily unlinked at the user's request. Restore this card's Link to
+                https://emigrationpro.com/global-wealth-strategy and "See if you qualify" CTA when requested. */}
+            <div
+              className="p-7 bg-brand-ink border border-brand-ink rounded-xl flex flex-col text-white"
             >
               <div className="text-xs font-semibold text-brand-accent-2 uppercase tracking-wide mb-3">$500K+ income / $1M+ net worth</div>
               <h3 className="font-brand-serif text-2xl font-medium text-white mb-2">Explore global wealth strategy</h3>
@@ -205,11 +206,7 @@ export default function Home() {
                 If your move is really about tax residency, asset protection, or a second
                 citizenship, see how our referral partner builds that holistic plan.
               </p>
-              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-accent-2 mt-auto">
-                See if you qualify
-                <ArrowRight className="w-3.5 h-3.5" />
-              </span>
-            </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -328,12 +325,12 @@ export default function Home() {
               >
                 Get your report
               </button>
-              <Link
-                to="/sample-report"
+              <a
+                href="https://emigrationpro.com/sample-report"
                 className="px-5 py-4 text-white border border-[#2b4879] rounded-lg font-semibold text-base hover:bg-white/5 transition-colors"
               >
                 View sample
-              </Link>
+              </a>
             </div>
           </div>
 

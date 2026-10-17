@@ -15,3 +15,7 @@ secrets*.json
 
 # Local design rollback snapshots / previews
 .design-backups/
+
+# Local codebase-mcp indexes and private history
+.codebase/
+.data/

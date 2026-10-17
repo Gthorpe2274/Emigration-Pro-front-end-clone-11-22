@@ -13,9 +13,9 @@ const footerSource = readFileSync(
 );
 
 const publicPages = [
-  { path: '/sample-report', component: 'SampleReport', label: 'Sample Report' },
-  { path: '/about', component: 'AboutUs', label: 'About Us' },
-  { path: '/blog', component: 'Blog', label: 'Relocation Guides' },
+  { path: '/sample-report', url: 'https://emigrationpro.com/sample-report', component: 'SampleReport', label: 'Sample Report' },
+  { path: '/about', url: 'https://emigrationpro.com/about', component: 'AboutUs', label: 'About Us' },
+  { path: '/blog', url: 'https://emigrationpro.com/blog', component: 'Blog', label: 'Relocation Guides' },
 ] as const;
 
 test('keeps the sample report, about, and relocation guide routes distinct', () => {
@@ -30,12 +30,12 @@ test('keeps the sample report, about, and relocation guide routes distinct', () 
   }
 });
 test('links every public page from both navigation surfaces', () => {
-  for (const { path, label } of publicPages) {
-    const escapedPath = path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  for (const { url, label } of publicPages) {
+    const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const escapedLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const linkPattern = new RegExp(
-      `(?:to:\\s*["']${escapedPath}["'][\\s\\S]{0,120}label:\\s*["']${escapedLabel}["']|` +
-        `to=["']${escapedPath}["'][\\s\\S]{0,160}>[\\s\\n]*${escapedLabel})`,
+      `(?:href:\\s*["']${escapedUrl}["'][\\s\\S]{0,120}label:\\s*["']${escapedLabel}["']|` +
+        `href=["']${escapedUrl}["'][\\s\\S]{0,160}>[\\s\\n]*${escapedLabel})`,
     );
 
     assert.match(navigationSource, linkPattern, `${label} should remain in the primary navigation`);
