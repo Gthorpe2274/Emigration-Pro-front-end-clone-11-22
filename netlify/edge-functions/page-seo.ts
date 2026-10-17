@@ -1,6 +1,7 @@
 import type { Config, Context } from '@netlify/edge-functions';
 import { PAGE_SEO, KEY_PAGES, SITE_ORIGIN, fullTitle } from '../../src/shared/page-seo.ts';
 import { GLOSSARY_TERMS } from '../../src/shared/glossary-data.ts';
+import { GUIDE_DATA, LAST_REVIEWED, GUIDE_DATE_PUBLISHED, GUIDE_DATE_MODIFIED } from '../../src/shared/guide-data.ts';
 
 /**
  * Server-side SEO for the main marketing pages, mirroring what blog-seo.ts does for
@@ -87,16 +88,47 @@ export default async function handler(request: Request, context: Context) {
         ).join('')}</section>`
       : '';
 
-    const prerenderedContent =
-      `<main data-seo-prerendered="true"><h1>${esc(seo.heading)}</h1>` +
-      seo.summary.map((paragraph) => `<p>${esc(paragraph)}</p>`).join('') +
-      glossaryContent +
-      (links.length
-        ? `<nav><h2>Related</h2><ul>${links
-            .map((l) => `<li><a href="${SITE_ORIGIN}${esc(l.href)}">${esc(l.label)}</a></li>`)
-            .join('')}</ul></nav>`
-        : '') +
-      `</main>`;
+    // Guide pages get the full content (sections, FAQs, sources) so AI crawlers
+    // that don't execute JavaScript see the real guide, not just a thin summary.
+    // Non-guide pages keep the existing summary-based fallback.
+    const guide = GUIDE_DATA[path];
+    const prerenderedContent = guide
+      ? `<main data-seo-prerendered="true">` +
+        `<h1>${esc(seo.heading)}</h1>` +
+        `<p>${esc(guide.intro)}</p>` +
+        `<p>Last reviewed ${esc(LAST_REVIEWED)}</p>` +
+        guide.sections.map((section) =>
+          `<section><h2>${esc(section.title)}</h2>` +
+          section.paragraphs.map((p) => `<p>${esc(p)}</p>`).join('') +
+          (section.bullets
+            ? `<ul>${section.bullets.map((b) => `<li>${esc(b)}</li>`).join('')}</ul>`
+            : '') +
+          `</section>`
+        ).join('') +
+        `<section><h2>Frequently asked questions</h2>` +
+        guide.faqs.map((faq) =>
+          `<div><h3>${esc(faq.question)}</h3><p>${esc(faq.answer)}</p></div>`
+        ).join('') +
+        `</section>` +
+        `<section><h2>Official starting points</h2>` +
+        `<p>Rules change. Confirm current requirements with the responsible government authority before acting.</p>` +
+        `<ul>${guide.sources.map((s) =>
+          `<li><a href="${esc(s.href)}">${esc(s.label)}</a></li>`
+        ).join('')}</ul>` +
+        `</section>` +
+        `<nav><h2>Related</h2><ul>${guide.related.map((r) =>
+          `<li><a href="${SITE_ORIGIN}${esc(r.to)}">${esc(r.label)}</a> — ${esc(r.description)}</li>`
+        ).join('')}</ul></nav>` +
+        `</main>`
+      : `<main data-seo-prerendered="true"><h1>${esc(seo.heading)}</h1>` +
+        seo.summary.map((paragraph) => `<p>${esc(paragraph)}</p>`).join('') +
+        glossaryContent +
+        (links.length
+          ? `<nav><h2>Related</h2><ul>${links
+              .map((l) => `<li><a href="${SITE_ORIGIN}${esc(l.href)}">${esc(l.label)}</a></li>`)
+              .join('')}</ul></nav>`
+          : '') +
+        `</main>`;
 
     const webPageStructuredData = {
       '@context': 'https://schema.org',
@@ -146,7 +178,32 @@ export default async function handler(request: Request, context: Context) {
             },
           ],
         }
-      : webPageStructuredData;
+      : guide
+        ? {
+            '@context': 'https://schema.org',
+            '@graph': [
+              { ...webPageStructuredData, '@context': undefined },
+              {
+                '@type': 'Article',
+                headline: seo.heading,
+                description: seo.description,
+                datePublished: GUIDE_DATE_PUBLISHED,
+                dateModified: GUIDE_DATE_MODIFIED,
+                author: { '@type': 'Organization', name: 'Emigration Pro' },
+                publisher: { '@type': 'Organization', name: 'Emigration Pro' },
+                mainEntityOfPage: url,
+              },
+              {
+                '@type': 'FAQPage',
+                mainEntity: guide.faqs.map((faq) => ({
+                  '@type': 'Question',
+                  name: faq.question,
+                  acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+                })),
+              },
+            ],
+          }
+        : webPageStructuredData;
 
     html = html.replace(
       '</head>',
