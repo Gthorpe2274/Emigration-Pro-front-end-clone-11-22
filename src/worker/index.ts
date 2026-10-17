@@ -435,6 +435,16 @@ const adminAuth = async (c: any, next: any) => {
   await next();
 };
 
+/** Constant-time string comparison to prevent timing attacks on credentials. */
+function timingSafeEqualString(a: string, b: string): boolean {
+  const encoder = new TextEncoder();
+  const bufA = encoder.encode(a);
+  const bufB = encoder.encode(b);
+  if (bufA.length !== bufB.length) return false;
+  // crypto.subtle.timingSafeEqual is available in the Workers runtime.
+  return crypto.subtle.timingSafeEqual(bufA, bufB);
+};
+
 
 // Health check endpoint
 app.get('/api/health', async (c) => {
@@ -469,7 +479,8 @@ app.post('/api/admin/login', async (c) => {
     console.error('ADMIN_PASSWORD is not configured');
     return c.json({ error: 'Admin login is temporarily unavailable' }, 503);
   }
-  const passwordIsValid = password === c.env.ADMIN_PASSWORD;
+  // Constant-time comparison to prevent timing attacks on the admin password.
+  const passwordIsValid = timingSafeEqualString(password ?? '', c.env.ADMIN_PASSWORD);
   const credentialsAreValid = (!username || username === c.env.ADMIN_USERNAME) && passwordIsValid;
   // A correct credential must always be able to clear an earlier lockout. Only
   // invalid attempts remain blocked during the rate-limit window.
@@ -2300,7 +2311,7 @@ const TestSendEmailSchema = z.object({
   email: z.string().trim().email()
 });
 
-app.post("/api/test/send-email", zValidator("json", TestSendEmailSchema), async (c) => {
+app.post("/api/test/send-email", adminAuth, zValidator("json", TestSendEmailSchema), async (c) => {
   const resendApiKey = c.env.RESEND_API_KEY;
   if (!resendApiKey) {
     // This is almost certainly why no purchase email has ever arrived.
@@ -3237,7 +3248,7 @@ app.get('/api/blog/images/:key', async (c) => {
 // File Converter API Endpoints
 
 // Upload and convert file
-app.post('/api/file-converter/upload', async (c) => {
+app.post('/api/file-converter/upload', adminAuth, async (c) => {
   try {
     const formData = await c.req.formData();
     const fileEntry = formData.get('file');
@@ -3349,7 +3360,7 @@ app.post('/api/file-converter/upload', async (c) => {
 });
 
 // List all converted files
-app.get('/api/file-converter/files', async (c) => {
+app.get('/api/file-converter/files', adminAuth, async (c) => {
   try {
     const { results } = await c.env.DB.prepare(`
       SELECT id, original_name, file_name, file_type, file_size, converted_at
@@ -3371,7 +3382,7 @@ app.get('/api/file-converter/files', async (c) => {
 });
 
 // Download converted file
-app.get('/api/file-converter/download/:id', async (c) => {
+app.get('/api/file-converter/download/:id', adminAuth, async (c) => {
   try {
     const fileId = c.req.param('id');
 
@@ -3408,7 +3419,7 @@ app.get('/api/file-converter/download/:id', async (c) => {
 });
 
 // Delete single file
-app.delete('/api/file-converter/delete/:id', async (c) => {
+app.delete('/api/file-converter/delete/:id', adminAuth, async (c) => {
   try {
     const fileId = c.req.param('id');
 
@@ -3444,7 +3455,7 @@ app.delete('/api/file-converter/delete/:id', async (c) => {
 });
 
 // Delete multiple files
-app.delete('/api/file-converter/delete-multiple', async (c) => {
+app.delete('/api/file-converter/delete-multiple', adminAuth, async (c) => {
   try {
     const body = await c.req.json();
     const { fileIds } = body;
@@ -3897,7 +3908,7 @@ const filterReachableSources = async <T extends ReportSource>(sources: T[], cach
   return results.filter((source): source is T => source !== null);
 };
 
-app.post("/api/perplexity", async (c) => {
+app.post("/api/perplexity", adminAuth, async (c) => {
   const apiKey = c.env.PERPLEXITY_API_KEY;
   if (!apiKey) {
     return c.json({ error: 'PERPLEXITY_API_KEY not configured in environment' }, 500);

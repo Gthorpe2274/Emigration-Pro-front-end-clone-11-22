@@ -36,9 +36,13 @@ export default function EmailTest() {
     setResult(null);
 
     try {
+      const token = sessionStorage.getItem('adminToken') || sessionStorage.getItem('blogAdminToken');
       const response = await fetch('/api/test/send-email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ email })
       });
 

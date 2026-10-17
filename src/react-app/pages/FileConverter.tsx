@@ -8,6 +8,15 @@ const getApiBaseUrl = () => {
   return '';
 };
 
+// Helper to get admin auth headers for authenticated API calls
+const getAuthHeaders = (extra?: Record<string, string>): Record<string, string> => {
+  const token = sessionStorage.getItem('adminToken') || sessionStorage.getItem('blogAdminToken');
+  return {
+    ...(extra || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
+
 interface ConvertedFile {
   id: string;
   originalName: string;
@@ -30,7 +39,9 @@ function FileConverter() {
     try {
       setLoading(true);
       const apiBase = getApiBaseUrl();
-      const response = await fetch(`${apiBase}/api/file-converter/files`);
+      const response = await fetch(`${apiBase}/api/file-converter/files`, {
+        headers: getAuthHeaders(),
+      });
       const data = await response.json();
       if (data.success) {
         setFiles(data.files || []);
@@ -72,6 +83,7 @@ function FileConverter() {
       const apiBase = getApiBaseUrl();
       const response = await fetch(`${apiBase}/api/file-converter/upload`, {
         method: 'POST',
+        headers: getAuthHeaders(),
         body: formData,
       });
 
@@ -110,7 +122,9 @@ function FileConverter() {
   const handleDownload = async (file: ConvertedFile) => {
     try {
       const apiBase = getApiBaseUrl();
-      const response = await fetch(`${apiBase}/api/file-converter/download/${file.id}`);
+      const response = await fetch(`${apiBase}/api/file-converter/download/${file.id}`, {
+        headers: getAuthHeaders(),
+      });
       if (!response.ok) {
         throw new Error('Download failed');
       }
@@ -138,6 +152,7 @@ function FileConverter() {
       const apiBase = getApiBaseUrl();
       const response = await fetch(`${apiBase}/api/file-converter/delete/${fileId}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
       });
 
       const data = await response.json();
@@ -164,9 +179,7 @@ function FileConverter() {
       const apiBase = getApiBaseUrl();
       const response = await fetch(`${apiBase}/api/file-converter/delete-multiple`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ fileIds: Array.from(selectedFiles) }),
       });
 

@@ -286,9 +286,13 @@ export const generateReportSection = async (userInput: UserInput, concern: Conce
     throw new Error('Customer assessment data is incomplete; report generation was stopped.');
   }
   try {
+    const token = sessionStorage.getItem('adminToken') || sessionStorage.getItem('blogAdminToken');
     const response = await fetch('/api/perplexity', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({
         action: 'generateSection',
         payload: { 
