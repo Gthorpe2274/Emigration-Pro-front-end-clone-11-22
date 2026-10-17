@@ -445,6 +445,24 @@ function timingSafeEqualString(a: string, b: string): boolean {
   return crypto.subtle.timingSafeEqual(bufA, bufB);
 };
 
+/**
+ * Simple IP-based rate limiter for public POST endpoints. Prevents abuse of
+ * assessment creation, report writes, and email capture without requiring a
+ * login. Uses KV with a sliding window counter.
+ */
+const rateLimit = (maxRequests: number, windowSeconds: number) => {
+  return async (c: any, next: any) => {
+    const ip = c.req.header('CF-Connecting-IP') || c.req.header('X-Forwarded-For') || 'unknown';
+    const key = `ratelimit:${ip}:${Math.floor(Date.now() / (windowSeconds * 1000))}`;
+    const count = parseInt((await c.env.REPORTS_KV.get(key)) || '0', 10);
+    if (count >= maxRequests) {
+      return c.json({ error: 'Too many requests. Please try again later.' }, 429);
+    }
+    await c.env.REPORTS_KV.put(key, String(count + 1), { expirationTtl: windowSeconds });
+    await next();
+  };
+};
+
 
 // Health check endpoint
 app.get('/api/health', async (c) => {
@@ -964,7 +982,7 @@ function calculateScore(assessment: any): { score: number; matchLevel: string; b
 }
 
 // Create assessment endpoint
-app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => {
+app.post("/api/assessments", rateLimit(20, 300), zValidator("json", AssessmentSchema), async (c) => {
   try {
     const assessment = c.req.valid("json");
 
@@ -994,14 +1012,20 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
     const retention_expires_at = new Date();
     retention_expires_at.setFullYear(retention_expires_at.getFullYear() + 2);
 
+    // Generate a random access token for IDOR protection. This token must be
+    // supplied on subsequent GET requests to read the assessment, so a
+    // sequential ID alone is not enough to access another user's data.
+    const accessToken = crypto.randomUUID();
+
     const result = await c.env.DB.prepare(`
       INSERT INTO assessments (
         user_age, user_job, monthly_budget, children_count, children_ages, education_preferences,
         preferred_country, preferred_city, location_preference,
         climate_preference, immigration_policies_importance, healthcare_importance, safety_importance,
         internet_importance, emigration_process_importance, ease_of_immigration_importance,
-        local_acceptance_importance, overall_score, match_level, budget_compatibility, retention_expires_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        local_acceptance_importance, overall_score, match_level, budget_compatibility, retention_expires_at,
+        access_token
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       assessment.user_age ?? 30,
       assessment.user_job ?? 'Test User',
@@ -1023,7 +1047,8 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
       score,
       matchLevel,
       budgetCompatibility,
-      retention_expires_at.toISOString()
+      retention_expires_at.toISOString(),
+      accessToken
     ).run();
 
     const assessmentId = result.meta.last_row_id;
@@ -1038,6 +1063,7 @@ app.post("/api/assessments", zValidator("json", AssessmentSchema), async (c) => 
     return c.json({
       success: true,
       id: assessmentId,
+      access_token: accessToken,
       score,
       matchLevel,
       criteriaScores
@@ -1638,12 +1664,22 @@ app.post('/api/admin/blog/unsplash/track-download', adminAuth, async (c) => {
 app.get("/api/assessments/:id", async (c) => {
   try {
     const id = c.req.param("id");
+    const token = c.req.query("access_token") || c.req.header("X-Access-Token");
     const result = await c.env.DB.prepare(
       "SELECT * FROM assessments WHERE id = ?"
     ).bind(id).first();
 
     if (!result) {
       return c.json({ error: "Assessment not found" }, 404);
+    }
+
+    // IDOR protection: require the access token that was issued at creation.
+    // Existing assessments without a token (created before this fix) remain
+    // accessible, but new assessments are protected.
+    if (result.access_token) {
+      if (!token || !timingSafeEqualString(token, result.access_token as string)) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
     }
 
     // Check if assessment is still within retention period
@@ -1770,7 +1806,7 @@ app.get("/api/checkout-return", async (c) => {
 // closes the tab keeps everything generated so far. The UNIQUE constraint on
 // (assessment_id, concern_id) makes this an upsert: regenerating a section
 // replaces it instead of creating a duplicate.
-app.post("/api/reports/:assessmentId/sections", async (c) => {
+app.post("/api/reports/:assessmentId/sections", rateLimit(60, 300), async (c) => {
   try {
     const assessmentId = parseInt(c.req.param("assessmentId"), 10);
     if (!Number.isFinite(assessmentId)) {
@@ -1972,12 +2008,20 @@ app.post("/api/reports/:assessmentId/send-generation-failure-email", zValidator(
 app.get("/api/assessments/:id/report-preview", async (c) => {
   try {
     const id = c.req.param("id");
+    const token = c.req.query("access_token") || c.req.header("X-Access-Token");
     const assessment = await c.env.DB.prepare(
       "SELECT * FROM assessments WHERE id = ?"
     ).bind(id).first() as any;
 
     if (!assessment) {
       return c.json({ error: "Assessment not found" }, 404);
+    }
+
+    // IDOR protection: same token check as the assessment GET endpoint.
+    if (assessment.access_token) {
+      if (!token || !timingSafeEqualString(token, assessment.access_token as string)) {
+        return c.json({ error: "Unauthorized" }, 401);
+      }
     }
 
     const GEMINI_API_KEY = c.env.GEMINI_API_KEY;
@@ -1991,10 +2035,10 @@ app.get("/api/assessments/:id/report-preview", async (c) => {
         Focus on how the report will help them navigate these specific areas. 
         Do not include any placeholders like [Name]. Start directly with the summary.`;
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`;
         const res = await fetch(geminiUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }]
           }),
@@ -2361,7 +2405,7 @@ const EmailLeadSchema = z.object({
   affiliate_code: z.string().optional().nullable()
 });
 
-app.post("/api/subscribe-for-permanent-access", zValidator("json", EmailLeadSchema), async (c) => {
+app.post("/api/subscribe-for-permanent-access", rateLimit(10, 300), zValidator("json", EmailLeadSchema), async (c) => {
   try {
     const { email, assessment_id, affiliate_code } = c.req.valid("json");
     const normalizedEmail = email.toLowerCase();
@@ -2531,7 +2575,7 @@ const PermanentAccessSchema = z.object({
   stripe_session_id: z.string().startsWith('cs_')
 });
 
-app.post("/api/relocation-hub/create-access", zValidator("json", PermanentAccessSchema), async (c) => {
+app.post("/api/relocation-hub/create-access", rateLimit(10, 300), zValidator("json", PermanentAccessSchema), async (c) => {
   try {
     const { assessment_id, email, stripe_session_id } = c.req.valid("json");
     const normalizedEmail = email.toLowerCase();
@@ -3075,7 +3119,7 @@ async function handleGenerateImage(c: any) {
   if (GEMINI_API_KEY) {
     try {
       // Gemini image generation endpoint (v1beta example)
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`;
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent`;
 
       const geminiPayload = {
         // This payload matches the generativelanguage image generation style (2024-2025 era)
@@ -3090,7 +3134,7 @@ async function handleGenerateImage(c: any) {
 
       const res = await fetch(geminiUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_API_KEY },
         body: JSON.stringify(geminiPayload),
       });
 

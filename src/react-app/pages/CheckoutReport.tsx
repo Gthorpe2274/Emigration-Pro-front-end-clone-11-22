@@ -94,7 +94,10 @@ export default function CheckoutReport() {
     }
 
     // Fetch assessment data
-    fetch(`/api/assessments/${assessmentIdParam}`)
+    const assessmentToken = sessionStorage.getItem(`assessment_token:${assessmentIdParam}`);
+    fetch(`/api/assessments/${assessmentIdParam}`, {
+      headers: assessmentToken ? { 'X-Access-Token': assessmentToken } : {},
+    })
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch assessment.");
         return res.json();

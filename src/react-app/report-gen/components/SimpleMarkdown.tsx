@@ -1,4 +1,5 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 
 /**
  * Renderer for generated report sections.
@@ -28,12 +29,13 @@ const NUMBERED = /^\s*\d+[.)]\s+(.*)$/;
 const SimpleMarkdown: React.FC<{ content: string | unknown }> = ({ content }) => {
     const source = typeof content === 'string' ? content : '';
 
-    // Pre-built HTML (the cost-of-living table) is passed straight through.
+    // Pre-built HTML (the cost-of-living table) is passed straight through,
+    // sanitized with DOMPurify to prevent XSS.
     if (source.trim().startsWith('<') && source.includes('>')) {
         return (
             <div
                 className="prose max-w-none report-text-area"
-                dangerouslySetInnerHTML={{ __html: source }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(source) }}
             />
         );
     }
@@ -132,7 +134,7 @@ const SimpleMarkdown: React.FC<{ content: string | unknown }> = ({ content }) =>
     return (
         <div
             className="prose max-w-none report-text-area"
-            dangerouslySetInnerHTML={{ __html: html.join('') }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html.join('')) }}
         />
     );
 };

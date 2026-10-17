@@ -130,7 +130,10 @@ export default function Results() {
 
         console.log(`📊 Fetching assessment data for ID: ${id}`);
 
-        const assessmentResponse = await fetch(`/api/assessments/${id}`);
+        const assessmentToken = sessionStorage.getItem(`assessment_token:${id}`);
+        const assessmentResponse = await fetch(`/api/assessments/${id}`, {
+          headers: assessmentToken ? { 'X-Access-Token': assessmentToken } : {},
+        });
 
         console.log('📥 Assessment API Response:', {
           status: assessmentResponse.status,
@@ -164,7 +167,10 @@ export default function Results() {
         setLoadingPreview(true);
         setPreviewError(null);
 
-        const response = await fetch(`/api/assessments/${id}/report-preview`);
+        const previewToken = sessionStorage.getItem(`assessment_token:${id}`);
+        const response = await fetch(`/api/assessments/${id}/report-preview`, {
+          headers: previewToken ? { 'X-Access-Token': previewToken } : {},
+        });
         if (response.ok) {
           const data = await response.json();
           setPreviewSummary(data.summary);

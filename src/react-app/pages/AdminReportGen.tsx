@@ -5,6 +5,7 @@ import { CountryData } from '@/shared/types';
 import Navigation from '@/react-app/components/Navigation';
 import Footer from '@/react-app/components/Footer';
 import SystemLogin from '@/react-app/components/SystemLogin';
+import DOMPurify from 'dompurify';
 
 interface AssessmentData {
   user_age: number;
@@ -197,6 +198,11 @@ export default function AdminReportGen() {
 
       const reportData = await reportResponse.json();
       if (!reportData.id) throw new Error('Assessment was created without an ID.');
+
+      // Store the access token for the IDOR-protected endpoints.
+      if (reportData.access_token) {
+        sessionStorage.setItem(`assessment_token:${reportData.id}`, reportData.access_token);
+      }
 
       setGenerationProgress(100);
       setCurrentStatus('Opening the full report generator...');
@@ -550,7 +556,7 @@ export default function AdminReportGen() {
               </div>
 
               <div className="bg-white rounded-3xl p-8 shadow-2xl text-gray-900 max-h-[800px] overflow-y-auto custom-scrollbar">
-                <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: generatedReport }} />
+                <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(generatedReport) }} />
               </div>
             </div>
           )}

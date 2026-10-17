@@ -8,6 +8,7 @@ import { useSEO } from '../hooks/useSEO';
 import { KEY_PAGES } from '@/shared/page-seo';
 import { GLOSSARY_TERMS } from '@/shared/glossary-data';
 import { applyBlogImageAlt, getBlogImageAlt } from '../utils/blogImageAlt';
+import DOMPurify from 'dompurify';
 
 interface BlogPostType {
   id: number;
@@ -305,7 +306,7 @@ export default function BlogPost() {
                       <div className="overflow-x-auto text-base leading-relaxed text-brand-muted">
                         <div
                           className="max-w-none prose prose-lg prose-headings:font-brand-serif prose-headings:font-medium prose-headings:text-brand-ink prose-p:text-brand-muted prose-a:text-brand-accent hover:prose-a:text-brand-ink prose-strong:text-brand-ink prose-table:mt-4 prose-table:mb-4 prose-table:border-collapse prose-table:w-full prose-thead:bg-brand-surface prose-th:text-left prose-th:border prose-th:border-brand-border prose-th:px-4 prose-th:py-2 prose-td:border prose-td:border-brand-border prose-td:px-4 prose-td:py-2 whitespace-pre-line"
-                          dangerouslySetInnerHTML={{ __html: processedBody }}
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(processedBody) }}
                         />
                       </div>
                     </>

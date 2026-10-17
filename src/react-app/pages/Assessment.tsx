@@ -205,6 +205,7 @@ export default function Assessment() {
       if (response.ok) {
         console.log('✅ Assessment created successfully!');
         const assessmentId = result.id;
+        const accessToken = result.access_token;
 
         if (!assessmentId) {
           console.error('❌ Assessment ID is missing from response!');
@@ -212,6 +213,10 @@ export default function Assessment() {
           return;
         }
 
+        // Store the access token for IDOR-protected endpoints.
+        if (accessToken) {
+          sessionStorage.setItem(`assessment_token:${assessmentId}`, accessToken);
+        }
         console.log(`🎯 Assessment ID: ${assessmentId} (type: ${typeof assessmentId})`);
         console.log(`🧭 Preparing to navigate to: /results/${assessmentId}`);
 

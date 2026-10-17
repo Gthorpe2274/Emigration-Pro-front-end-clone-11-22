@@ -220,7 +220,10 @@ export default function RelocationHub() {
           setIsPermanentAccess(true);
         }
 
-        const response = await fetch(`/api/assessments/${id}`);
+        const hubToken = sessionStorage.getItem(`assessment_token:${id}`);
+        const response = await fetch(`/api/assessments/${id}`, {
+          headers: hubToken ? { 'X-Access-Token': hubToken } : {},
+        });
         if (response.ok) {
           const result = await response.json();
           setAssessment(result.assessment);
@@ -293,7 +296,10 @@ export default function RelocationHub() {
         setLoadingPreview(true);
         setPreviewError(null);
 
-        const response = await fetch(`/api/assessments/${id}/report-preview`);
+        const previewToken = sessionStorage.getItem(`assessment_token:${id}`);
+        const response = await fetch(`/api/assessments/${id}/report-preview`, {
+          headers: previewToken ? { 'X-Access-Token': previewToken } : {},
+        });
         if (response.ok) {
           const data = await response.json();
           setPreviewSummary(data.summary);
